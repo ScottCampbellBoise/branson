@@ -21,6 +21,13 @@
 #include <unordered_map>
 #include <vector>
 
+// @Author: Scott Campbell
+// @desc: including imports for math funcs
+
+#include <math.h>
+
+// END ADDITIONS
+
 #include "RNG.h"
 #include "buffer.h"
 #include "constants.h"
@@ -47,7 +54,11 @@ Constants::event_type transport_photon_particle_pass(
   using Constants::EXIT;
   using Constants::KILL;
   using Constants::PASS;
+  using Constants::TALLY_CROSS; // NEW ADDITION by Scott Campbell: mark if photon passes the tally surface
+
   using std::min;
+  
+  using std::cout;
 
   uint32_t cell_id, next_cell;
   bc_type boundary_event;
@@ -65,6 +76,16 @@ Constants::event_type transport_photon_particle_pass(
   cell = mesh.get_on_rank_cell(cell_id);
   bool active = true;
 
+
+  // NEW ADDITIONS
+  // @Author: Scott Campbell
+
+  double* cur_pos; // Hold the current position of the photon
+  double dist_to_tally; // Hold the distance the photon is from the tally surface
+
+  // END ADDITIONS
+
+
   // transport this photon
   while (active) {
     group = phtn.get_group();
@@ -80,8 +101,20 @@ Constants::event_type transport_photon_particle_pass(
         phtn.get_position(), phtn.get_angle(), surface_cross);
     dist_to_census = phtn.get_distance_remaining();
 
+
+    // NEW ADDITIONS
+    // @author: Scott Campbell
+    // desc: Adding a distance to a Tally Surface: yz-plane anchored @ x=5
+    
+    cur_pos = phtn.get_position();    
+    dist_to_tally = tally_surface_x - cur_pos[0]; // the dist to the tally surface   	
+
     // select minimum distance event
-    dist_to_event = min(dist_to_scatter, min(dist_to_boundary, dist_to_census));
+    // dist_to_event = min(dist_to_scatter, min(dist_to_boundary, dist_to_census)); // ORIGINAL VERSION
+    dist_to_event = min(dist_to_scatter, min(dist_to_boundary, min(dist_to_census, dist_to_tally)));
+
+    // END ADDITIONS 
+    
 
     // calculate energy absorbed by material, update photon and material energy
     // and update the path-length weighted tally for T_r
@@ -112,6 +145,45 @@ Constants::event_type transport_photon_particle_pass(
             (sigma_s / ((1.0 - f) * sigma_a + sigma_s)))
           phtn.set_group(sample_emission_group(rng, cell));
       }
+
+    rank_track_E[cell_id] += absorbed_E / (sigma_a * f);
+    rank_abs_E[cell_id] += absorbed_E;
+
+    phtn.set_E(phtn.get_E() - absorbed_E);
+
+    // update position
+    phtn.move(dist_to_event);
+
+    // apply variance/runtime reduction
+    if (phtn.below_cutoff(cutoff_fraction)) {
+      rank_abs_E[cell_id] += phtn.get_E();
+      active = false;
+      event = KILL;
+    }
+    // or apply event
+    else {
+      // EVENT TYPE: SCATTER
+      if (dist_to_event == dist_to_scatter) {
+        get_uniform_angle(angle, rng);
+        phtn.set_angle(angle);
+        if (rng->generate_random_number() >
+            (sigma_s / ((1.0 - f) * sigma_a + sigma_s)))
+          phtn.set_group(sample_emission_group(rng, cell));
+      }
+
+      // NEW ADDITIONS
+      // @Author: Scott Campbell
+      // @desc: Adding case for particle passing through the Tally Surface
+      // EVENT TYPE: TALLY CROSS
+      else if (dist_to_event == dist_to_tally) {
+	// Count the number of particles that have passed the tally point
+	// Count the amount of energy that has passed the tally point
+	tally_out_count++;
+	tally_out_energy += phtn.get_E();
+        event = TALLY_CROSS; // NOT SURE IF THIS IS THE RIGHT OPTION ... 
+      }
+      // END ADDITIONS
+
       // EVENT TYPE: BOUNDARY CROSS
       else if (dist_to_event == dist_to_boundary) {
         boundary_event = cell.get_bc(surface_cross);
@@ -142,6 +214,18 @@ Constants::event_type transport_photon_particle_pass(
       }
     } // end event loop
   }   // end while alive
+
+
+  // NEW ADDITIONS
+  // @Author: Scott Campbell
+  // @desc: print out the tally surface information
+
+  cout << "Num Phtns Passed Tally: " << tally_out_count << "\n";
+  cout << "Total Phtn Energy Passed Tally: " << tally_out_energy << "\n";
+
+  // END ADDITIONS
+
+
   return event;
 }
 
@@ -155,6 +239,7 @@ std::vector<Photon> particle_pass_transport(
   using Constants::EXIT;
   using Constants::KILL;
   using Constants::PASS;
+  using Constants::TALLY_CROSS; // NEW ADDITON by Scott Campbell: event type if photon passes the tally surface
   using Constants::photon_tag;
   using Constants::WAIT;
   using std::cout;
@@ -162,6 +247,17 @@ std::vector<Photon> particle_pass_transport(
   using std::stack;
   using std::unordered_map;
   using std::vector;
+
+
+  // NEW ADDITIONS
+  // @Author: Scott Campbell
+  // @desc: Variables to record info of particles that pass the tally surface
+ 
+  uint32_t tally_out_count = 0; // number of photons that pass through the tally surface
+  double tally_out_energy = 0; // Total energy of the photons that pass throught tally surface
+
+  // END ADDITIONS
+
 
   double census_E = 0.0;
   double exit_E = 0.0;
@@ -315,6 +411,13 @@ std::vector<Photon> particle_pass_transport(
           mctr.n_particle_messages++;
         }
         break;
+      // NEW ADDITIONS
+      // @Author: Scott Campbell
+      // @desc: Add case to check if passed through the tally surface
+      case TALLY_CROSS:
+	tally_out_count++;
+	tally_out_enegry += phtn.get_E();
+      // END ADDITIONS
       }
       n--;
       if (from_receive_stack)
@@ -364,44 +467,6 @@ std::vector<Photon> particle_pass_transport(
             MPI_Isend(phtn_send_buffer[i_b].get_buffer(), n_photons_to_send,
                       MPI_Particle, adj_rank, photon_tag, MPI_COMM_WORLD,
                       &phtn_send_request[i_b]);
-            phtn_send_buffer[i_b].set_sent();
-            // update counters
-            mctr.n_particles_sent += n_photons_to_send;
-            mctr.n_sends_posted++;
-            mctr.n_particle_messages++;
-          }
-        }
-
-        // process receive buffer
-        if (phtn_recv_buffer[i_b].awaiting()) {
-          MPI_Test(&phtn_recv_request[i_b], &recv_req_flag, &recv_status);
-          if (recv_req_flag) {
-            const vector<Photon> &receive_list =
-                phtn_recv_buffer[i_b].get_object();
-            // only push the number of received photons onto the recv_stack
-            MPI_Get_count(&recv_status, MPI_Particle, &recv_count);
-            for (uint32_t i = 0; i < uint32_t(recv_count); ++i)
-              phtn_recv_stack.push(receive_list[i]);
-            phtn_recv_buffer[i_b].reset();
-            // post receive again, don't resize--it's already set to maximum
-            MPI_Irecv(phtn_recv_buffer[i_b].get_buffer(), max_buffer_size,
-                      MPI_Particle, adj_rank, photon_tag, MPI_COMM_WORLD,
-                      &phtn_recv_request[i_b]);
-            phtn_recv_buffer[i_b].set_awaiting();
-            mctr.n_receives_completed++;
-            mctr.n_receives_posted++;
-          }
-        }
-      } // end loop over adjacent processors
-    }   // end scope of particle passing
-
-    //------------------------------------------------------------------------//
-    // binary tree completion communication
-    //------------------------------------------------------------------------//
-
-    if (!req_made) {
-      s_global_complete = n_complete;
-      MPI_Iallreduce(&s_global_complete, &r_global_complete, 1,
                      MPI_UNSIGNED_LONG, MPI_SUM, MPI_COMM_WORLD,
                      &completion_request);
       req_made = true;
