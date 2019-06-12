@@ -21,6 +21,7 @@
 #include <unordered_map>
 #include <vector>
 
+// NEW ADDITIONS
 // @Author: Scott Campbell
 // @desc: including imports for math funcs
 
@@ -82,7 +83,8 @@ Constants::event_type transport_photon_particle_pass(
 
   double* cur_pos; // Hold the current position of the photon
   double dist_to_tally; // Hold the distance the photon is from the tally surface
-
+  double tally_surface_x = 5;
+	
   // END ADDITIONS
 
 
@@ -178,8 +180,6 @@ Constants::event_type transport_photon_particle_pass(
       else if (dist_to_event == dist_to_tally) {
 	// Count the number of particles that have passed the tally point
 	// Count the amount of energy that has passed the tally point
-	tally_out_count++;
-	tally_out_energy += phtn.get_E();
         event = TALLY_CROSS; // NOT SURE IF THIS IS THE RIGHT OPTION ... 
       }
       // END ADDITIONS
@@ -214,18 +214,7 @@ Constants::event_type transport_photon_particle_pass(
       }
     } // end event loop
   }   // end while alive
-
-
-  // NEW ADDITIONS
-  // @Author: Scott Campbell
-  // @desc: print out the tally surface information
-
-  cout << "Num Phtns Passed Tally: " << tally_out_count << "\n";
-  cout << "Total Phtn Energy Passed Tally: " << tally_out_energy << "\n";
-
-  // END ADDITIONS
-
-
+	  
   return event;
 }
 
@@ -417,6 +406,7 @@ std::vector<Photon> particle_pass_transport(
       case TALLY_CROSS:
 	tally_out_count++;
 	tally_out_enegry += phtn.get_E();
+	break;
       // END ADDITIONS
       }
       n--;
