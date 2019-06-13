@@ -81,8 +81,6 @@ Constants::event_type transport_photon_particle_pass(
   // NEW ADDITIONS
   // @Author: Scott Campbell
 
-  double* cur_pos; // Hold the current position of the photon
-  double dist_to_tally; // Hold the distance the photon is from the tally surface
   double tally_surface_x = 5;
 	
   // END ADDITIONS
@@ -101,22 +99,10 @@ Constants::event_type transport_photon_particle_pass(
 
     dist_to_boundary = cell.get_distance_to_boundary(
         phtn.get_position(), phtn.get_angle(), surface_cross);
-    dist_to_census = phtn.get_distance_remaining();
-
-
-    // NEW ADDITIONS
-    // @author: Scott Campbell
-    // desc: Adding a distance to a Tally Surface: yz-plane anchored @ x=5
-    
-    cur_pos = phtn.get_position();    
-    dist_to_tally = tally_surface_x - cur_pos[0]; // the dist to the tally surface   	
-
+    dist_to_census = phtn.get_distance_remaining();	  
+	  
     // select minimum distance event
-    // dist_to_event = min(dist_to_scatter, min(dist_to_boundary, dist_to_census)); // ORIGINAL VERSION
-    dist_to_event = min(dist_to_scatter, min(dist_to_boundary, min(dist_to_census, dist_to_tally)));
-
-    // END ADDITIONS 
-    
+    dist_to_event = min(dist_to_scatter, min(dist_to_boundary, dist_to_census ));    
 
     // calculate energy absorbed by material, update photon and material energy
     // and update the path-length weighted tally for T_r
@@ -131,8 +117,18 @@ Constants::event_type transport_photon_particle_pass(
     // update position
     phtn.move(dist_to_event);
 
+    // NEW ADDITIONS
+    // @Author: Scott Campbell
+    // @desc: check if passed the tally surface
+    if(cur_pos[0] >= tally_surface_x) {
+      rank_abs_E[cell_id] += phtn.get_E();
+      active = false;
+      event = TALLY_CROSS;
+    }
+    // END ADDITIONS
+	  
     // apply variance/runtime reduction
-    if (phtn.below_cutoff(cutoff_fraction)) {
+    else if (phtn.below_cutoff(cutoff_fraction)) {
       rank_abs_E[cell_id] += phtn.get_E();
       active = false;
       event = KILL;
@@ -147,43 +143,6 @@ Constants::event_type transport_photon_particle_pass(
             (sigma_s / ((1.0 - f) * sigma_a + sigma_s)))
           phtn.set_group(sample_emission_group(rng, cell));
       }
-
-    rank_track_E[cell_id] += absorbed_E / (sigma_a * f);
-    rank_abs_E[cell_id] += absorbed_E;
-
-    phtn.set_E(phtn.get_E() - absorbed_E);
-
-    // update position
-    phtn.move(dist_to_event);
-
-    // apply variance/runtime reduction
-    if (phtn.below_cutoff(cutoff_fraction)) {
-      rank_abs_E[cell_id] += phtn.get_E();
-      active = false;
-      event = KILL;
-    }
-    // or apply event
-    else {
-      // EVENT TYPE: SCATTER
-      if (dist_to_event == dist_to_scatter) {
-        get_uniform_angle(angle, rng);
-        phtn.set_angle(angle);
-        if (rng->generate_random_number() >
-            (sigma_s / ((1.0 - f) * sigma_a + sigma_s)))
-          phtn.set_group(sample_emission_group(rng, cell));
-      }
-
-      // NEW ADDITIONS
-      // @Author: Scott Campbell
-      // @desc: Adding case for particle passing through the Tally Surface
-      // EVENT TYPE: TALLY CROSS
-      else if (dist_to_event == dist_to_tally) {
-	// Count the number of particles that have passed the tally point
-	// Count the amount of energy that has passed the tally point
-        event = TALLY_CROSS; // NOT SURE IF THIS IS THE RIGHT OPTION ... 
-      }
-      // END ADDITIONS
-
       // EVENT TYPE: BOUNDARY CROSS
       else if (dist_to_event == dist_to_boundary) {
         boundary_event = cell.get_bc(surface_cross);
