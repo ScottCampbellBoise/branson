@@ -15,6 +15,9 @@
 #include <iostream>
 #include <vector>
 
+#include "photon.h"
+#include "tally.h"
+
 int main(void) {
 
   using Constants::bc_type;
@@ -223,6 +226,45 @@ int main(void) {
     else {
       cout << "TEST FAILED: construction from proto cell" << endl;
       nfail++;
+    }
+
+    // test the tally surface and counter
+    {
+       bool tally_surface_pass = true;
+
+       double pos_1 = {0,0,0};       
+       double pos_2 = {2,2,2};       
+       double pos_3 = {2.8,2.8,2.8};
+       
+       double pos_4 = {2.9,2.9,2.9}; 
+       double pos_5 = {3.5,3.5,3.5};       
+       double pos_6 = {5,5,5};       
+
+       Tally* tally = new Tally(5); // Create a spherical tally with radius = 5
+       Photon* phtn = new Photon();      
+
+       phtn.set_position(pos_1);
+       if(tally.hitTally()) { tally_surface_pass = false; }
+       phtn.set_position(pos_2);
+       if(tally.hitTally()) { tally_surface_pass = false; }
+       phtn.set_position(pos_3);
+       if(tally.hitTally()) { tally_surface_pass = false; }
+
+      
+       phtn.set_position(pos_4);
+       if(!tally.hitTally()) { tally_surface_pass = false; }
+       phtn.set_position(pos_5);
+       if(!tally.hitTally()) { tally_surface_pass = false; } 
+       phtn.set_position(pos_6);
+       if(!tally.hitTally()) { tally_surface_pass = false; }
+
+       if (tally_surface_pass) {
+	 cout << "TEST PASSED: tally surface count" << endl;
+       } else {
+	 cout << "TEST FAILED: tally surface count" << endl;
+         nfail++;
+       }
+
     }
   }
 
