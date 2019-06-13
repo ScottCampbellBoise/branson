@@ -23,9 +23,9 @@
 
 // NEW ADDITIONS
 // @Author: Scott Campbell
-// @desc: including imports for math funcs
+// @desc: including import for the tally.h class
 
-#include <math.h>
+#include "tally.h"
 
 // END ADDITIONS
 
@@ -80,8 +80,9 @@ Constants::event_type transport_photon_particle_pass(
 
   // NEW ADDITIONS
   // @Author: Scott Campbell
-
-  double tally_surface_x = 5;
+  // @desc: create a tally object to store all the info.
+	
+  Tally* tally = new Tally(5, -100, 100, -100, 100); // yz-plane @ x = 5, where y->[-100,100] & z->[-100,100]
 	
   // END ADDITIONS
 
@@ -120,10 +121,10 @@ Constants::event_type transport_photon_particle_pass(
     // NEW ADDITIONS
     // @Author: Scott Campbell
     // @desc: check if passed the tally surface
-    if(cur_pos[0] >= tally_surface_x) {
+    if(tally->hitTally(phtn)) {
       rank_abs_E[cell_id] += phtn.get_E();
       active = false;
-      event = TALLY_CROSS;
+      event = KILL;
     }
     // END ADDITIONS
 	  
@@ -195,18 +196,7 @@ std::vector<Photon> particle_pass_transport(
   using std::stack;
   using std::unordered_map;
   using std::vector;
-
-
-  // NEW ADDITIONS
-  // @Author: Scott Campbell
-  // @desc: Variables to record info of particles that pass the tally surface
- 
-  uint32_t tally_out_count = 0; // number of photons that pass through the tally surface
-  double tally_out_energy = 0; // Total energy of the photons that pass throught tally surface
-
-  // END ADDITIONS
-
-
+	
   double census_E = 0.0;
   double exit_E = 0.0;
   double next_dt = imc_state.get_next_dt(); //! Set for census photons
@@ -359,14 +349,6 @@ std::vector<Photon> particle_pass_transport(
           mctr.n_particle_messages++;
         }
         break;
-      // NEW ADDITIONS
-      // @Author: Scott Campbell
-      // @desc: Add case to check if passed through the tally surface
-      case TALLY_CROSS:
-	tally_out_count++;
-	tally_out_enegry += phtn.get_E();
-	break;
-      // END ADDITIONS
       }
       n--;
       if (from_receive_stack)
