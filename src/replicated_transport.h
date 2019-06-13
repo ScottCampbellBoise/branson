@@ -27,10 +27,16 @@
 #include "sampling_functions.h"
 #include "source.h"
 
+// NEW ADDITION
+// @author: Scott Campbell
+// @desc: add Tally Surface class
+#include "tally.h"
+// END ADDITION
+
 Constants::event_type transport_photon(
     Photon &phtn, const Mesh &mesh, RNG *rng, double &next_dt, double &exit_E,
     double &census_E, std::vector<double> &rank_abs_E,
-    std::vector<double> &rank_track_E) {
+    std::vector<double> &rank_track_E, Tally* tally) {
   using Constants::ELEMENT;
   using Constants::REFLECT;
   using Constants::VACUUM;
@@ -90,8 +96,16 @@ Constants::event_type transport_photon(
     // update position
     phtn.move(dist_to_event);
 
+    // NEW ADDITION
+    // @author: Scott Campbell
+    // Check if the particle has 'hit' the tally surface
+    if (tally->hitTally(phtn)) {
+      active = false; 	
+      event = KILL;	
+    }
+    // END ADDITION
     // apply variance/runtime reduction
-    if (phtn.below_cutoff(cutoff_fraction)) {
+    else if (phtn.below_cutoff(cutoff_fraction)) {
       rank_abs_E[cell_id] += phtn.get_E();
       active = false;
       event = KILL;
@@ -136,7 +150,8 @@ Constants::event_type transport_photon(
 std::vector<Photon> replicated_transport(Source &source, const Mesh &mesh,
                                          IMC_State &imc_state,
                                          std::vector<double> &rank_abs_E,
-                                         std::vector<double> &rank_track_E) {
+                                         std::vector<double> &rank_track_E,
+					 Tally* tally) {
   using Constants::CENSUS;
   using Constants::event_type;
   using Constants::EXIT;
@@ -178,12 +193,13 @@ std::vector<Photon> replicated_transport(Source &source, const Mesh &mesh,
     n_local_sourced++;
 
     event = transport_photon(phtn, mesh, rng, next_dt, exit_E,
-                                           census_E, rank_abs_E, rank_track_E);
+                                           census_E, rank_abs_E, rank_track_E, tally); // ADDED tally object
     switch (event) {
     // this case should never be reached
     case WAIT:
       break;
     case KILL:
+      std::cout << "Tally count: " << tally.getCount();
       break;
     case EXIT:
       break;
@@ -191,6 +207,13 @@ std::vector<Photon> replicated_transport(Source &source, const Mesh &mesh,
       census_list.push_back(phtn);
       break;
     }
+	
+    // NEW ADDITION
+    // @author: Scott Campbell
+    // @desc: reset the Tally count
+    tally.resetHits();
+    // END ADDITION
+
   } // end while
 
   // record time of transport work for this rank
