@@ -33,10 +33,12 @@
 #include "tally.h"
 // END ADDITION
 
-Constants::event_type transport_photon(
-    Photon &phtn, const Mesh &mesh, RNG *rng, double &next_dt, double &exit_E,
-    double &census_E, std::vector<double> &rank_abs_E,
-    std::vector<double> &rank_track_E, Tally* tally) {
+Constants::event_type transport_photon(Photon &phtn, const Mesh &mesh, RNG *rng,
+                                       double &next_dt, double &exit_E,
+                                       double &census_E,
+                                       std::vector<double> &rank_abs_E,
+                                       std::vector<double> &rank_track_E,
+				       Tally* tally) {
   using Constants::ELEMENT;
   using Constants::REFLECT;
   using Constants::VACUUM;
@@ -192,8 +194,10 @@ std::vector<Photon> replicated_transport(Source &source, const Mesh &mesh,
     phtn = source.get_photon(rng, dt);
     n_local_sourced++;
 
+
     event = transport_photon(phtn, mesh, rng, next_dt, exit_E,
                                            census_E, rank_abs_E, rank_track_E, tally); // ADDED tally object
+
     switch (event) {
     // this case should never be reached
     case WAIT:
