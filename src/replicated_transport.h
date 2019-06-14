@@ -1,4 +1,4 @@
-//----------------------------------*-C++-*----------------------------------//
+//---------------------------------*-C++-*----------------------------------//
 /*!
  * \file   replicated_transport.h
  * \author Alex Long
@@ -203,7 +203,7 @@ std::vector<Photon> replicated_transport(Source &source, const Mesh &mesh,
     case WAIT:
       break;
     case KILL:
-      std::cout << "Tally count: " << tally.getCount();
+      std::cout << "Tally count: " << tally->getHits();
       break;
     case EXIT:
       break;
@@ -214,8 +214,8 @@ std::vector<Photon> replicated_transport(Source &source, const Mesh &mesh,
 	
     // NEW ADDITION
     // @author: Scott Campbell
-    // @desc: reset the Tally count
-    tally.resetHits();
+    // @desc: reset the Tally count"
+    tally->resetHits();
     // END ADDITION
 
   } // end while
