@@ -17,6 +17,7 @@
 
 #include "../photon.h"
 #include "../tally.h"
+#include "../response_funct.h"
 
 int main(void) {
 
@@ -264,8 +265,30 @@ int main(void) {
 	 cout << "TEST FAILED: tally surface count" << endl;
          nfail++;
        }
-    }
+    }  
 
+
+    // test response_funct.h class for proper getting and setting ...
+    {
+       bool resp_func_pass = true;
+
+       Response_Funct* resp = new Response_Funct(); // generate a blank table
+       
+       // Check that the table is 'blank' - all 1's
+       for(int r=0; r<3; r++) {
+	 for(int c=0; c<3; c++) {
+	   resp_func_pass = (resp->get_response(r,c) == 1);
+	 }
+       }
+
+       if(resp_func_pass) {
+	 cout << "TEST PASSED: response function get/set" << endl;
+       } else {
+	 cout << "TEST FAILED: response function get/set" << endl;
+         nfail++;
+       }
+      
+    }  
 
   }
 
