@@ -101,7 +101,7 @@ Constants::event_type transport_photon(Photon &phtn, const Mesh &mesh, RNG *rng,
     // NEW ADDITION
     // @author: Scott Campbell
     // Check if the particle has 'hit' the tally surface
-    if (tally->hitTally(phtn)) {
+    if (tally->hit_tally(phtn)) {
       active = false; 	
       event = KILL;	
     }
@@ -196,14 +196,14 @@ std::vector<Photon> replicated_transport(Source &source, const Mesh &mesh,
 
 
     event = transport_photon(phtn, mesh, rng, next_dt, exit_E,
-                                           census_E, rank_abs_E, rank_track_E, tally); // ADDED tally object
+                             census_E, rank_abs_E, rank_track_E, tally); // ADDED tally object
 
     switch (event) {
     // this case should never be reached
     case WAIT:
       break;
     case KILL:
-      std::cout << "Tally count: " << tally->getHits();
+      std::cout << "Tally count: " << tally->get_hits();
       break;
     case EXIT:
       break;
@@ -215,7 +215,7 @@ std::vector<Photon> replicated_transport(Source &source, const Mesh &mesh,
     // NEW ADDITION
     // @author: Scott Campbell
     // @desc: reset the Tally count"
-    tally->resetHits();
+    tally->reset_hits();
     // END ADDITION
 
   } // end while

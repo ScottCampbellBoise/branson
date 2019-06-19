@@ -40,7 +40,7 @@ void imc_replicated_driver(Mesh &mesh, IMC_State &imc_state,
   constexpr double fake_mpi_runtime = 0.0;
 
 
-  Tally* tally = new Tally(5); // Make a new Tally of radius 5
+  Tally* tally = new Tally(1,1,1,1); // Make a new tally line object
 
 
 
