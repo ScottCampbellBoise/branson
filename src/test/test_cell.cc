@@ -233,31 +233,70 @@ int main(void) {
     {
        bool tally_surface_pass = true;
 
-       double pos_1[3] = {0,0,0};       
-       double pos_2[3] = {2,2,2};       
-       double pos_3[3] = {2.8,2.8,2.8};
-       
-       double pos_4[3] = {2.9,2.9,2.9}; 
-       double pos_5[3] = {3.5,3.5,3.5};       
-       double pos_6[3] = {5,5,5};       
+       double prev_pos_1[3] = {1.2394,1.3421,1};
+       double prev_pos_2[3] = {2.1245,1.6433,1};
+       double prev_pos_3[3] = {1.2234,3.9863,1};
 
-       Tally* tally = new Tally(5); // Create a spherical tally with radius = 5
+       double pos_1[3] = {3.3253,5.2523,1};       
+       double pos_2[3] = {2.7356,5.3532,1};       
+       double pos_3[3] = {3.8623,3.8325,1};
+       
+       double prev_pos_4[3] = {3.9323,5.0234,1};
+       double prev_pos_5[3] = {2.4852,5.9212,1};
+       double prev_pos_6[3] = {1.0112,0.5634,1};
+
+       double pos_4[3] = {6.0293,6.7652,1}; 
+       double pos_5[3] = {4.1724,5.4621,1};       
+       double pos_6[3] = {1.2189,0.5126,1};       
+
+       Tally* tally = new Tally(1, 5, 3, 1); // Create a line tally
        Photon phtn;      
 
-       phtn.set_position(pos_1);
-       if(tally->hitTally(phtn)) { tally_surface_pass = false; }
-       phtn.set_position(pos_2);
-       if(tally->hitTally(phtn)) { tally_surface_pass = false; }
-       phtn.set_position(pos_3);
-       if(tally->hitTally(phtn)) { tally_surface_pass = false; }
+       	phtn.set_position(pos_1);
+	phtn.set_prev_position(prev_pos_1);
+       	if(!tally->hit_tally(phtn)) { tally_surface_pass = false; }
+       	
+	phtn.set_position(pos_2);
+	phtn.set_prev_position(prev_pos_2);
+       	if(!tally->hit_tally(phtn)) { tally_surface_pass = false; }
+       	
+	phtn.set_position(pos_3);
+	phtn.set_prev_position(prev_pos_3);
+	if(!tally->hit_tally(phtn)) { tally_surface_pass = false; }
 
-      
-       phtn.set_position(pos_4);
-       if(!tally->hitTally(phtn)) { tally_surface_pass = false; }
-       phtn.set_position(pos_5);
-       if(!tally->hitTally(phtn)) { tally_surface_pass = false; } 
-       phtn.set_position(pos_6);
-       if(!tally->hitTally(phtn)) { tally_surface_pass = false; }
+	// Test the motion filter of the tally
+	tally->set_motion_filter(tally->POSITIVE_ONLY_FILTER);
+	
+	phtn.set_position(pos_1);
+	phtn.set_prev_position(prev_pos_1);
+	if(!tally->hit_tally(phtn)) { tally_surface_pass = false; }
+	
+	phtn.set_position(prev_pos_1);
+	phtn.set_prev_position(pos_1);
+	if(tally->hit_tally(phtn)) { tally_surface_pass = false; }
+
+	tally->set_motion_filter(tally->NEGATIVE_ONLY_FILTER);
+	
+	phtn.set_position(pos_1);
+	phtn.set_prev_position(prev_pos_1);
+	if(tally->hit_tally(phtn)) { tally_surface_pass = false; }
+
+	phtn.set_position(prev_pos_1);
+	phtn.set_prev_position(pos_1);
+	if(!tally->hit_tally(phtn)) { tally_surface_pass = false; } 
+
+	// Test the cases where the tally shouldn't be triggered
+       	phtn.set_position(pos_4);
+       	phtn.set_prev_position(prev_pos_4);
+	if(tally->hit_tally(phtn)) { tally_surface_pass = false; }
+       
+	phtn.set_position(pos_5); 
+	phtn.set_prev_position(prev_pos_5);
+	if(tally->hit_tally(phtn)) { tally_surface_pass = false; } 
+       	
+	phtn.set_position(pos_6);	
+	phtn.set_prev_position(prev_pos_6);
+	if(tally->hit_tally(phtn)) { tally_surface_pass = false; }
 
        if (tally_surface_pass) {
 	 cout << "TEST PASSED: tally surface count" << endl;
