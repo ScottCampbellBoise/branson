@@ -56,6 +56,9 @@ public:
   //! Return a constant pointer to the start of the particle position array
   inline const double *get_position(void) const { return m_pos; }
 
+  //! Return the previous position of the photon
+  inline const double *get_prev_position(void) const { return m_prev_pos; }
+
   //! Return a constant pointer to the start of the particle direction array
   inline const double *get_angle(void) const { return m_angle; }
 
@@ -133,6 +136,17 @@ public:
     m_pos[0] = pos[0];
     m_pos[1] = pos[1];
     m_pos[2] = pos[2];
+
+    m_prev_pos[0] = pos[0];
+    m_prev_pos[1] = pos[1];
+    m_prev_pos[2] = pos[2];
+  }
+
+  //! Set previous position: FOR TESTING USE ONLY!
+  inline void set_prev_position(double const *const pos) {
+    m_prev_pos[0] = pos[0];
+    m_prev_pos[1] = pos[1];
+    m_prev_pos[2] = pos[2];
   }
 
   //! Reflect a photon about a plane aligned with the X, Y, or Z axes
@@ -158,6 +172,7 @@ private:
   uint32_t m_grip_ID; //!< Grip ID of current cell
   uint32_t group;     //!< Group of photon
   double m_pos[3];    //!< photon position
+  double m_prev_pos[3]; //!< previous position of the photon
   double m_angle[3];  //!< photon angle array
   double m_E;         //!< current photon energy
   double m_E0;        //!< photon energy at creation
