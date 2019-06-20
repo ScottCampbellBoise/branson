@@ -56,7 +56,7 @@ public:
         rank(mpi_info.get_rank()), n_rank(mpi_info.get_n_rank()),
         total_photon_E(0.0), off_rank_reads(0), silo_x(input.get_silo_x()),
         silo_y(input.get_silo_y()), silo_z(input.get_silo_z()),
-        regions(input.get_regions()) {
+        regions(input.get_regions()), input(input) {
     using Constants::bc_type;
     using Constants::ELEMENT;
     using Constants::X_NEG;
@@ -109,6 +109,10 @@ public:
   //--------------------------------------------------------------------------//
   // const functions                                                          //
   //--------------------------------------------------------------------------//
+  
+  // Allow a way to access the input variables
+  const Input& get_input() const { return input; }
+
   uint32_t get_n_local_cells(void) const { return n_cell; }
   uint32_t get_my_rank(void) const { return rank; }
   uint32_t get_offset(void) const { return on_rank_start; }
@@ -337,6 +341,10 @@ private:
       region_ID_to_index; //!< Maps region ID to index
 
   Cell current_cell; //!< Off rank cell found in search
+
+  // Store the mesh input information
+  const Input& input; 
+
 };
 
 #endif // mesh_h_
