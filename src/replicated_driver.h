@@ -40,7 +40,7 @@ void imc_replicated_driver(Mesh &mesh, IMC_State &imc_state,
   constexpr double fake_mpi_runtime = 0.0;
 
 
-  Tally* tally = new Tally(1,1,1,1); // Make a new tally line object
+  Tally* tally = new Tally(1,1,1,1, mesh.get_input()); // Make a new tally line object
 
 
 
