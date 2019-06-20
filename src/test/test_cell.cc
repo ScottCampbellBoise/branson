@@ -14,10 +14,8 @@
 #include "testing_functions.h"
 #include <iostream>
 #include <vector>
-
-#include "../photon.h"
-#include "../tally.h"
-#include "../response_funct.h"
+#include <fstream>
+#include <string>
 
 int main(void) {
 
@@ -228,106 +226,6 @@ int main(void) {
       cout << "TEST FAILED: construction from proto cell" << endl;
       nfail++;
     }
-
-    // test the tally surface and counter
-    {
-       bool tally_surface_pass = true;
-
-       double prev_pos_1[3] = {1.2394,1.3421,1};
-       double prev_pos_2[3] = {2.1245,1.6433,1};
-       double prev_pos_3[3] = {1.2234,3.9863,1};
-
-       double pos_1[3] = {3.3253,5.2523,1};       
-       double pos_2[3] = {2.7356,5.3532,1};       
-       double pos_3[3] = {3.8623,3.8325,1};
-       
-       double prev_pos_4[3] = {3.9323,5.0234,1};
-       double prev_pos_5[3] = {2.4852,5.9212,1};
-       double prev_pos_6[3] = {1.0112,0.5634,1};
-
-       double pos_4[3] = {6.0293,6.7652,1}; 
-       double pos_5[3] = {4.1724,5.4621,1};       
-       double pos_6[3] = {1.2189,0.5126,1};       
-
-       Tally* tally = new Tally(1, 5, 3, 1); // Create a line tally
-       Photon phtn;      
-
-       	phtn.set_position(pos_1);
-	phtn.set_prev_position(prev_pos_1);
-       	if(!tally->hit_tally(phtn)) { tally_surface_pass = false; }
-       	
-	phtn.set_position(pos_2);
-	phtn.set_prev_position(prev_pos_2);
-       	if(!tally->hit_tally(phtn)) { tally_surface_pass = false; }
-       	
-	phtn.set_position(pos_3);
-	phtn.set_prev_position(prev_pos_3);
-	if(!tally->hit_tally(phtn)) { tally_surface_pass = false; }
-
-	// Test the motion filter of the tally
-	tally->set_motion_filter(tally->POSITIVE_ONLY_FILTER);
-	
-	phtn.set_position(pos_1);
-	phtn.set_prev_position(prev_pos_1);
-	if(!tally->hit_tally(phtn)) { tally_surface_pass = false; }
-	
-	phtn.set_position(prev_pos_1);
-	phtn.set_prev_position(pos_1);
-	if(tally->hit_tally(phtn)) { tally_surface_pass = false; }
-
-	tally->set_motion_filter(tally->NEGATIVE_ONLY_FILTER);
-	
-	phtn.set_position(pos_1);
-	phtn.set_prev_position(prev_pos_1);
-	if(tally->hit_tally(phtn)) { tally_surface_pass = false; }
-
-	phtn.set_position(prev_pos_1);
-	phtn.set_prev_position(pos_1);
-	if(!tally->hit_tally(phtn)) { tally_surface_pass = false; } 
-
-	// Test the cases where the tally shouldn't be triggered
-       	phtn.set_position(pos_4);
-       	phtn.set_prev_position(prev_pos_4);
-	if(tally->hit_tally(phtn)) { tally_surface_pass = false; }
-       
-	phtn.set_position(pos_5); 
-	phtn.set_prev_position(prev_pos_5);
-	if(tally->hit_tally(phtn)) { tally_surface_pass = false; } 
-       	
-	phtn.set_position(pos_6);	
-	phtn.set_prev_position(prev_pos_6);
-	if(tally->hit_tally(phtn)) { tally_surface_pass = false; }
-
-       if (tally_surface_pass) {
-	 cout << "TEST PASSED: tally surface count" << endl;
-       } else {
-	 cout << "TEST FAILED: tally surface count" << endl;
-         nfail++;
-       }
-    }  
-
-
-    // test response_funct.h class for proper getting and setting ...
-    {
-       bool resp_func_pass = true;
-
-       Response_Funct* resp = new Response_Funct(); // generate a blank table
-       
-       // Check that the table is 'blank' - all 1's
-       for(int r=0; r<3; r++) {
-	 for(int c=0; c<3; c++) {
-	   resp_func_pass = (resp->get_response(r,c) == 1);
-	 }
-       }
-
-       if(resp_func_pass) {
-	 cout << "TEST PASSED: response function get/set" << endl;
-       } else {
-	 cout << "TEST FAILED: response function get/set" << endl;
-         nfail++;
-       }
-      
-    }  
 
   }
 
