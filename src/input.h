@@ -679,6 +679,13 @@ public:
   //! Return the starting z position of a given z division
   double get_z_start(const uint32_t &div) const { return z_start[div]; }
 
+  //! Return the ending x position of a given x division
+  double get_x_end(const uint32_t &div) const { return x_end[div]; }
+  //! Return the ending y position of a given y division
+  double get_y_end(const uint32_t &div) const { return y_end[div]; }
+  //! Return the ending z position of a given z division
+  double get_z_end(const uint32_t &div) const { return z_end[div]; }
+
   //! Return the value of the use tilt option
   bool get_tilt_bool(void) const { return use_tilt; }
   //! Return the value of the use comb option
