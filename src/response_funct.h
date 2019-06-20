@@ -13,52 +13,39 @@ using namespace std;
 
 class Response_Funct {
 
+// TO DO:
+//     * Add a reference to a tally surface in const
+//     * Add a way to do ray tracing towards cells, 
+//       based on position on the tally line and angle
+
 public:
 
-    Response_Funct() : num_rows(3) , num_cols(3) {
-      generate_blank_table();
+    Response_Funct(Tally& tally, uint32_t n_rays, uint32_t n_tally_points) : 
+		   tally(tally), n_rays(n_rays), n_tally_points(n_tally_points) {
+	mesh_start_x = tally.get_mesh_start_x();
+	mesh_end_x = tally.get_mesh_end_x();
+	mesh_start_y = tally.get_mesh_start_y();
+	mesh_end_y = tally.get_mesh_end_y();
+	
+	tally_x1 = tally.get_x1();
+	tally_y1 = tally.get_y1();
+	tally_x2 = tally.get_x2();
+	tally_y2 = tally.get_y2();
     }   
 
-    Response_Funct(int n_rows, int n_cols) : num_rows(n_rows), num_cols(n_cols) {
-      generate_blank_table();
-    }
-
-    inline double get_response(int row, int col) {
-      if(row >= 0 && row < num_rows && col >= 0 && col < num_cols) {
-         return response_table[row][col];
-      }
-      return -1;
-    }
-
-    inline bool set_response(int row, int col, double new_response) {
-      if(row >= 0 && row < num_rows && col >= 0 && col < num_cols) {
-         response_table[row][col] = new_response;
-         return true;
-      }
-      return false;
-    }
-
-    void set_response_table(int n_rows, int n_cols, double** new_table) {
-      num_rows = n_rows;
-      num_cols = n_cols;
-      response_table = new_table;
-    }
-
-    void generate_blank_table() {
-      response_table = new double*[num_rows];
-      for(int row = 0; row < num_rows; row++) {
-          response_table[row] = new double[num_cols];
-         for(int col = 0; col < num_cols; col++) {
-            response_table[row][col] = 1;
-         }
-      }
-    }
+    ~Response_Funct() {}
 
 private:
 
-    int num_rows;
-    int num_cols;
-    double** response_table; // Holds the avg. response of each cell
+    Tally& tally;
+
+    uint32_t n_rays; 
+    uint32_t n_tally_points;
+
+    double mesh_start_x, mesh_start_y;
+    double mesh_end_x, mesh_end_y;
+    double tally_x1, tally_y1;
+    double tally_x2, tally_y2;
 
 };
 #endif
