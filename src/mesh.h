@@ -67,6 +67,21 @@ public:
     using Constants::Z_POS;
     using std::vector;
 
+    // Get info about the mesh dimensions
+    mesh_start_x = input.get_x_start(0);
+    mesh_start_y = input.get_y_start(0);
+    mesh_start_z = input.get_z_start(0);
+    mesh_end_x = input.get_x_end(input.get_n_x_divisions() - 1);    
+    mesh_end_y = input.get_y_end(input.get_n_y_divisions() - 1);
+    mesh_end_z = input.get_z_end(input.get_n_z_divisions() - 1);
+
+    mesh_n_x = input.get_global_n_x_cells(); 
+    mesh_n_y = input.get_global_n_y_cells();
+    mesh_n_z = input.get_global_n_z_cells();
+    mesh_dx = input.get_dx(0);
+    mesh_dy = input.get_dy(0);
+    mesh_dz = input.get_dz(0);
+
     Proto_Mesh proto_mesh(input, mpi_types, mpi_info);
 
     // mode is replicated
@@ -296,6 +311,21 @@ public:
   //! Get external source energy vector needed to source particles
   std::vector<double> &get_source_E_ref(void) { return m_source_E; }
 
+  inline double get_start_x() { return mesh_start_x; }
+  inline double get_end_x() { return mesh_end_x; }
+  inline double get_start_y() { return mesh_start_y; }
+  inline double get_end_y() { return mesh_end_y; }
+  inline double get_start_z() { return mesh_start_z; }
+  inline double get_end_z() { return mesh_end_z; }
+    
+  inline double get_dx() { return mesh_dx; }
+  inline double get_dy() { return mesh_dy; }
+  inline double get_dz() { return mesh_dz; }
+    
+  inline int get_n_x_cells() { return mesh_n_x; }
+  inline int get_n_y_cells() { return mesh_n_y; }
+  inline int get_n_z_cells() { return mesh_n_z; }
+    
   //--------------------------------------------------------------------------//
   // member variables
   //--------------------------------------------------------------------------//
@@ -344,6 +374,12 @@ private:
 
   // Store the mesh input information
   const Input& input; 
+  
+  // Variables to store information about the mesh dimensions
+  double mesh_start_x, mesh_start_y, mesh_start_z;
+  double mesh_end_x, mesh_end_y, mesh_end_z;
+  double mesh_dx, mesh_dy, mesh_dz;
+  int mesh_n_x, mesh_n_y, mesh_n_z;
 
 };
 
