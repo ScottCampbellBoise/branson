@@ -14,31 +14,27 @@
 #include <vector>
 #include <fstream>
 
+#include "../response_funct.h"
 #include "../photon.h"
 #include "../tally.h"
 #include "../constants.h"
 #include "../input.h"
 #include "../mpi_types.h"
+#include "../imc_parameters.h"
 #include "../proto_mesh.h"
+#include "../mesh.h"
 #include "testing_functions.h"
 
 int main(int argc, char *argv[]) {
 
   MPI_Init(&argc, &argv);
-
   int nfail = 0;
 
   // scope for MPI type commit and frees (needs to be done before MPI_Finalize)
   {
     const Info mpi_info;
 
-    MPI_Types mpi_types;
-
-
-    string filename("simple_input.xml");
-    Input input(filename, mpi_types);
-    Proto_Mesh mesh(input, mpi_types, mpi_info);
-
+    MPI_Types mpi_types;	
 
     using std::cout;
     using std::endl;
@@ -121,9 +117,9 @@ int main(int argc, char *argv[]) {
       }
     }
    
-
     // test the tally surface and counter
     {
+        using std::string;
         bool tally_surface_pass = true;
 
         double prev_pos_1[3] = {1.2394,1.3421,1};
@@ -142,20 +138,42 @@ int main(int argc, char *argv[]) {
         double pos_5[3] = {4.1724,5.4621,1};       
         double pos_6[3] = {1.2189,0.5126,1};       
 
-        Tally* tally = new Tally(1, 5, 3, 1, input); // Create a line tally
+	string filename("simple_input.xml");
+	const Info mpi_info;
+	MPI_Types mpi_types;
+	Input input(filename, mpi_types);
+	IMC_Parameters imc_p(input);
+	
+	Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh
+	Tally* tally = new Tally(1, 5, 3, 1, mesh); // Create a line tally
 
 	ofstream outfile("RESULTS.txt");
-	outfile << "Mesh Start x: " << tally->get_mesh_start_x() << endl;
-	outfile << "Mesh End x: " << tally->get_mesh_end_x() << endl;\
-        outfile.close();
+	outfile << "Mesh start x: " << mesh.get_start_x() << endl;
+	outfile << "Mesh start y: " << mesh.get_start_y() << endl;
+	outfile << "Mesh start z: " << mesh.get_start_z() << endl;
+	outfile << "Mesh end x: " << mesh.get_end_x() << endl;
+	outfile << "Mesh end y: " << mesh.get_end_y() << endl;
+	outfile << "Mesh end z: " << mesh.get_end_z() << endl;
+	outfile << "Mesh dx: " << mesh.get_dx() << endl;
+	outfile << "Mesh dy: " << mesh.get_dy() << endl;        
+	outfile << "Mesh dz: " << mesh.get_dz() << endl;
+	outfile.close();
    
         Photon phtn; 
-	// Test the tally get mesh dimension methods
-	if(tally->get_mesh_start_x() != 0) { tally_surface_pass = false; }
-	if(tally->get_mesh_end_x() != 10) { tally_surface_pass = false; }
+	// Test the mesh get mesh dimension methods
+	if(mesh.get_start_x() != 0) { tally_surface_pass = false; }
+	if(mesh.get_end_x() != 10) { tally_surface_pass = false; }
 
-	if(tally->get_mesh_start_y() != 0) { tally_surface_pass = false; }
-	if(tally->get_mesh_end_y() != 40) { tally_surface_pass = false; }
+	if(mesh.get_start_y() != 0) { tally_surface_pass = false; }
+	if(mesh.get_end_y() != 40) { tally_surface_pass = false; }
+
+	if(mesh.get_start_z() != 0) { tally_surface_pass = false; }
+	if(mesh.get_end_z() != 90) { tally_surface_pass = false; }
+
+	// Test the mesh get_dx ... functions
+	if(mesh.get_dx() != 1) { tally_surface_pass = false; }
+	if(mesh.get_dy() != 2) { tally_surface_pass = false; }
+	if(mesh.get_dz() != 3) { tally_surface_pass = false; }
 
 	// Test the basic tally operation
        	phtn.set_position(pos_1);
@@ -213,6 +231,71 @@ int main(int argc, char *argv[]) {
        }
     }  
    
+    // Test the response funtion class
+    {
+	bool response_pass = true;
+	// Need to create a mesh
+	string filename("simple_input.xml");
+	const Info mpi_info;
+	MPI_Types mpi_types;
+	Input input(filename, mpi_types);
+	IMC_Parameters imc_p(input);
+	
+	Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh	
+	Tally tally(1, 5, 3, 1, mesh); // Create a line tally
+	Response_Funct resp(tally, mesh);
+	
+	//Define a box: lower_left = (0,0), and upper_right = (10,10)
+	//v1 - v3 are false cases, v4 - v8 are true cases
+	double v1 = resp.intersect_cell(resp.make_point(0,0), 
+		         resp.make_point(10,10), resp.make_ray(1,11));
+	double v2 = resp.intersect_cell(resp.make_point(0,0), 
+		         resp.make_point(10,10), resp.make_ray(0,-1));
+	double v3 = resp.intersect_cell(resp.make_point(0,0), 
+		         resp.make_point(10,10), resp.make_ray(-1,21));
+
+	double v4 = resp.intersect_cell(resp.make_point(0,0), 
+		         resp.make_point(10,10), resp.make_ray(1,0));
+	double v5 = resp.intersect_cell(resp.make_point(0,0), 
+		         resp.make_point(10,10), resp.make_ray(-1,8));
+	double v6 = resp.intersect_cell(resp.make_point(0,0), 
+		         resp.make_point(10,10), resp.make_ray(0,5));
+	double v7 = resp.intersect_cell(resp.make_point(0,0), 
+		         resp.make_point(10,10), resp.make_ray(0,0));
+	double v8 = resp.intersect_cell(resp.make_point(0,0), 
+		         resp.make_point(10,10), resp.make_ray(1e8,0));
+
+
+	ofstream outfile("RESULTS.txt");
+	outfile << "v1 (-1): " << v1 << endl;	
+	outfile << "v2 (-1): " << v2 << endl;	
+	outfile << "v3 (-1): " << v3 << endl;	
+	outfile << "v4 (14.142135): " << v4 << endl;	
+	outfile << "v5 (11.3137): " << v5 << endl;
+	outfile << "v6 (10): " << v6 << endl;
+	outfile << "v7 (10): " << v7 << endl;
+	outfile << "v8 (10): " << v8 << endl;
+	outfile.close();
+   
+
+	if(v1 != -1) { response_pass = false; }
+	if(v2 != -1) { response_pass = false; }
+	if(v3 != -1) { response_pass = false; }
+	
+	if(v4 < 14.1420 || v4 > 14.1422) { response_pass = false; }
+	if(v5 < 11.312 || v5 > 11.314) { response_pass = false; }
+	if(v6 != 10) { response_pass = false; }
+	if(v7 != 10) { response_pass = false; }
+	if(v8 != 10) { response_pass = false; }
+
+	if(response_pass) {
+      	    cout << "TEST PASSED: Response Function" << endl;		
+	} else {
+	    cout << "TEST FAILED: Response Function" << endl;
+	    nfail++;
+	}
+    }
+
 
   } // need to call destructors for mpi_types before MPI_Finalize
 
