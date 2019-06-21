@@ -26,12 +26,7 @@
 #include "photon.h"
 #include "sampling_functions.h"
 #include "source.h"
-
-// NEW ADDITION
-// @author: Scott Campbell
-// @desc: add Tally Surface class
 #include "tally.h"
-// END ADDITION
 
 Constants::event_type transport_photon(Photon &phtn, const Mesh &mesh, RNG *rng,
                                        double &next_dt, double &exit_E,
@@ -98,14 +93,10 @@ Constants::event_type transport_photon(Photon &phtn, const Mesh &mesh, RNG *rng,
     // update position
     phtn.move(dist_to_event);
 
-    // NEW ADDITION
-    // @author: Scott Campbell
-    // Check if the particle has 'hit' the tally surface
     if (tally->hit_tally(phtn)) {
       active = false; 	
       event = KILL;	
     }
-    // END ADDITION
     // apply variance/runtime reduction
     else if (phtn.below_cutoff(cutoff_fraction)) {
       rank_abs_E[cell_id] += phtn.get_E();
@@ -212,11 +203,7 @@ std::vector<Photon> replicated_transport(Source &source, const Mesh &mesh,
       break;
     }
 	
-    // NEW ADDITION
-    // @author: Scott Campbell
-    // @desc: reset the Tally count"
     tally->reset_hits();
-    // END ADDITION
 
   } // end while
 
