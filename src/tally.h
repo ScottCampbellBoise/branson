@@ -11,48 +11,34 @@
 #include <cmath>
 #include "constants.h"	// Use for standard math constants
 #include "photon.h"	// Use for particle information: pos, angle, weight
-#include "input.h"	// Contains information about the mesh dimesions
+#include "mesh.h"	
 
 using namespace std;
 using Constants::pi;
-
-// This class creates a 'bar' tally
-// Test verified that the tally will accurately count
-//     particles only if they travel through the tally
-//     within their last time/space step. Also verified 
-//     the motion filter settings.
-// Test verified to properly get the x and y dimensions
-//     of the mesh object through an Input object
 
 class Tally {
 
 public:
     
     // NOTE: The Mesh class jhas been updated to have ref. to Input. Could
-    // 	alternatively pass a mesh as an object, and extract the input
-    // 	out of the mesh object.
+    // 	alternatively pass a mesh.as an object, and extract the input
+    // 	out of the mesh.object. 
+    //
+    // 	** ASSUMES THAT THE CELLS ARE OF EQUAL SIZE IN ALL DIVISIONS **
     
-    Tally(double x1, double y1, double x2, double y2, const Input& input) : x1(x1), 
-	  y1(y1), x2(x2), y2(y2), n_hits(0), filter_state(NO_FILTER) {
+    Tally(double x1, double y1, double x2, double y2, Mesh& mesh) : x1(x1), 
+	  y1(y1), x2(x2), y2(y2), mesh(mesh),  n_hits(0), filter_state(NO_FILTER) {
 	// Define the line equation to connect the two tally points
         tally_m = (y1 - y2) / (x1 - x2);
         tally_b = (-tally_m * x1) + y1;
-   	
-	// Set up the mesh boundary information
-	mesh_start_x = input.get_x_start(0);
-	mesh_start_y = input.get_y_start(0);
-	mesh_start_z = input.get_z_start(0);
-	mesh_end_x = input.get_x_end(input.get_n_x_divisions() - 1);
-	mesh_end_y = input.get_y_end(input.get_n_y_divisions() - 1);
-	mesh_end_z = input.get_z_end(input.get_n_z_divisions() - 1);     
-
-	// Check that the tally line is fully inside/on the mesh surface
-	if(x1 >= mesh_start_x && x1 <= mesh_end_x &&
-	   x2 >= mesh_start_x && x2 <= mesh_end_x &&
-	   y1 >= mesh_start_y && y1 <= mesh_end_y &&
-	   y2 >= mesh_start_y && y2 <= mesh_end_y) {
+	
+	// Check that the tally line is fully inside/on the mesh.surface
+	if(x1 >= mesh.get_start_x() && x1 <= mesh.get_end_x() &&
+	   x2 >= mesh.get_start_x() && x2 <= mesh.get_end_x() &&
+	   y1 >= mesh.get_start_y() && y1 <= mesh.get_end_y() &&
+	   y2 >= mesh.get_start_y() && y2 <= mesh.get_end_y()) {
 	    std::cout << "\n\nERROR: The tally line MUST be inside or on" <<
-		" the mesh surface!\n\n";
+		" the mesh.surface!\n\n";
 	    return;
 	}	
     }
@@ -77,14 +63,6 @@ public:
     inline double get_tally_slope() { return tally_m; }
     inline double get_tally_intercept() { return tally_b; }
     inline int get_motion_filter() { return filter_state; }
-
-    inline double get_mesh_start_x() { return mesh_start_x; }
-    inline double get_mesh_end_x() { return mesh_end_x; }
-    inline double get_mesh_start_y() { return mesh_start_y; }
-    inline double get_mesh_end_y() { return mesh_end_y; }
-    inline double get_mesh_start_z() { return mesh_start_z; }
-    inline double get_mesh_end_z() { return mesh_end_z; }
-    
     inline void set_tally_pos(double x1, double y1, double x2, double y2) {
 	x1 = x1;
 	y1 = y1;
@@ -92,6 +70,9 @@ public:
 	y2 = x2;
 	tally_m = (y1 - y2) / (x1 - x1);
 	tally_b = (-tally_m * x1) + y1;
+    }
+    inline double get_len() {
+	return sqrt(pow(x1 - x2 ,2) + pow(y1 - y2 ,2));
     }
     bool set_motion_filter(int new_filter) {
 	if(new_filter < -1 || new_filter > 1) {
@@ -136,7 +117,7 @@ private:
 	    if(phtn_pos[1] < tally_m * phtn_pos[0] + tally_b) {
 		return false;
 	    }
-	} else if(filter_state == NEGATIVE_ONLY_FILTER) {
+	} else if(filter_state == NEGATIVE_ONLY_FILTER) {    	
 	    if(phtn_pos[1] > tally_m * phtn_pos[0] + tally_b) {
 		return false;
 	    }
@@ -178,20 +159,16 @@ private:
 		q.y <= max(p.y, r.y) && q.y >= min(p.y, r.y));
     }
 
+
     // ----------------------------------------------------------------------
     // Private Variables/Constants
     // ----------------------------------------------------------------------
-    
+    Mesh& mesh;   
     double x1, y1, x2, y2;
     double tally_m, tally_b; // Define the line between the tally y = m*x + b
     int n_hits;
     double total_energy;
     int filter_state;
-    
-    // Variables to store information about the mesh dimensions
-    double mesh_start_x, mesh_start_y, mesh_start_z;
-    double mesh_end_x, mesh_end_y, mesh_end_z;
-
 };
 
 #endif
