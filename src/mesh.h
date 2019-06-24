@@ -165,7 +165,7 @@ public:
 
   Cell get_on_rank_cell(const uint32_t index) const {
     // this can only be called after with valid cell index (on rank or in stored
-    // cells vector
+    // cells vecto
     return cells[index - on_rank_start];
   }
 

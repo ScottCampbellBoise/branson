@@ -302,6 +302,28 @@ public:
 	return particles;
     }
 
+    void extract_sigma_values(Response_Cell** table, double table_dx, double table_dy) {
+	const Cell* cells = mesh.get_const_cells_ptr();
+	int n_cells = mesh.get_n_local_cells();
+	for(int k = 0; k < n_cells; k++) {
+	    Cell c = cells[k];
+	    const double* cell_dimen = c.get_node_array();
+	    int min_col = (int)(cell_dimen[0] / table_dx);
+	    int max_col = (int)(cell_dimen[1] / table_dx);
+	    int min_row = (int)(cell_dimen[2] / table_dy);
+	    int max_row = (int)(cell_dimen[3] / table_dy);
+	    for(int row = min_row; row <= max_row; row++) {
+		for(int col = min_col; col <= max_col; col++) {
+		    // Calculate the overlapping area
+		    double int_area = (min(cell_dimen[1],(col+1)*table_dx)-max(cell_dimen[0],(col*table_dx))) *
+				      (min(cell_dimen[3],(row+1)*table_dy)-max(cell_dimen[2],(row*table_dy)));
+		    table[row][col].response += c.get_op_a() * (int_area / (table_dx * table_dy));
+
+		}
+	    }
+	}	
+    }
+
 private:
 
     Mesh& mesh;
