@@ -245,48 +245,45 @@ int main(int argc, char *argv[]) {
 	Tally tally(1, 5, 3, 1, mesh); // Create a line tally
 	Response_Funct resp(tally, mesh);
 	
-	//Define a box: lower_left = (0,0), and upper_right = (10,10)
-	//v1 - v3 are false cases, v4 - v8 are true cases
-	double v1 = resp.intersect_cell(resp.make_point(0,0), 
-		         resp.make_point(10,10), resp.make_ray(1,11));
-	double v2 = resp.intersect_cell(resp.make_point(0,0), 
-		         resp.make_point(10,10), resp.make_ray(0,-1));
-	double v3 = resp.intersect_cell(resp.make_point(0,0), 
-		         resp.make_point(10,10), resp.make_ray(-1,21));
+	//Define a response_cell: lower_left = (0,0), and upper_right = (10,10)
+	Point l_left = {0,0};
+	Point u_right = {10,10};
+	Response_Cell rc = {l_left, u_right, 0, 0, 0};
+	
+	// Define particles in that cell
+	Particle p1 = { {5,5} , {1,0} };
+	Particle p2 = { {3,0} , {0,0} };
+	Particle p3 = { {5,10} , {1,5} };
+	Particle p4 = { {10,13} , {0,12} };	
 
-	double v4 = resp.intersect_cell(resp.make_point(0,0), 
-		         resp.make_point(10,10), resp.make_ray(1,0));
-	double v5 = resp.intersect_cell(resp.make_point(0,0), 
-		         resp.make_point(10,10), resp.make_ray(-1,8));
-	double v6 = resp.intersect_cell(resp.make_point(0,0), 
-		         resp.make_point(10,10), resp.make_ray(0,5));
-	double v7 = resp.intersect_cell(resp.make_point(0,0), 
-		         resp.make_point(10,10), resp.make_ray(0,0));
-	double v8 = resp.intersect_cell(resp.make_point(0,0), 
-		         resp.make_point(10,10), resp.make_ray(1e8,0));
+	// Test the get intersect point method
+	Point int_pt = resp.get_intersect_point(rc, p1);
+	if(int_pt.x != 0 && int_pt.y != 0) { response_pass = false; }
+	int_pt = resp.get_intersect_point(rc, p2);
+	if(int_pt.x != 0 && int_pt.y != 0) { response_pass = false; }	
+	int_pt = resp.get_intersect_point(rc, p3);
+	if(int_pt.x != 0 && int_pt.y != 5) { response_pass = false; }
+	int_pt = resp.get_intersect_point(rc, p4);
+	if(int_pt.x != NULL && int_pt.y != NULL) { response_pass = false; }
 
+	// Test the move Particle method
+	double table_dx = 10, table_dy = 10;
+	Response_Cell** table = resp.get_empty_resp_table(5,5,table_dx,table_dy);
+
+	Particle p5 = {{15,15} , {1,0}};
+	if(!resp.move_particle(p5, table, table_dx, table_dy)) {response_pass = false;} 
+	if(p5.pos.x != 10 && p5.pos.y != 10) { response_pass = false; }
+
+	Particle p6 = {{5,5} , {1,0}};
+	bool res6 = resp.move_particle(p6, table, table_dx, table_dy);
+	if(!res6) { response_pass = false; } 	
+	if(p6.pos.x != 0 && p6.pos.y != 0) { response_pass = false; }
 
 	ofstream outfile("RESULTS.txt");
-	outfile << "v1 (-1): " << v1 << endl;	
-	outfile << "v2 (-1): " << v2 << endl;	
-	outfile << "v3 (-1): " << v3 << endl;	
-	outfile << "v4 (14.142135): " << v4 << endl;	
-	outfile << "v5 (11.3137): " << v5 << endl;
-	outfile << "v6 (10): " << v6 << endl;
-	outfile << "v7 (10): " << v7 << endl;
-	outfile << "v8 (10): " << v8 << endl;
+	outfile << "Result of move particle 6: " << res6 << endl;
+	outfile << "End x (p6): " << p6.pos.x << endl;
+	outfile << "End y (p6): " << p6.pos.y << endl;
 	outfile.close();
-   
-
-	if(v1 != -1) { response_pass = false; }
-	if(v2 != -1) { response_pass = false; }
-	if(v3 != -1) { response_pass = false; }
-	
-	if(v4 < 14.1420 || v4 > 14.1422) { response_pass = false; }
-	if(v5 < 11.312 || v5 > 11.314) { response_pass = false; }
-	if(v6 != 10) { response_pass = false; }
-	if(v7 != 10) { response_pass = false; }
-	if(v8 != 10) { response_pass = false; }
 
 	if(response_pass) {
       	    cout << "TEST PASSED: Response Function" << endl;		
