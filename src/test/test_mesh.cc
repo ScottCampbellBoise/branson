@@ -14,8 +14,7 @@
 #include <vector>
 #include <fstream>
 
-#include "../response_funct.h"
-#include "../photon.h"
+#include "../sphere_response.h"
 #include "../tally.h"
 #include "../constants.h"
 #include "../input.h"
@@ -122,20 +121,20 @@ int main(int argc, char *argv[]) {
         using std::string;
         bool tally_surface_pass = true;
 
-        double prev_pos_1[3] = {1.2394,1.3421,1};
-        double prev_pos_2[3] = {2.1245,1.6433,1};
-        double prev_pos_3[3] = {1.2234,3.9863,1};
+        double prev_pos_1[3] = {0,0,0};
+        double prev_pos_2[3] = {2.12,1.6433,1};
+        double prev_pos_3[3] = {1,3,1};
 
-        double pos_1[3] = {3.3253,5.2523,1};       
-        double pos_2[3] = {2.7356,5.3532,1};       
-        double pos_3[3] = {3.8623,3.8325,1};
+        double pos_1[3] = {5,5,6};       
+        double pos_2[3] = {4.7,8.4,6.3};       
+        double pos_3[3] = {7,7,7};
        
-        double prev_pos_4[3] = {3.9323,5.0234,1};
-        double prev_pos_5[3] = {2.4852,5.9212,1};
+        double prev_pos_4[3] = {5.9323,5.0234,5};
+        double prev_pos_5[3] = {5.4852,7.9212,7};
         double prev_pos_6[3] = {1.0112,0.5634,1};
 
-        double pos_4[3] = {6.0293,6.7652,1}; 
-        double pos_5[3] = {4.1724,5.4621,1};       
+        double pos_4[3] = {6.0293,6.7652,8}; 
+        double pos_5[3] = {4.1724,5.4621,9};       
         double pos_6[3] = {1.2189,0.5126,1};       
 
 	string filename("simple_input.xml");
@@ -145,8 +144,8 @@ int main(int argc, char *argv[]) {
 	IMC_Parameters imc_p(input);
 	
 	Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh
-	Tally* tally = new Tally(1, 5, 3, 1, mesh); // Create a line tally
-
+	Tally* tally = new Tally(5, 0, 0, 0, mesh); // Create a spherical tally
+/*
 	ofstream outfile("RESULTS.txt");
 	outfile << "Mesh start x: " << mesh.get_start_x() << endl;
 	outfile << "Mesh start y: " << mesh.get_start_y() << endl;
@@ -158,23 +157,9 @@ int main(int argc, char *argv[]) {
 	outfile << "Mesh dy: " << mesh.get_dy() << endl;        
 	outfile << "Mesh dz: " << mesh.get_dz() << endl;
 	outfile.close();
-   
+*/ 
         Photon phtn; 
-	// Test the mesh get mesh dimension methods
-	if(mesh.get_start_x() != 0) { tally_surface_pass = false; }
-	if(mesh.get_end_x() != 10) { tally_surface_pass = false; }
-
-	if(mesh.get_start_y() != 0) { tally_surface_pass = false; }
-	if(mesh.get_end_y() != 40) { tally_surface_pass = false; }
-
-	if(mesh.get_start_z() != 0) { tally_surface_pass = false; }
-	if(mesh.get_end_z() != 90) { tally_surface_pass = false; }
-
-	// Test the mesh get_dx ... functions
-	if(mesh.get_dx() != 1) { tally_surface_pass = false; }
-	if(mesh.get_dy() != 2) { tally_surface_pass = false; }
-	if(mesh.get_dz() != 3) { tally_surface_pass = false; }
-
+	
 	// Test the basic tally operation
        	phtn.set_position(pos_1);
 	phtn.set_prev_position(prev_pos_1);
@@ -187,29 +172,7 @@ int main(int argc, char *argv[]) {
 	phtn.set_position(pos_3);
 	phtn.set_prev_position(prev_pos_3);
 	if(!tally->hit_tally(phtn)) { tally_surface_pass = false; }
-
-	// Test the motion filter of the tally
-	tally->set_motion_filter(tally->POSITIVE_ONLY_FILTER);
 	
-	phtn.set_position(pos_1);
-	phtn.set_prev_position(prev_pos_1);
-
-	if(!tally->hit_tally(phtn)) { tally_surface_pass = false; }
-	
-	phtn.set_position(prev_pos_1);
-	phtn.set_prev_position(pos_1);
-	if(tally->hit_tally(phtn)) { tally_surface_pass = false; }
-
-	tally->set_motion_filter(tally->NEGATIVE_ONLY_FILTER);
-	
-	phtn.set_position(pos_1);
-	phtn.set_prev_position(prev_pos_1);
-	if(tally->hit_tally(phtn)) { tally_surface_pass = false; }
-
-	phtn.set_position(prev_pos_1);
-	phtn.set_prev_position(pos_1);
-	if(!tally->hit_tally(phtn)) { tally_surface_pass = false; } 
-
 	// Test the cases where the tally shouldn't be triggered
        	phtn.set_position(pos_4);
        	phtn.set_prev_position(prev_pos_4);
@@ -230,9 +193,10 @@ int main(int argc, char *argv[]) {
          nfail++;
        }
     }  
-   
+  
+ 
     // Test the response funtion class
-    {
+/*    {
 	bool response_pass = true;
 	// Need to create a mesh
 	string filename("simple_input.xml");
@@ -242,9 +206,9 @@ int main(int argc, char *argv[]) {
 	IMC_Parameters imc_p(input);
 	
 	Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh	
-	Tally tally(1, 5, 3, 1, mesh); // Create a line tally
+	Tally tally(9, 20, 9, 10, mesh); // Create a line tally
 	Response_Funct resp(tally, mesh);
-	
+
 	//Define a response_cell: lower_left = (0,0), and upper_right = (10,10)
 	Point l_left = {0,0};
 	Point u_right = {10,10};
@@ -278,21 +242,19 @@ int main(int argc, char *argv[]) {
 	bool res6 = resp.move_particle(p6, table, table_dx, table_dy);
 	if(!res6) { response_pass = false; } 	
 	if(p6.pos.x != 0 && p6.pos.y != 0) { response_pass = false; }
+	
+	// Make a table of response_values
+	resp.get_response(3,3);
 
-	ofstream outfile("RESULTS.txt");
-	outfile << "Result of move particle 6: " << res6 << endl;
-	outfile << "End x (p6): " << p6.pos.x << endl;
-	outfile << "End y (p6): " << p6.pos.y << endl;
-	outfile.close();
-
+	
 	if(response_pass) {
       	    cout << "TEST PASSED: Response Function" << endl;		
 	} else {
 	    cout << "TEST FAILED: Response Function" << endl;
 	    nfail++;
 	}
-    }
-
+   }
+*/
 
   } // need to call destructors for mpi_types before MPI_Finalize
 
