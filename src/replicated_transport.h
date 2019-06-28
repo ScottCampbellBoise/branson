@@ -203,8 +203,6 @@ std::vector<Photon> replicated_transport(Source &source, const Mesh &mesh,
       break;
     }
 	
-    tally->reset_hits();
-
   } // end while
 
   // record time of transport work for this rank

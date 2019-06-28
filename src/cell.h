@@ -59,6 +59,10 @@ public:
     op_a = 0.0;
     op_s = 0.0;
     f = 0.0;
+
+    // Variables for response function generation
+    total_dist = 0.0;
+    total_sigma_dist = 0.0;
   }
 
   ~Cell(void) {}
@@ -281,6 +285,19 @@ public:
   //! Set SILO index (for plotting)
   void set_silo_index(uint32_t _silo_index) { silo_index = _silo_index; }
 
+
+
+  // Functions for the response function creation
+  void add_response(double dist) {
+    total_dist += dist;
+    total_sigma_dist += dist;
+  }
+
+  void reset_response() {
+    total_dist = 0;
+    total_sigma_dist = 0;
+  }
+
   //--------------------------------------------------------------------------//
   // member data                                                              //
   //--------------------------------------------------------------------------//
@@ -307,6 +324,10 @@ private:
   double T_e;  //!< Material temperature
   double T_r;  //!< Radiation temperature
   double T_s;  //!< Source temperature
+
+  double total_dist;
+  double total_sigma_dist;
+  
 };
 
 #endif // cell_h_

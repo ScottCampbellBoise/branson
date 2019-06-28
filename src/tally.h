@@ -24,10 +24,20 @@ public:
     // 	alternatively pass a mesh.as an object, and extract the input
     // 	out of the mesh.object. 
     //
-    // 	** ASSUMES THAT THE CELLS ARE OF EQUAL SIZE IN ALL DIVISIONS **
-    
-    Tally(double x1, double y1, double x2, double y2, Mesh& mesh) : x1(x1), 
+   
+    Tally(double radius, double x1, double y1, double z1, Mesh& mesh) : 
+	  radius(radius), x1(x1), y1(y1), z1(z1), mesh(mesh), 
+	  n_hits(0), filter_state(NO_FILTER) {
+	
+	is_spherical_tally = true;
+    }
+ 
+    // temp flag is used just to distinguish the spherical from plane
+    Tally(double x1, double y1, double x2, double y2, Mesh& mesh, bool temp_flag) : x1(x1), 
 	  y1(y1), x2(x2), y2(y2), mesh(mesh),  n_hits(0), filter_state(NO_FILTER) {
+	
+        is_spherical_tally = false;
+ 
 	// Define the line equation to connect the two tally points
         tally_m = (y1 - y2) / (x1 - x2);
         tally_b = (-tally_m * x1) + y1;
@@ -45,19 +55,32 @@ public:
     
     ~Tally() {}
     
-    bool hit_tally(const Photon phtn){
-	if(passed_tally(phtn)) {
-	    n_hits++;
-	    return true;
-	} 
+    bool hit_tally(Photon phtn) {
+	if(is_spherical_tally) {
+	    if(passed_spherical_tally(phtn)) {
+		n_hits++;
+		// Total energy is added in passed_spherical_tally()
+		return true;
+	    } 
+	} else {
+	    if(passed_tally(phtn)) {
+		n_hits++;
+		return true;
+	    }
+	}
 	return false;
     }
+
     inline int get_hits() { return n_hits; }
     inline double get_E() { return total_energy; }
     inline void reset_hits() { n_hits = 0; }
     inline void reset_E() { total_energy = 0; }
     inline double get_x1() { return x1; }
     inline double get_y1() { return y1; }
+    inline double get_z1() { return z1; }
+
+    inline double get_radius() { return radius; }
+
     inline double get_x2() { return x2; }
     inline double get_y2() { return y2; }
     inline double get_tally_slope() { return tally_m; }
@@ -84,8 +107,8 @@ public:
 
     // Variables regarding the motion filter settings
     const static int NO_FILTER = 0;
-    const static int POSITIVE_ONLY_FILTER = 1; // Only particles moving in (+) dir
-    const static int NEGATIVE_ONLY_FILTER = -1; // " " in (-) dir
+    const static int POSITIVE_ONLY_FILTER = 1; // Only particles moving in (+) dir / into sphere
+    const static int NEGATIVE_ONLY_FILTER = -1; // " " in (-) dir / out of sphere
 
 private:
     
@@ -97,6 +120,28 @@ private:
 	double x;
 	double y;
     };
+
+    bool passed_spherical_tally(Photon phtn) {
+	const double* phtn_pos = phtn.get_position();
+	const double* phtn_prev_pos = phtn.get_prev_position();
+	
+	//Calculate the distance the phtn is from the tally center
+	double cur_dist = sqrt(pow(phtn_pos[0] - x1,2) + pow(phtn_pos[1] - y1,2) + pow(phtn_pos[2] - z1,2));
+	double prev_dist = sqrt(pow(phtn_prev_pos[0] - x1,2) + pow(phtn_prev_pos[1] - y1,2) + pow(phtn_prev_pos[2] - z1,2));
+	
+	if(filter_state == POSITIVE_ONLY_FILTER) {
+	    // Count only particles moving into the sphere
+	    // total_energy += 
+	    return (cur_dist <= radius && prev_dist > radius);
+	} else if(filter_state == NEGATIVE_ONLY_FILTER) {
+	    // Count only the particles moving out of the sphere
+	    // total_energy -=
+	    return (cur_dist > radius && prev_dist < radius);
+	} else {
+	    return (cur_dist <= radius && prev_dist > radius) ||
+		   (cur_dist > radius && prev_dist < radius);
+	}
+    }
 
     // determine if the photon has passed through the tally in the last time step
     bool passed_tally(Photon phtn) { 
@@ -164,8 +209,13 @@ private:
     // Private Variables/Constants
     // ----------------------------------------------------------------------
     Mesh& mesh;   
+    
+    bool is_spherical_tally;
+    double radius, z1;   
+
     double x1, y1, x2, y2;
     double tally_m, tally_b; // Define the line between the tally y = m*x + b
+   
     int n_hits;
     double total_energy;
     int filter_state;
