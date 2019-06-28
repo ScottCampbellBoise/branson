@@ -9,16 +9,13 @@
 #ifndef sphere_response_h
 #define sphere_response_h
 
-#include <functional>
 #include <mpi.h>
-#include <numeric>
 
 #include "RNG.h"
 #include "constants.h"
 #include "info.h"
 #include "mesh.h"
 #include "photon.h"
-#include "sampling_functions.h"
 #include "tally.h"
 
 using namespace std;
@@ -34,7 +31,77 @@ public:
 
     // Constructor: store the info about the mesh and tally
     Sphere_Response(Tally tally, Mesh mesh) : tally(tally),
-					     mesh(mesh) {
+					     mesh(mesh) {}   
+
+    ~Sphere_Response() {}
+
+    // generate photon objects starting on the tally surface
+    // track the photons outward,
+    //     each cell the photon passes through, update the dist and sigma_dist
+    //     if the particle reaches a barrier - kill it
+    void generate_response(int n_particles) {
+	if(!response_set) {
+	    setup_response();
+	    response_set = true;
+	}
+
+	for(int k = 0; k < n_particles; k++) {
+	    Photon phtn;
+            create_photon(phtn);
+	    
+	    move_photon(phtn);
+	}
+    }
+
+    void reset_response() {
+	response_set = false;	
+
+	// Iterate through every cell in the mesh and reset its value	
+ 	uint32_t n_cell = mesh.get_n_local_cells();
+	for(uint32_t k = 0; k < n_cell; ++k) {
+	    Cell cell = mesh.get_cell(k);
+	    cell.reset_response();
+	}
+    }
+
+    void create_photon(Photon& phtn) {
+	// FOR DEBUGGING USE - REMOVE CONDITIONAL ...	
+	if(!response_set) {
+	    setup_response();
+	    response_set = true;
+	}
+
+        // Create a photon on the tally surface	
+        double phi = 2 * Constants::pi * rng->generate_random_number();
+	double mu = 1 - 2 * rng->generate_random_number();
+	double theta = acos(mu);
+	double pos[3] = {tally.get_x1() + tally.get_radius()*(cos(phi)*sqrt((1-pow(mu,2)))),
+			 tally.get_y1() + tally.get_radius()*(sin(phi)*sqrt(1-pow(mu,2))),
+			 tally.get_z1() + tally.get_radius()*mu};
+
+	// Cosine-distribution for angle
+	double mu_r = sqrt(rng->generate_random_number());
+	double phi_r = 2 * Constants::pi * rng->generate_random_number();
+	double mu_theta = cos(phi_r) * sqrt(1 - pow(mu,2));
+	double mu_phi = sin(phi_r) * sqrt(1 - pow(mu_r,2));
+	
+	double mu_x = sin(theta)*cos(phi)*mu_r + cos(theta)*cos(phi)*mu_theta
+		      - sin(phi)*mu_phi;
+	double mu_y = sin(theta)*sin(phi)*mu_r + cos(theta)*sin(phi)*mu_theta
+		      + cos(phi)*mu_phi;
+	double mu_z = cos(theta)*mu_r - sin(theta)*mu_theta;
+	double angle[3] = {mu_x, mu_y, mu_z};
+	
+	// Set photon values
+	phtn.set_position(pos);
+	phtn.set_angle(angle);
+	phtn.set_cell(get_photons_cell(pos[0],pos[1],pos[2]).get_ID());
+        phtn.set_group(floor(rng->generate_random_number() * double(BRANSON_N_GROUPS)));
+    }
+
+private:
+
+    void setup_response() {
 	tally_r = tally.get_radius();
 	tally_x = tally.get_x1();
 	tally_y = tally.get_y1();
@@ -59,31 +126,6 @@ public:
 	    }
 	}
 	n_tally_cells = cur_pos;
-    }   
-
-    ~Sphere_Response() {}
-
-    // generate photon objects starting on the tally surface
-    // track the photons outward,
-    //     each cell the photon passes through, update the dist and sigma_dist
-    //     if the particle reaches a barrier - kill it
-
-    void generate_response(int n_particles) {
-	for(int k = 0; k < n_particles; k++) {
-	    Photon phtn;
-            create_photon(phtn);
-	    
-	    move_photon(phtn);
-	}
-    }
-
-    void reset_response() {
-	// Iterate through every cell in the mesh and reset its value	
- 	uint32_t n_cell = mesh.get_n_local_cells();
-	for(uint32_t k = 0; k < n_cell; ++k) {
-	    Cell cell = mesh.get_cell(k);
-	    cell.reset_response();
-	}
     }
 
     void move_photon(Photon &phtn) {
@@ -124,22 +166,6 @@ public:
         }   // end while alive
     }
 
-    void create_photon(Photon& phtn) {
-        // Create a photon on the tally surface	
-        double theta = 2 * Constants::pi * rng->generate_random_number();
-	double phi = acos(2 * rng->generate_random_number() - 1);
-	double pos[3] = {tally_r*cos(theta)*cos(phi) , tally_r*cos(theta)*sin(phi) , tally_r * sin(theta)};
-	phtn.set_position(pos);
-
-	// Cosine-distribution to get angle ... ?
-	
-	// Set the photons cell
-	phtn.set_cell(get_photons_cell(pos[0],pos[1],pos[2]));
-
-	//Set the photon group - NOT SURE WHAT TO DO HERE ...	
-        phtn.set_group(floor(rng->generate_random_number() * double(BRANSON_N_GROUPS)));
-    }
-
     // Check if a point is inside one of the cells
     // that the tally surface is in
     Cell& get_photons_cell(double x, double y, double z) {
@@ -175,10 +201,14 @@ public:
 	return dist_squared > 0;
     }
 
-private:
+    //-------------------------------------------
+    // Variables
+    //-------------------------------------------
 
-    const Mesh mesh;
-    const Tally tally;
+    bool response_set = false;
+
+    Mesh mesh;
+    Tally tally;
 
     Cell* tally_cells;
     int n_tally_cells;
