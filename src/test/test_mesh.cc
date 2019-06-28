@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
 	
 	Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh
 	Tally* tally = new Tally(5, 0, 0, 0, mesh); // Create a spherical tally
-/*
+
 	ofstream outfile("RESULTS.txt");
 	outfile << "Mesh start x: " << mesh.get_start_x() << endl;
 	outfile << "Mesh start y: " << mesh.get_start_y() << endl;
@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
 	outfile << "Mesh dy: " << mesh.get_dy() << endl;        
 	outfile << "Mesh dz: " << mesh.get_dz() << endl;
 	outfile.close();
-*/ 
+ 
         Photon phtn; 
 	
 	// Test the basic tally operation
@@ -193,69 +193,41 @@ int main(int argc, char *argv[]) {
          nfail++;
        }
     }  
-  
- 
-    // Test the response funtion class
-/*    {
-	bool response_pass = true;
-	// Need to create a mesh
-	string filename("simple_input.xml");
+
+    // Test the spherical response function 
+    {
+	bool passed = true;
+
+	string filename("three_region_mesh_input.xml");
 	const Info mpi_info;
 	MPI_Types mpi_types;
 	Input input(filename, mpi_types);
 	IMC_Parameters imc_p(input);
 	
-	Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh	
-	Tally tally(9, 20, 9, 10, mesh); // Create a line tally
-	Response_Funct resp(tally, mesh);
+	Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh
+	Tally tally(2.5, 5, 5, 5, mesh); // Create a spherical tally
+	Sphere_Response resp(tally, mesh);
+	//resp.set_up_response();
 
-	//Define a response_cell: lower_left = (0,0), and upper_right = (10,10)
-	Point l_left = {0,0};
-	Point u_right = {10,10};
-	Response_Cell rc = {l_left, u_right, 0, 0, 0};
+	Photon phtn;
+	resp.create_photon(phtn);
 	
-	// Define particles in that cell
-	Particle p1 = { {5,5} , {1,0} };
-	Particle p2 = { {3,0} , {0,0} };
-	Particle p3 = { {5,10} , {1,5} };
-	Particle p4 = { {10,13} , {0,12} };	
+	const double* phtn_pos = phtn.get_position();
+	double radius = sqrt(pow(phtn_pos[0]-tally.get_x1(),2) +
+			     pow(phtn_pos[1]-tally.get_y1(),2) +
+			     pow(phtn_pos[2]-tally.get_z1(),2));
 
-	// Test the get intersect point method
-	Point int_pt = resp.get_intersect_point(rc, p1);
-	if(int_pt.x != 0 && int_pt.y != 0) { response_pass = false; }
-	int_pt = resp.get_intersect_point(rc, p2);
-	if(int_pt.x != 0 && int_pt.y != 0) { response_pass = false; }	
-	int_pt = resp.get_intersect_point(rc, p3);
-	if(int_pt.x != 0 && int_pt.y != 5) { response_pass = false; }
-	int_pt = resp.get_intersect_point(rc, p4);
-	if(int_pt.x != NULL && int_pt.y != NULL) { response_pass = false; }
+	if(radius == tally.get_radius()) { passed = false; }
 
-	// Test the move Particle method
-	double table_dx = 10, table_dy = 10;
-	Response_Cell** table = resp.get_empty_resp_table(5,5,table_dx,table_dy);
-
-	Particle p5 = {{15,15} , {1,0}};
-	if(!resp.move_particle(p5, table, table_dx, table_dy)) {response_pass = false;} 
-	if(p5.pos.x != 10 && p5.pos.y != 10) { response_pass = false; }
-
-	Particle p6 = {{5,5} , {1,0}};
-	bool res6 = resp.move_particle(p6, table, table_dx, table_dy);
-	if(!res6) { response_pass = false; } 	
-	if(p6.pos.x != 0 && p6.pos.y != 0) { response_pass = false; }
-	
-	// Make a table of response_values
-	resp.get_response(3,3);
-
-	
-	if(response_pass) {
-      	    cout << "TEST PASSED: Response Function" << endl;		
+	if(passed) {
+	    cout << "TEST PASSED: sphere_response funct" << endl;
 	} else {
-	    cout << "TEST FAILED: Response Function" << endl;
+	    cout << "TEST PASSED: sphere_response funct" << endl;
 	    nfail++;
 	}
-   }
-*/
+    }
 
+ 
   } // need to call destructors for mpi_types before MPI_Finalize
 
   MPI_Finalize();
