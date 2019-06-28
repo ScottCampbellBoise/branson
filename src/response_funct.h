@@ -11,6 +11,8 @@
 
 #include <cmath>
 #include <algorithm>
+#include <fstream>
+#include <iostream>
 
 #include "tally.h"
 #include "mesh.h"
@@ -32,6 +34,7 @@ using namespace std;
 	int row; // row in 2D array view of grid
 	int col; // col in 2D array view of grid
 	double response; // Contribution to cell
+	double sigma_a;
     };
     struct Particle {
 	Point pos; // Starting position of the particle
@@ -75,29 +78,56 @@ public:
     // This uses each cell as a region to accumulate over
     // Add a return statement as a double**
     void get_response(int n_points, int n_angles) {
+	
+	ofstream outfile("TEST_RESPONSE_TABLE.txt");
+	outfile << "Entered into get_response ..." << endl;
 	// Set up a 'blank table': each response cell has no initial contr.	
 	Response_Cell** resp_table = get_empty_resp_table(mesh_n_x_cells, mesh_n_y_cells, mesh_dx, mesh_dy);
+
+	outfile << "Created a blank table ..." << endl;
+
+	//extract_sigma_values(resp_table, mesh_dx, mesh_dy);
+
+	outfile << "Extracted the sigma_a values ..." << endl;
 
 	// Generate particles with a given start pt and dir
 	Particle* particles = get_initial_particles(n_points, n_angles);
 
+	outfile << "Created the initial particles ..." << endl;
+
 	// track particles updating the cell contr and particle weight
 	for(int k = 0; k < n_points*n_angles; k++) {
 	    Particle particle = particles[k];   
-	
+	    
+	    outfile << "Tracking particle " << k << endl;
+	    outfile << "  Starting particle at: " << "(" << particle.pos.x << "," << particle.pos.y << ")\n";
+
 	    bool is_active = true;
 	    while(is_active) {
 		if(particle.pos.x <= 0 || particle.pos.y <= 0) {
 		    is_active = false;
+		
+		    outfile << "\t Stopped tracking particle ..." << endl;
+
 		} else {
 		    move_particle(particle, resp_table, mesh_dx, mesh_dy);
+		    outfile << "\tMoved the particle to: " << "(" << particle.pos.x << "," << particle.pos.y << ")\n";
 		}
 	    }
 	}
+	
+	outfile << "\n\nPrinting response table\n\n";
+
+	for(int row = 0; row < mesh_n_y_cells; row++) {
+	    for(int col = 0; col < mesh_n_x_cells; col++) {
+		outfile << "\t(" << col << "," << row << "):\t" << resp_table[row][col].response << endl;
+	    }
+	}
+	outfile.close();
+
     }
 
-
-    // Find a way to get the sigma_a / sigma_s values!!!!
+    // Move the particle through the cell its currently in
     bool move_particle(Particle& particle, Response_Cell** resp_table, double table_dx, double table_dy ) {
 	int cur_cell_col = (int)((particle.pos.x - 1e-4) / table_dx); // get the col of the resp_cell the particle is in
 	int cur_cell_row = (int)((particle.pos.y - 1e-4) / table_dy); // get the row of the resp_cell the particle is in
@@ -105,10 +135,12 @@ public:
 	if(cur_cell_col < 0) { cur_cell_col = 0; }
 	if(cur_cell_row < 0) { cur_cell_row = 0; }
 
-	Point int_pt = get_intersect_point(resp_table[cur_cell_row][cur_cell_col] , particle); // get the point where the particle intersects the next cell
+	// Find where the particle intersects the cell
+	Point int_pt = get_intersect_point(resp_table[cur_cell_row][cur_cell_col] , particle);
 
-	double dist = sqrt(pow(particle.pos.x-int_pt.x,2) + pow(particle.pos.y-int_pt.y,2)); // distance the particle traveled
-	double sigma_a = 0; // GET THE REAL SIGMA_A VALUE FROM MESH INFO ... 
+	// Find the dist & contribution of the particle
+	double dist = sqrt(pow(particle.pos.x-int_pt.x,2) + pow(particle.pos.y-int_pt.y,2)); 
+	double sigma_a = resp_table[cur_cell_row][cur_cell_col].sigma_a;
 	double contr = get_contribution(particle, dist, sigma_a);
 	resp_table[cur_cell_row][cur_cell_col].response += contr;
 	
@@ -116,6 +148,8 @@ public:
 	return true;
     }
 
+    // Get the (x,y) coord of the point the particle passes through its
+    // current cell - ASSUMES ALWAYS MOVING LEFTWARD
     Point get_intersect_point(Response_Cell& rc, Particle& particle) {
 	// Calculate particle residuals 	
 	Ray ray = particle.dir;
@@ -202,11 +236,15 @@ public:
 	return {NULL , NULL}; // Indicate that the ray does not intersect the cell
     }
 
+    // Find how much weight is absorbed by the response cell as the
+    // particle passes through
     double get_contribution(Particle& particle, double dist, double sigma_a) {
 	double absorbed_E = particle.weight * (1 - exp(-sigma_a * dist));
 	return absorbed_E;
     }
 
+    // Get a table that has only basic info - points/row & col
+    // The response variable is left at 0, sigma_a is left at zero
     Response_Cell** get_empty_resp_table(int n_cols, int n_rows, double dx, double dy) {
 	Response_Cell** resp_table;
 	resp_table = new Response_Cell*[n_rows];
@@ -215,12 +253,15 @@ public:
 	    for(int col = 0; col < n_cols; col++) { 
 		Point l_left = {col * dx , row * dy};
 		Point u_right = {(col+1) * dx , (row + 1) * dy};
-		resp_table[row][col] = {l_left, u_right, row, col, 0.0};
+		resp_table[row][col] = {l_left, u_right, row, col, 0.0, 0.0};
 	    }
 	}
 	return resp_table;
     }
-	
+
+    // Create a specified number of particles uniformly along the tally
+    // surface, where particles are sent at specified number of angles
+    // at each point
     Particle* get_initial_particles(int n_points, int n_angles) {
 	Particle* particles = new Particle[n_angles * n_points];
 	
@@ -302,9 +343,12 @@ public:
 	return particles;
     }
 
-    void extract_sigma_values(Response_Cell** table, double table_dx, double table_dy) {
+    // Find the average sigma value for each Response Cell from the mesh
+    // The sigma value is stored in the Response_Cell table
+    void extract_sigma_values(Response_Cell**& table, double table_dx, double table_dy) {
 	const Cell* cells = mesh.get_const_cells_ptr();
 	int n_cells = mesh.get_n_local_cells();
+	
 	for(int k = 0; k < n_cells; k++) {
 	    Cell c = cells[k];
 	    const double* cell_dimen = c.get_node_array();
@@ -317,7 +361,7 @@ public:
 		    // Calculate the overlapping area
 		    double int_area = (min(cell_dimen[1],(col+1)*table_dx)-max(cell_dimen[0],(col*table_dx))) *
 				      (min(cell_dimen[3],(row+1)*table_dy)-max(cell_dimen[2],(row*table_dy)));
-		    table[row][col].response += c.get_op_a() * (int_area / (table_dx * table_dy));
+		    table[row][col].sigma_a += c.get_op_a() * (int_area / (table_dx * table_dy));
 
 		}
 	    }
@@ -328,9 +372,6 @@ private:
 
     Mesh& mesh;
     Tally& tally;
-
-    uint32_t n_rays; 
-    uint32_t n_tally_points;
 
     double mesh_start_x, mesh_start_y;
     double mesh_end_x, mesh_end_y;
