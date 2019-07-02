@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
     // correctly from the input file (simple_input.xml) and that each cell
     // is assigned the correct region
     {
-      string filename("simple_input.xml");
+      string filename("/users/campbell_s/branson/src/test/simple_input.xml");
       Input input(filename, mpi_types);
       Proto_Mesh mesh(input, mpi_types, mpi_info);
 
@@ -74,8 +74,9 @@ int main(int argc, char *argv[]) {
     {
       bool three_region_mesh_pass = true;
       // first test large particle input file
-      string three_reg_filename("three_region_mesh_input.xml");
-      Input three_reg_input(three_reg_filename, mpi_types);
+
+      string filename("/users/campbell_s/branson/src/test/three_region_mesh_input.xml");
+      Input three_reg_input(filename, mpi_types);
 
       Proto_Mesh mesh(three_reg_input, mpi_types, mpi_info);
 
@@ -137,7 +138,7 @@ int main(int argc, char *argv[]) {
         double pos_5[3] = {4.1724,5.4621,9};       
         double pos_6[3] = {1.2189,0.5126,1};       
 
-	string filename("simple_input.xml");
+        string filename("/users/campbell_s/branson/src/test/simple_input.xml");
 	const Info mpi_info;
 	MPI_Types mpi_types;
 	Input input(filename, mpi_types);
@@ -146,17 +147,17 @@ int main(int argc, char *argv[]) {
 	Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh
 	Tally* tally = new Tally(5, 0, 0, 0, mesh); // Create a spherical tally
 
-	ofstream outfile("RESULTS.txt");
-	outfile << "Mesh start x: " << mesh.get_start_x() << endl;
-	outfile << "Mesh start y: " << mesh.get_start_y() << endl;
-	outfile << "Mesh start z: " << mesh.get_start_z() << endl;
-	outfile << "Mesh end x: " << mesh.get_end_x() << endl;
-	outfile << "Mesh end y: " << mesh.get_end_y() << endl;
-	outfile << "Mesh end z: " << mesh.get_end_z() << endl;
-	outfile << "Mesh dx: " << mesh.get_dx() << endl;
-	outfile << "Mesh dy: " << mesh.get_dy() << endl;        
-	outfile << "Mesh dz: " << mesh.get_dz() << endl;
-	outfile.close();
+// ofstream outfile("RESULTS.txt");
+// outfile << "Mesh start x: " << mesh.get_start_x() << endl;
+// outfile << "Mesh start y: " << mesh.get_start_y() << endl;
+// outfile << "Mesh start z: " << mesh.get_start_z() << endl;
+// outfile << "Mesh end x: " << mesh.get_end_x() << endl;
+// outfile << "Mesh end y: " << mesh.get_end_y() << endl;
+// outfile << "Mesh end z: " << mesh.get_end_z() << endl;
+// outfile << "Mesh dx: " << mesh.get_dx() << endl;
+// outfile << "Mesh dy: " << mesh.get_dy() << endl;        
+// outfile << "Mesh dz: " << mesh.get_dz() << endl;
+// outfile.close();
  
         Photon phtn; 
 	
@@ -198,35 +199,26 @@ int main(int argc, char *argv[]) {
     {
 	bool passed = true;
 
-	string filename("three_region_mesh_input.xml");
+	string filename("/users/campbell_s/branson/src/test/simple_input.xml");
+//	string filename("/users/campbell_s/branson/src/test/point_source.xml");
 	const Info mpi_info;
 	MPI_Types mpi_types;
 	Input input(filename, mpi_types);
-	IMC_Parameters imc_p(input);
-	
+	IMC_Parameters imc_p(input);	
+        IMC_State imc_state(input, mpi_info.get_rank());
+
 	Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh
-	Tally tally(2.5, 5, 5, 5, mesh); // Create a spherical tally
-	Sphere_Response resp(tally, mesh);
-	//resp.set_up_response();
 
-	Photon phtn;
-	resp.create_photon(phtn);
+//	Tally tally(.05, 0, 0, 0, mesh); // Tally for point_source.xml
+	Tally tally(2.5, 5, 5, 5, mesh); // Tally for simple_input.xml	
+
+	Sphere_Response resp(tally, mesh, imc_state); // Create a response function class
 	
-	const double* phtn_pos = phtn.get_position();
-	double radius = sqrt(pow(phtn_pos[0]-tally.get_x1(),2) +
-			     pow(phtn_pos[1]-tally.get_y1(),2) +
-			     pow(phtn_pos[2]-tally.get_z1(),2));
+	resp.generate_response(1000000);	
 
-	if(radius == tally.get_radius()) { passed = false; }
-
-	if(passed) {
-	    cout << "TEST PASSED: sphere_response funct" << endl;
-	} else {
-	    cout << "TEST PASSED: sphere_response funct" << endl;
-	    nfail++;
-	}
+	// Print out all the cells sigma*dist, dist, and calc sigma values ....
+	resp.print_response();	
     }
-
  
   } // need to call destructors for mpi_types before MPI_Finalize
 
