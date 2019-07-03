@@ -147,18 +147,6 @@ int main(int argc, char *argv[]) {
 	Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh
 	Tally* tally = new Tally(5, 0, 0, 0, mesh); // Create a spherical tally
 
-// ofstream outfile("RESULTS.txt");
-// outfile << "Mesh start x: " << mesh.get_start_x() << endl;
-// outfile << "Mesh start y: " << mesh.get_start_y() << endl;
-// outfile << "Mesh start z: " << mesh.get_start_z() << endl;
-// outfile << "Mesh end x: " << mesh.get_end_x() << endl;
-// outfile << "Mesh end y: " << mesh.get_end_y() << endl;
-// outfile << "Mesh end z: " << mesh.get_end_z() << endl;
-// outfile << "Mesh dx: " << mesh.get_dx() << endl;
-// outfile << "Mesh dy: " << mesh.get_dy() << endl;        
-// outfile << "Mesh dz: " << mesh.get_dz() << endl;
-// outfile.close();
- 
         Photon phtn; 
 	
 	// Test the basic tally operation
@@ -187,12 +175,41 @@ int main(int argc, char *argv[]) {
 	phtn.set_prev_position(prev_pos_6);
 	if(tally->hit_tally(phtn)) { tally_surface_pass = false; }
 
-       if (tally_surface_pass) {
-	 cout << "TEST PASSED: tally surface count" << endl;
-       } else {
-	 cout << "TEST FAILED: tally surface count" << endl;
-         nfail++;
-       }
+ 	// Check the dist_to_tally() method
+ 	double pos_7[3] = {-10,0,0};
+	double prev_pos_7[3] = {-15,0,0};
+ 	Photon phtn2;
+	phtn2.set_position(pos_7);
+	phtn2.set_prev_position(prev_pos_7);
+ 	double dist = tally->get_dist_to_tally(phtn2);
+	cout << "distance to tally: " << dist << endl;
+	if(dist != 5) { tally_surface_pass = false; }
+
+	double pos_8[3] = {-2,0,0};
+	double prev_pos_8[3] = {-1,0,0};
+	phtn2.set_position(pos_8);
+	phtn2.set_prev_position(prev_pos_8);
+ 	dist = tally->get_dist_to_tally(phtn2);
+	cout << "distance to tally: " << dist << endl;
+	if(dist != 0) { tally_surface_pass = false; }
+
+	double pos_9[3] = {6,6,6};
+	double prev_pos_9[3] = {6,16,6};
+	phtn2.set_position(pos_9);
+	phtn2.set_prev_position(prev_pos_9);
+ 	dist = tally->get_dist_to_tally(phtn2);
+	cout << "distance to tally: " << dist << endl;
+	if(dist != -1) { tally_surface_pass = false; }
+
+
+
+
+        if (tally_surface_pass) {
+	  cout << "TEST PASSED: tally surface count" << endl;
+        } else {
+	  cout << "TEST FAILED: tally surface count" << endl;
+          nfail++;
+        }
     }  
 
     // Test the spherical response function 
@@ -206,16 +223,16 @@ int main(int argc, char *argv[]) {
 	Input input(filename, mpi_types);
 	IMC_Parameters imc_p(input);	
         IMC_State imc_state(input, mpi_info.get_rank());
+	RNG* rng = new RNG();
 
 	Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh
+        mesh.initialize_physical_properties(input); // Initialize the physical props (T)
 
 //	Tally tally(.05, 0, 0, 0, mesh); // Tally for point_source.xml
 	Tally tally(2.5, 5, 5, 5, mesh); // Tally for simple_input.xml	
 
-	Sphere_Response resp(tally, mesh, imc_state); // Create a response function class
-	
-	resp.generate_response(1000000);	
-
+	Sphere_Response resp(tally, mesh, imc_state, rng); // Create a response function class
+	resp.generate_response(10000);	
 	// Print out all the cells sigma*dist, dist, and calc sigma values ....
 	resp.print_response();	
     }
