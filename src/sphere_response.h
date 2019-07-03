@@ -45,11 +45,26 @@ public:
 	    response_set = true;
 	}
 
+	phtn_total_sigma_dist = new double[n_particles];
+	phtn_total_dist = new double[n_particles];
+	
 	for(int k = 0; k < n_particles; k++) {
-	    Photon phtn;
-            create_photon(phtn);
-	    
-	    move_photon(phtn);
+	    Photon phtn_1, phtn_2;
+            create_photon(phtn_1);
+	    phtn_2 = phtn_1; // Make a copy of the phtn
+	
+	    phtn_total_dist[k] = 0.0;
+	    phtn_total_sigma_dist[k] = 0.0;
+   		
+	    move_photon(phtn_1, k, true); 
+	    move_photon(phtn_2, k, false);
+	}
+
+	uint32_t n_cells = mesh.get_n_local_cells();
+	cell_response = new double[n_cells];
+	
+	for(int k = 0; k < n_cells; k++) {
+	    cell_response[k] = (cell_total_sigma_dist[k] / cell_total_dist[k]);
 	}
     }
 
@@ -59,8 +74,8 @@ public:
 	// Iterate through every cell in the mesh and reset its value	
  	uint32_t n_cell = mesh.get_n_local_cells();
 	for(uint32_t k = 0; k < n_cell; ++k) {
-	    resp_total_sigma_dist[k] = 0.0;
-	    resp_total_dist[k] = 0.0;
+	    cell_total_sigma_dist[k] = 0.0;
+	    cell_total_dist[k] = 0.0;
 	}
     }
 
@@ -98,9 +113,7 @@ public:
 
  	uint32_t n_cell = mesh.get_n_local_cells();
 	for(uint32_t k = 0; k < n_cell; ++k) {
-	    outfile << "sig_avg: " << (resp_total_sigma_dist[k] / resp_total_dist[k]) <<
-		       ",\tsigma*dist: " << resp_total_sigma_dist[k] <<
-		       ",\tdist: " << resp_total_dist[k] << endl;
+	    outfile <<  "\tcell resp: " << cell_response[k] << endl;
 	}
 	
 	outfile.close();
@@ -125,13 +138,13 @@ private:
  	uint32_t n_cell = mesh.get_n_local_cells();
 	Cell temp_tally_cells[n_cell]; 
 
-	resp_total_sigma_dist = new double[n_cell];
-	resp_total_dist = new double[n_cell];
+	cell_total_sigma_dist = new double[n_cell];
+	cell_total_dist = new double[n_cell];
 	
 	for(uint32_t k = 0; k < n_cell; ++k) {
 
-	    resp_total_sigma_dist[k] = 0.0;
-	    resp_total_dist[k] = 0.0;
+	    cell_total_sigma_dist[k] = 0.0;
+	    cell_total_dist[k] = 0.0;
 
 	    Cell cell = mesh.get_cell(k);
 	    if(tally_intersects_cell(cell)) {
@@ -147,7 +160,7 @@ private:
 	n_tally_cells = cur_pos + 1;
     }
 
-    void move_photon(Photon &phtn) {
+    void move_photon(Photon &phtn, int phtn_pos, bool track_phtn) {
 	uint32_t cell_id, next_cell;
 	bc_type boundary_event;
 	double dist_to_event;
@@ -169,12 +182,17 @@ private:
 	    // get distance to event
             dist_to_event = cell.get_distance_to_boundary(
                 phtn.get_position(), phtn.get_angle(), surface_cross);
-        
-	    // Update the resp dist and sigma_dist
- 	    resp_total_dist[cell_id] += dist_to_event;
-	    resp_total_sigma_dist[cell_id] += (dist_to_event * sigma_a);
-
-	    // update position
+       
+	    if(track_phtn) {
+		phtn_total_dist[phtn_pos] += dist_to_event;
+	    	phtn_total_sigma_dist[phtn_pos] += (dist_to_event * sigma_a);
+	    } else {
+		cell_total_dist[cell_id] += dist_to_event;
+	    	cell_total_sigma_dist[cell_id] += 
+		    (phtn_total_sigma_dist[phtn_pos] / phtn_total_dist[phtn_pos]) * dist_to_event;
+	    }
+ 
+ 	    // update position
             phtn.move(dist_to_event);
 
             boundary_event = cell.get_bc(surface_cross);
@@ -241,7 +259,11 @@ private:
 
     double tally_r, tally_x, tally_y, tally_z;
 
-    double* resp_total_sigma_dist;
-    double* resp_total_dist;
+    double* cell_total_sigma_dist;
+    double* cell_total_dist;
+    double* phtn_total_sigma_dist;
+    double* phtn_total_dist;
+
+    double* cell_response;
 };
 #endif
