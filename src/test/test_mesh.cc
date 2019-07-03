@@ -231,7 +231,7 @@ int main(int argc, char *argv[]) {
 //	Tally tally(.05, 0, 0, 0, mesh); // Tally for point_source.xml
 	Tally tally(2.5, 5, 5, 5, mesh); // Tally for simple_input.xml	
 
-	Sphere_Response resp(tally, mesh, imc_state, rng); // Create a response function class
+	Sphere_Response resp(tally, mesh, imc_state); // Create a response function class
 	resp.generate_response(10000);	
 	// Print out all the cells sigma*dist, dist, and calc sigma values ....
 	resp.print_response();	
