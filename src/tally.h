@@ -22,14 +22,14 @@ public:
     
     Tally(double radius, double x1, double y1, double z1, Mesh& mesh) : 
 	  radius(radius), x1(x1), y1(y1), z1(z1), mesh(mesh), 
-	  n_hits(0), filter_state(NO_FILTER) {}
+	  n_hits(0), total_energy(0), filter_state(NO_FILTER) {}
     
     ~Tally() {}
     
     bool hit_tally(Photon phtn) {
         if(passed_spherical_tally(phtn)) {
 	    n_hits++;
-	    // Total energy is added in passed_spherical_tally()
+	    total_energy += phtn.get_E();
 	    return true;
 	}
 	return false;
@@ -58,6 +58,12 @@ public:
 	    return false;
 	filter_state = new_filter;
 	return true;
+    }
+
+    inline void add_weight(double weight) { total_energy += weight; }
+
+    void print_tally_info(ostream& outfile, double time_step) {
+	outfile << time_step << " , " << total_energy << endl;
     }
 
     // Find the distance of the photon to tally surface
@@ -112,7 +118,7 @@ public:
 private:
     
     // ----------------------------------------------------------------------
-    // Private helper methods/structs
+    // Private helper methods
     // ----------------------------------------------------------------------
    
     bool passed_spherical_tally(Photon phtn) {
