@@ -10,6 +10,8 @@
 #define sphere_response_h
 
 #include <mpi.h>
+#include <iostream>
+#include <fstream>
 
 #include "RNG.h"
 #include "constants.h"
@@ -30,7 +32,7 @@ class Sphere_Response {
 public:
 
     // Constructor: store the info about the mesh and tally
-    Sphere_Response(Tally& tally, Mesh& mesh, IMC_State &imc_state) : tally(tally),
+    Sphere_Response(Tally*& tally, const Mesh& mesh, IMC_State &imc_state) : tally(tally),
 					     mesh(mesh), imc_state(imc_state) {}   
 
     ~Sphere_Response() {}
@@ -39,25 +41,17 @@ public:
     // track the photons outward,
     //     each cell the photon passes through, update the dist and sigma_dist
     //     if the particle reaches a barrier - kill it
-    void generate_response(int n_particles) {
+    double* generate_response(int n_particles) {
 	if(!response_set) {
 	    setup_response();
 	    response_set = true;
 	}
 
-	phtn_total_sigma_dist = new double[n_particles];
-	phtn_total_dist = new double[n_particles];
-	
 	for(int k = 0; k < n_particles; k++) {
-	    Photon phtn_1, phtn_2;
+	    Photon phtn_1;
             create_photon(phtn_1);
-	    phtn_2 = phtn_1; // Make a copy of the phtn
 	
-	    phtn_total_dist[k] = 0.0;
-	    phtn_total_sigma_dist[k] = 0.0;
-   		
-	    move_photon(phtn_1, k, true); 
-	    move_photon(phtn_2, k, false);
+	    move_photon(phtn_1, k); 
 	}
 
 	uint32_t n_cells = mesh.get_n_local_cells();
@@ -66,6 +60,8 @@ public:
 	for(int k = 0; k < n_cells; k++) {
 	    cell_response[k] = (cell_total_sigma_dist[k] / cell_total_dist[k]);
 	}
+
+	return cell_response;
     }
 
     void reset_response() {
@@ -84,9 +80,9 @@ public:
         double phi = 2 * Constants::pi * rng->generate_random_number();
         double mu = 1 - 2 * rng->generate_random_number();
         double theta = acos(mu);
-        double pos[3] = {tally.get_x1() + tally.get_radius()*(cos(phi)*sqrt((1-pow(mu,2)))),
-       	     	         tally.get_y1() + tally.get_radius()*(sin(phi)*sqrt(1-pow(mu,2))),
-        		 tally.get_z1() + tally.get_radius()*mu};
+        double pos[3] = {tally->get_x1() + tally->get_radius()*(cos(phi)*sqrt((1-pow(mu,2)))),
+       	     	         tally->get_y1() + tally->get_radius()*(sin(phi)*sqrt(1-pow(mu,2))),
+        		 tally->get_z1() + tally->get_radius()*mu};
 
         // Cosine-distribution for angle
         double mu_r = sqrt(rng->generate_random_number());
@@ -102,6 +98,8 @@ public:
         double angle[3] = {mu_x, mu_y, mu_z};
         
         // Set photon values
+        phtn.set_total_dist(0.0);
+	phtn.set_total_sigma_dist(0.0);
         phtn.set_position(pos);
         phtn.set_angle(angle);
         phtn.set_cell(get_photons_cell(pos[0],pos[1],pos[2]));
@@ -122,14 +120,11 @@ public:
 private:
 
     void setup_response() {
-	tally_r = tally.get_radius();
-	tally_x = tally.get_x1();
-	tally_y = tally.get_y1();
-	tally_z = tally.get_z1();
+	tally_r = tally->get_radius();
+	tally_x = tally->get_x1();
+	tally_y = tally->get_y1();
+	tally_z = tally->get_z1();
 
-	// To set the cell opacity values
-        mesh.calculate_photon_energy(imc_state);
-	
 	// Set the random number generator
 	rng = new RNG();
 
@@ -160,7 +155,7 @@ private:
 	n_tally_cells = cur_pos + 1;
     }
 
-    void move_photon(Photon &phtn, int phtn_pos, bool track_phtn) {
+    void move_photon(Photon &phtn, int phtn_pos) {
 	uint32_t cell_id, next_cell;
 	bc_type boundary_event;
 	double dist_to_event;
@@ -183,14 +178,10 @@ private:
             dist_to_event = cell.get_distance_to_boundary(
                 phtn.get_position(), phtn.get_angle(), surface_cross);
        
-	    if(track_phtn) {
-		phtn_total_dist[phtn_pos] += dist_to_event;
-	    	phtn_total_sigma_dist[phtn_pos] += (dist_to_event * sigma_a);
-	    } else {
-		cell_total_dist[cell_id] += dist_to_event;
-	    	cell_total_sigma_dist[cell_id] += 
-		    (phtn_total_sigma_dist[phtn_pos] / phtn_total_dist[phtn_pos]) * dist_to_event;
-	    }
+	    phtn.add_to_total_dist(dist_to_event, sigma_a);
+ 	    cell_total_dist[cell_id] += dist_to_event;
+	    cell_total_sigma_dist[cell_id] += 
+		    (phtn.get_total_sigma_dist() / phtn.get_total_dist()) * dist_to_event;
  
  	    // update position
             phtn.move(dist_to_event);
@@ -248,8 +239,8 @@ private:
 
     bool response_set = false;
 
-    Mesh& mesh;
-    Tally& tally;
+    const Mesh& mesh;
+    Tally*& tally;
     IMC_State &imc_state;
 
     Cell* tally_cells;
@@ -261,8 +252,6 @@ private:
 
     double* cell_total_sigma_dist;
     double* cell_total_dist;
-    double* phtn_total_sigma_dist;
-    double* phtn_total_dist;
 
     double* cell_response;
 };
