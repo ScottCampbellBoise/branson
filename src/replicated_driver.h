@@ -24,6 +24,7 @@
 #include "mesh.h"
 #include "mpi_types.h"
 #include "replicated_transport.h"
+#include "response_transport.h"
 #include "timer.h"
 #include "write_silo.h"
 
@@ -31,18 +32,14 @@
 
 void imc_replicated_driver(Mesh &mesh, IMC_State &imc_state,
                            const IMC_Parameters &imc_parameters,
-                           const MPI_Types &mpi_types, const Info &mpi_info) {
+                           const MPI_Types &mpi_types, const Info &mpi_info,
+			   Tally* tally) {
   using std::vector;
   vector<double> abs_E(mesh.get_global_num_cells(), 0.0);
   vector<double> track_E(mesh.get_global_num_cells(), 0.0);
   vector<Photon> census_photons;
   int rank = mpi_info.get_rank();
   constexpr double fake_mpi_runtime = 0.0;
-
-
-
-  Tally* tally = new Tally(1,1,1,1, mesh); // Make a new tally line object
-
 
 
   if (imc_parameters.get_write_silo_flag()) {
@@ -77,8 +74,9 @@ void imc_replicated_driver(Mesh &mesh, IMC_State &imc_state,
     imc_state.set_transported_particles(source.get_n_photon());
 
     // transport photons, return the particles that reached census
-    census_photons =
-        replicated_transport(source, mesh, imc_state, abs_E, track_E, tally);
+    //census_photons = replicated_transport(source, mesh, imc_state, abs_E, track_E, tally);
+    census_photons = response_transport(source, mesh, imc_state, abs_E, track_E, tally);
+
 
     // reduce the abs_E and the track weighted energy (for T_r)
     MPI_Allreduce(MPI_IN_PLACE, &abs_E[0], mesh.get_global_num_cells(),
