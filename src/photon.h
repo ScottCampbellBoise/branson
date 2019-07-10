@@ -95,6 +95,10 @@ public:
 
   //! Update particle position by moving it some distance
   inline void move(const double distance) {
+    m_prev_pos[0] = m_pos[0];
+    m_prev_pos[1] = m_pos[1];
+    m_prev_pos[2] = m_pos[2];
+
     m_pos[0] += m_angle[0] * distance;
     m_pos[1] += m_angle[1] * distance;
     m_pos[2] += m_angle[2] * distance;
@@ -137,9 +141,9 @@ public:
     m_pos[1] = pos[1];
     m_pos[2] = pos[2];
 
-    m_prev_pos[0] = pos[0];
-    m_prev_pos[1] = pos[1];
-    m_prev_pos[2] = pos[2];
+    m_prev_pos[0] = pos[0] - 1e-6;
+    m_prev_pos[1] = pos[1] - 1e-6;
+    m_prev_pos[2] = pos[2] - 1e-6;
   }
 
   //! Set previous position: FOR TESTING USE ONLY!
@@ -164,6 +168,18 @@ public:
       m_angle[2] = -m_angle[2];
   }
 
+
+  inline void set_total_sigma_dist(double val) { total_sigma_dist = val; }
+  inline void set_total_dist(double val) { total_dist = val; }
+
+  inline void add_to_total_dist(double dist, double sigma) {
+    total_dist += dist;
+    total_sigma_dist += dist * sigma;
+  }
+
+  inline double get_total_dist() { return total_dist; }
+  inline double get_total_sigma_dist() { return total_sigma_dist; }
+
   //--------------------------------------------------------------------------//
   // member data                                                              //
   //--------------------------------------------------------------------------//
@@ -177,6 +193,10 @@ private:
   double m_E;         //!< current photon energy
   double m_E0;        //!< photon energy at creation
   double m_life_dx;   //!< Distance remaining this time step
+
+
+  double total_sigma_dist;
+  double total_dist;
 
   // private member functions
 private:
