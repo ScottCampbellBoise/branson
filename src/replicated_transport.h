@@ -194,7 +194,6 @@ std::vector<Photon> replicated_transport(Source &source, const Mesh &mesh,
     case WAIT:
       break;
     case KILL:
-      std::cout << "Tally count: " << tally->get_hits();
       break;
     case EXIT:
       break;
