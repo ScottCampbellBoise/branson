@@ -14,6 +14,7 @@
 #include <vector>
 #include <fstream>
 
+#include "../replicated_driver.h"
 #include "../sphere_response.h"
 #include "../tally.h"
 #include "../constants.h"
@@ -212,7 +213,7 @@ int main(int argc, char *argv[]) {
         }
     }  
 
-    // Test the spherical response function 
+/*    // Test the spherical response function 
     {
 	bool passed = true;
 
@@ -223,21 +224,51 @@ int main(int argc, char *argv[]) {
 	Input input(filename, mpi_types);
 	IMC_Parameters imc_p(input);	
         IMC_State imc_state(input, mpi_info.get_rank());
-	RNG* rng = new RNG();
 
-	Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh
+	const Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh
         mesh.initialize_physical_properties(input); // Initialize the physical props (T)
 
 //	Tally tally(.05, 0, 0, 0, mesh); // Tally for point_source.xml
 	Tally tally(2.5, 5, 5, 5, mesh); // Tally for simple_input.xml	
 
 	Sphere_Response resp(tally, mesh, imc_state); // Create a response function class
-	resp.generate_response(10000);	
+	double* table = resp.generate_response(10000);	
+
 	// Print out all the cells sigma*dist, dist, and calc sigma values ....
-	resp.print_response();	
+	ofstream outfile("RESP_TABLE.txt");
+
+ 	uint32_t n_cell = mesh.get_n_local_cells();
+	for(uint32_t k = 0; k < n_cell; ++k) {
+	    outfile <<  "\tcell resp: " << table[k] << endl;
+	}
+	
+	outfile.close();
     }
- 
-  } // need to call destructors for mpi_types before MPI_Finalize
+*/
+    {
+	bool passed = true;
+
+	string filename("/users/campbell_s/branson/src/test/point_source.xml");
+	const Info mpi_info;
+	MPI_Types mpi_types;
+	Input input(filename, mpi_types);
+	IMC_Parameters imc_p(input);	
+        IMC_State imc_state(input, mpi_info.get_rank());
+
+	Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh
+        mesh.initialize_physical_properties(input); // Initialize the physical props (T)
+
+	Tally* tally = new Tally(.05, 0, 0, 0, mesh); // Tally for point_source.xml
+	
+    	imc_replicated_driver(mesh, imc_state, imc_p, mpi_types, mpi_info, tally);
+
+	// PRINT OUT THE TALLY INFORMATION
+    	cout << "\n\tTally energy for non-resp: \t" << tally->get_E() << endl << endl;
+    	//cout << "Tally energy for resp funct: \t" << tally.get_E() << endl;
+    }
+   
+
+  }
 
   MPI_Finalize();
 
