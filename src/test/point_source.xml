@@ -3,10 +3,10 @@
     <method>IMC</method>
     <t_start>0.0</t_start>
     <t_stop>1.0</t_stop>
-    <dt_start>0.01</dt_start>
+    <dt_start>0.1</dt_start>
     <t_mult>1.0</t_mult>
     <dt_max>1.0</dt_max>
-    <photons>10000000</photons>
+    <photons>50000</photons>
     <seed>14706</seed>
     <tilt>FALSE</tilt>
     <stratified_sampling>FALSE</stratified_sampling>
