@@ -1,5 +1,5 @@
 #ifndef response_transport_h_
-#define response_transport_h_
+#define resposne_transport_h_
 
 #include <algorithm>
 #include <functional>
@@ -16,13 +16,14 @@
 #include "sampling_functions.h"
 #include "source.h"
 #include "tally.h"
+#include "sphere_response.h"
 
-Constants::event_type transport_photon(Photon &phtn, const Mesh &mesh, RNG *rng,
+Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG *rng,
                                        double &next_dt, double &exit_E,
                                        double &census_E,
                                        std::vector<double> &rank_abs_E,
                                        std::vector<double> &rank_track_E,
-				       Tally* tally) {
+				       Tally* tally, Sphere_Response* resp) {
   using Constants::ELEMENT;
   using Constants::REFLECT;
   using Constants::VACUUM;
@@ -51,22 +52,39 @@ Constants::event_type transport_photon(Photon &phtn, const Mesh &mesh, RNG *rng,
   cell = mesh.get_on_rank_cell(cell_id);
   bool active = true;
 
+
+
   // transport this photon
   while (active) {
-  
-    // Calculate distance of photon from the tally
-    double dist_to_tally = tally->get_dist_to_tally(phtn);
-  
-    // FINISH
-
-    //--------------------------------------------------------------------------
-    // Original loop contents
-    //--------------------------------------------------------------------------
-
     group = phtn.get_group();
     sigma_a = cell.get_op_a(group);
     sigma_s = cell.get_op_s(group);
     f = cell.get_f();
+
+
+
+    //-----------------------------------------------------------------------------------------------
+    // Added methods for the sphere response method
+    //-----------------------------------------------------------------------------------------------
+
+    // generate the response table
+    double* resp_table = resp->generate_response(1000);
+//    std::cout << "\tgenerated resp table ... " << std::endl;
+ 
+    // Get the distance of the photon from the tally surface
+    double dist_to_tally = tally->get_dist_to_tally(phtn);
+
+    // calculate the contribution to the tally 
+    double tally_contr = phtn.get_E() * 
+	exp(-(resp_table[phtn.get_cell()] + 1 / phtn.get_distance_remaining()) * dist_to_tally);
+
+    // Add the contribution to the tally
+    tally->add_weight(tally_contr);	
+
+    //-----------------------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------------------
+
+
 
     // get distance to event
     dist_to_scatter =
@@ -80,7 +98,6 @@ Constants::event_type transport_photon(Photon &phtn, const Mesh &mesh, RNG *rng,
     dist_to_event = min(dist_to_scatter, min(dist_to_boundary, dist_to_census));
 
     // calculate energy absorbed by material, update photon and material energy
-    // and update the path-length weighted tally for T_r
     ew_factor = exp(-sigma_a * f * dist_to_event);
     absorbed_E = phtn.get_E() * (1.0 - ew_factor);
 
@@ -92,12 +109,14 @@ Constants::event_type transport_photon(Photon &phtn, const Mesh &mesh, RNG *rng,
     // update position
     phtn.move(dist_to_event);
 
-    if (tally->hit_tally(phtn)) {
-      active = false; 	
-      event = KILL;	
-    }
+
+
+//    tally->hit_tally(phtn);
+
+
+   
     // apply variance/runtime reduction
-    else if (phtn.below_cutoff(cutoff_fraction)) {
+    if (phtn.below_cutoff(cutoff_fraction)) {
       rank_abs_E[cell_id] += phtn.get_E();
       active = false;
       event = KILL;
@@ -160,6 +179,7 @@ std::vector<Photon> response_transport(Source &source, const Mesh &mesh,
 
   RNG *rng = imc_state.get_rng();
 
+
   // timing
   Timer t_transport;
   t_transport.start_timer("timestep transport");
@@ -176,24 +196,33 @@ std::vector<Photon> response_transport(Source &source, const Mesh &mesh,
   Photon phtn;
   event_type event;
 
+
+
+  Sphere_Response* resp = new Sphere_Response(tally, mesh, imc_state);
+  uint32_t count = 0;
+
+
   //------------------------------------------------------------------------//
   // Transport photons from source
   //------------------------------------------------------------------------//
   while (n_local_sourced < n_local) {
 
+//   std::cout << "\tTRACKING NEW PARTICLE" << std::endl;
+
+    count++;
+    std::cout << "\t\tCOUNT: " << count << std::endl;
+
     phtn = source.get_photon(rng, dt);
     n_local_sourced++;
 
-
-    event = transport_photon(phtn, mesh, rng, next_dt, exit_E,
-                             census_E, rank_abs_E, rank_track_E, tally); // ADDED tally object
+    event = resp_transport_photon(phtn, mesh, rng, next_dt, exit_E,
+                             census_E, rank_abs_E, rank_track_E, tally, resp);
 
     switch (event) {
     // this case should never be reached
     case WAIT:
       break;
     case KILL:
-      std::cout << "Tally count: " << tally->get_hits();
       break;
     case EXIT:
       break;
@@ -203,6 +232,10 @@ std::vector<Photon> response_transport(Source &source, const Mesh &mesh,
     }
 	
   } // end while
+
+  
+  cout << "\t# OF TRACKED PARTICLES: " << count << endl;
+
 
   // record time of transport work for this rank
   t_transport.stop_timer("timestep transport");
