@@ -23,7 +23,7 @@ Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG 
                                        double &census_E,
                                        std::vector<double> &rank_abs_E,
                                        std::vector<double> &rank_track_E,
-				       Tally* tally, Sphere_Response* resp) {
+				       Tally* tally, Sphere_Response& resp) {
   using Constants::ELEMENT;
   using Constants::REFLECT;
   using Constants::VACUUM;
@@ -52,8 +52,6 @@ Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG 
   cell = mesh.get_on_rank_cell(cell_id);
   bool active = true;
 
-
-
   // transport this photon
   while (active) {
     group = phtn.get_group();
@@ -62,13 +60,12 @@ Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG 
     f = cell.get_f();
 
 
-
-    //-----------------------------------------------------------------------------------------------
+    //------------------------------------------------------------------------------------------
     // Added methods for the sphere response method
-    //-----------------------------------------------------------------------------------------------
+    //------------------------------------------------------------------------------------------
 
     // generate the response table
-    double* resp_table = resp->generate_response(1000);
+    double resp_value = resp.generate_response(1000, phtn.get_cell());
 //    std::cout << "\tgenerated resp table ... " << std::endl;
  
     // Get the distance of the photon from the tally surface
@@ -76,14 +73,13 @@ Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG 
 
     // calculate the contribution to the tally 
     double tally_contr = phtn.get_E() * 
-	exp(-(resp_table[phtn.get_cell()] + 1 / phtn.get_distance_remaining()) * dist_to_tally);
+	exp(-(resp_value + 1 / phtn.get_distance_remaining()) * dist_to_tally);
 
     // Add the contribution to the tally
     tally->add_weight(tally_contr);	
 
-    //-----------------------------------------------------------------------------------------------
-    //-----------------------------------------------------------------------------------------------
-
+    //------------------------------------------------------------------------------------------
+    //------------------------------------------------------------------------------------------
 
 
     // get distance to event
@@ -109,12 +105,6 @@ Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG 
     // update position
     phtn.move(dist_to_event);
 
-
-
-//    tally->hit_tally(phtn);
-
-
-   
     // apply variance/runtime reduction
     if (phtn.below_cutoff(cutoff_fraction)) {
       rank_abs_E[cell_id] += phtn.get_E();
@@ -155,6 +145,9 @@ Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG 
       }
     } // end event loop
   }   // end while alive
+
+  resp.reset_response();
+
   return event;
 }
 
@@ -162,7 +155,7 @@ std::vector<Photon> response_transport(Source &source, const Mesh &mesh,
                                          IMC_State &imc_state,
                                          std::vector<double> &rank_abs_E,
                                          std::vector<double> &rank_track_E,
-					 Tally* tally) {
+					 Tally* tally, Sphere_Response& resp) {
   using Constants::CENSUS;
   using Constants::event_type;
   using Constants::EXIT;
@@ -196,11 +189,7 @@ std::vector<Photon> response_transport(Source &source, const Mesh &mesh,
   Photon phtn;
   event_type event;
 
-
-
-  Sphere_Response* resp = new Sphere_Response(tally, mesh, imc_state);
   uint32_t count = 0;
-
 
   //------------------------------------------------------------------------//
   // Transport photons from source
