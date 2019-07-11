@@ -12,13 +12,16 @@
 #include <mpi.h>
 #include <iostream>
 #include <fstream>
-
+#include <chrono>
+	
 #include "RNG.h"
 #include "constants.h"
 #include "info.h"
 #include "mesh.h"
 #include "photon.h"
 #include "tally.h"
+
+using namespace std::chrono;
 
 using namespace std;
 using Constants::ELEMENT;
@@ -41,48 +44,61 @@ public:
     // track the photons outward,
     //     each cell the photon passes through, update the dist and sigma_dist
     //     if the particle reaches a barrier - kill it
-    double generate_response(int n_particles, uint32_t cell_id) {
+    void generate_response(int n_particles) {
+
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();	
+
+
 	if(!response_set) {
 	    setup_response();
 	    response_set = true;
 	}
 
-	for(int k = 0; k < n_particles; k++) {
-	    Photon phtn_1;
-            create_photon(phtn_1);
-	
-	    move_photon(phtn_1, k); 
+	for(uint32_t k = 0; k < n_cell; k++) {
+	    cell_total_sigma_dist[k] = 0;
+            cell_total_dist[k] = 0;
 	}
 
-	//uint32_t n_cells = mesh.get_n_local_cells();
-	//cell_response = new double[n_cells];
-	
-	//for(int k = 0; k < n_cells; k++) {
-	//  cell_response[k] = (cell_total_sigma_dist[k] / cell_total_dist[k]);
-	//}
+	for(int k = 0; k < n_particles; k++) {
+	    Photon phtn = photon_deck[(int)(rng->generate_random_number() * photon_deck_size)];
+	    Photon cpy_phtn;
 
+	    // Set the copy photon values
+            cpy_phtn.set_total_dist(0.0);
+ 	    cpy_phtn.set_total_sigma_dist(0.0);
+            cpy_phtn.set_position(phtn.get_position());
+            cpy_phtn.set_angle(phtn.get_angle());
+            cpy_phtn.set_cell(phtn.get_cell());
+            cpy_phtn.set_group(phtn.get_group());
+
+	    // Move the photon through the mesh
+	    move_photon(cpy_phtn); 
+	}
+
+        high_resolution_clock::time_point t2 = high_resolution_clock::now();	
+	auto duration = duration_cast<microseconds>( t2 - t1).count();
+	cout << "Time to move all photons: " << duration << endl;
+
+	response_generated = true;
+    }
+
+    double get_response(uint32_t cell_id) {
+	if(!response_generated) { return -1; }
+	if(cell_id < 0 || cell_id > mesh.get_n_local_cells()) { return -1; }
+	
 	return cell_total_sigma_dist[cell_id] / cell_total_dist[cell_id];
     }
 
-    void reset_response() {
-	response_set = false;	
-
-	// Iterate through every cell in the mesh and reset its value	
- 	uint32_t n_cell = mesh.get_n_local_cells();
-	for(uint32_t k = 0; k < n_cell; ++k) {
-	    cell_total_sigma_dist[k] = 0.0;
-	    cell_total_dist[k] = 0.0;
-	}
-    }
+    void reset_response() { response_set = false; }
 
     void create_photon(Photon& phtn) {
         // Create a photon on the tally surface	
         double phi = 2 * Constants::pi * rng->generate_random_number();
         double mu = 1 - 2 * rng->generate_random_number();
         double theta = acos(mu);
-        double pos[3] = {tally->get_x1() + tally->get_radius()*(cos(phi)*sqrt((1-pow(mu,2)))),
-       	     	         tally->get_y1() + tally->get_radius()*(sin(phi)*sqrt(1-pow(mu,2))),
-        		 tally->get_z1() + tally->get_radius()*mu};
+        double pos[3] = {tally_x + tally_r*(cos(phi)*sqrt((1-pow(mu,2)))),
+       	     	         tally_y + tally_r*(sin(phi)*sqrt(1-pow(mu,2))),
+        		 tally_z + tally_r*mu};
 
         // Cosine-distribution for angle
         double mu_r = sqrt(rng->generate_random_number());
@@ -111,7 +127,7 @@ public:
 
  	uint32_t n_cell = mesh.get_n_local_cells();
 	for(uint32_t k = 0; k < n_cell; ++k) {
-	    outfile <<  "\tcell resp: " << (cell_total_sigma_dist[k] / cell_total_dist[k]) << endl;
+	    outfile <<  "\tcell resp: " << cell_total_sigma_dist[k] / cell_total_dist[k] << endl;
 	}
 	
 	outfile.close();
@@ -130,17 +146,11 @@ private:
 
         int cur_pos = 0;
 
- 	uint32_t n_cell = mesh.get_n_local_cells();
+	// Find all cells that the tally intersects
+ 	n_cell = mesh.get_n_local_cells();
 	Cell temp_tally_cells[n_cell]; 
 
-	cell_total_sigma_dist = new double[n_cell];
-	cell_total_dist = new double[n_cell];
-	
 	for(uint32_t k = 0; k < n_cell; ++k) {
-
-	    cell_total_sigma_dist[k] = 0.0;
-	    cell_total_dist[k] = 0.0;
-
 	    Cell cell = mesh.get_cell(k);
 	    if(tally_intersects_cell(cell)) {
 		temp_tally_cells[cur_pos++] = cell;
@@ -153,14 +163,25 @@ private:
 	}	
 
 	n_tally_cells = cur_pos + 1;
+
+	//Create a 'deck' of photons to use for the sampling
+	photon_deck = new Photon[photon_deck_size];
+	for(int k = 0; k < photon_deck_size; k++) {
+	    Photon phtn;
+	    create_photon(phtn);
+	    photon_deck[k] = phtn;
+	}
+
+	//Generate the variables to hold the resp info
+	cell_total_sigma_dist = new double[n_cell];
+        cell_total_dist = new double[n_cell];	
     }
 
-    void move_photon(Photon &phtn, int phtn_pos) {
+    void move_photon(Photon &phtn) {
 	uint32_t cell_id, next_cell;
 	bc_type boundary_event;
 	double dist_to_event;
 	double sigma_a;
-	double angle[3];
 
         uint32_t surface_cross = 0;
   	
@@ -238,6 +259,7 @@ private:
     //-------------------------------------------
 
     bool response_set = false;
+    bool response_generated = false;
 
     const Mesh& mesh;
     Tally*& tally;
@@ -245,14 +267,16 @@ private:
 
     Cell* tally_cells;
     int n_tally_cells;
+    uint32_t n_cell;
 
     RNG* rng;
 
     double tally_r, tally_x, tally_y, tally_z;
 
     double* cell_total_sigma_dist;
-    double* cell_total_dist;
+    double*  cell_total_dist;
 
-    //double* cell_response;
+    int photon_deck_size = 1000000;
+    Photon* photon_deck;
 };
 #endif
