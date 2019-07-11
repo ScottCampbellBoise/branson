@@ -23,7 +23,7 @@ Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG 
                                        double &census_E,
                                        std::vector<double> &rank_abs_E,
                                        std::vector<double> &rank_track_E,
-				       Tally* tally, Sphere_Response& resp) {
+				       Tally* tally, Sphere_Response* resp) {
   using Constants::ELEMENT;
   using Constants::REFLECT;
   using Constants::VACUUM;
@@ -52,6 +52,13 @@ Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG 
   cell = mesh.get_on_rank_cell(cell_id);
   bool active = true;
 
+
+
+  // generate the response table
+  resp->generate_response(1000);
+ 
+
+
   // transport this photon
   while (active) {
     group = phtn.get_group();
@@ -64,17 +71,13 @@ Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG 
     // Added methods for the sphere response method
     //------------------------------------------------------------------------------------------
 
-    // generate the response table
-    double resp_value = resp.generate_response(1000, phtn.get_cell());
-//    std::cout << "\tgenerated resp table ... " << std::endl;
- 
     // Get the distance of the photon from the tally surface
     double dist_to_tally = tally->get_dist_to_tally(phtn);
 
     // calculate the contribution to the tally 
     double tally_contr = phtn.get_E() * 
-	exp(-(resp_value + 1 / phtn.get_distance_remaining()) * dist_to_tally);
-
+	exp(-(resp->get_response(cell_id) + 1 / phtn.get_distance_remaining()) * dist_to_tally);   
+  
     // Add the contribution to the tally
     tally->add_weight(tally_contr);	
 
@@ -145,9 +148,6 @@ Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG 
       }
     } // end event loop
   }   // end while alive
-
-  resp.reset_response();
-
   return event;
 }
 
@@ -155,7 +155,7 @@ std::vector<Photon> response_transport(Source &source, const Mesh &mesh,
                                          IMC_State &imc_state,
                                          std::vector<double> &rank_abs_E,
                                          std::vector<double> &rank_track_E,
-					 Tally* tally, Sphere_Response& resp) {
+					 Tally* tally, Sphere_Response* resp) {
   using Constants::CENSUS;
   using Constants::event_type;
   using Constants::EXIT;
@@ -199,7 +199,9 @@ std::vector<Photon> response_transport(Source &source, const Mesh &mesh,
 //   std::cout << "\tTRACKING NEW PARTICLE" << std::endl;
 
     count++;
-    std::cout << "\t\tCOUNT: " << count << std::endl;
+
+    if((count % 1000) == 0) 
+    	std::cout << "\t\tCOUNT: " << count << std::endl;
 
     phtn = source.get_photon(rng, dt);
     n_local_sourced++;
