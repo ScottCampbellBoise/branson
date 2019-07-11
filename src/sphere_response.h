@@ -41,7 +41,7 @@ public:
     // track the photons outward,
     //     each cell the photon passes through, update the dist and sigma_dist
     //     if the particle reaches a barrier - kill it
-    double* generate_response(int n_particles) {
+    double generate_response(int n_particles, uint32_t cell_id) {
 	if(!response_set) {
 	    setup_response();
 	    response_set = true;
@@ -54,14 +54,14 @@ public:
 	    move_photon(phtn_1, k); 
 	}
 
-	uint32_t n_cells = mesh.get_n_local_cells();
-	cell_response = new double[n_cells];
+	//uint32_t n_cells = mesh.get_n_local_cells();
+	//cell_response = new double[n_cells];
 	
-	for(int k = 0; k < n_cells; k++) {
-	    cell_response[k] = (cell_total_sigma_dist[k] / cell_total_dist[k]);
-	}
+	//for(int k = 0; k < n_cells; k++) {
+	//  cell_response[k] = (cell_total_sigma_dist[k] / cell_total_dist[k]);
+	//}
 
-	return cell_response;
+	return cell_total_sigma_dist[cell_id] / cell_total_dist[cell_id];
     }
 
     void reset_response() {
@@ -111,7 +111,7 @@ public:
 
  	uint32_t n_cell = mesh.get_n_local_cells();
 	for(uint32_t k = 0; k < n_cell; ++k) {
-	    outfile <<  "\tcell resp: " << cell_response[k] << endl;
+	    outfile <<  "\tcell resp: " << (cell_total_sigma_dist[k] / cell_total_dist[k]) << endl;
 	}
 	
 	outfile.close();
@@ -253,6 +253,6 @@ private:
     double* cell_total_sigma_dist;
     double* cell_total_dist;
 
-    double* cell_response;
+    //double* cell_response;
 };
 #endif
