@@ -66,18 +66,17 @@ public:
 	outfile << time_step << " , " << total_energy << endl;
     }
 
+    bool is_inside_tally(Photon& phtn) {
+	const double* pos = phtn.get_position();
+	double dist = sqrt(pow(pos[0]-x1,2) + pow(pos[1]-y1,2) + pow(pos[2]-z1,2));
+	return dist <= radius;
+    }
+
     // Find the distance of the photon to tally surface
     double get_dist_to_tally(Photon& phtn) {
 	const double* pos = phtn.get_position();
 	const double* ang = phtn.get_angle();
 	const double* prev_pos = phtn.get_prev_position();
-
- 	// If the photon is inside the tally, return
- 	if(sqrt(pow(pos[0] - x1, 2) + 
-	        pow(pos[1] - y1, 2) + 
-	        pow(pos[2] - z1, 2)) < radius) {
-	    return 0;
-	}
 
 	// Check that the photon intersects the sphere
 	// equation: a*t^2 + b*t + c = 0
@@ -90,22 +89,21 @@ public:
 	double c = pow(x1 - pos[0], 2) + pow(y1 - pos[1], 2) + 
 		   pow(z1 - pos[2], 2) - pow(radius, 2);
 	
-	if((pow(b, 2) - 4*a*c) < 0) { return -1; } // No intersection
+	if((pow(b, 2) - 4*a*c) < 0) { return 1e9; } // No intersection
 
 	// Solve the quadratic equation for t
 	double t_a = (-b + sqrt(pow(b, 2) - 4*a*c)) / (2*a);
 	double t_b = (-b - sqrt(pow(b, 2) - 4*a*c)) / (2*a);	
 
-	double x_a = (prev_pos[0] - pos[0])*t_a + pos[0];
-	double y_a = (prev_pos[1] - pos[1])*t_a + pos[1];
-	double z_a = (prev_pos[2] - pos[2])*t_a + pos[2];
+	double pt_a[3] = { (prev_pos[0] - pos[0])*t_a + pos[0], 
+			   (prev_pos[1] - pos[1])*t_a + pos[1],
+			   (prev_pos[2] - pos[2])*t_a + pos[2] };
+	double pt_b[3] = { (prev_pos[0] - pos[0])*t_b + pos[0], 
+			   (prev_pos[1] - pos[1])*t_b + pos[1],
+			   (prev_pos[2] - pos[2])*t_b + pos[2] };
 	
-	double x_b = (prev_pos[0] - pos[0])*t_a + pos[0];
-	double y_b = (prev_pos[1] - pos[1])*t_a + pos[1];
-	double z_b = (prev_pos[2] - pos[2])*t_a + pos[2];
-
-	double dist_a = sqrt(pow(pos[0]-x_a,2) + pow(pos[1]-y_a,2) + pow(pos[2]-z_a,2));
-	double dist_b = sqrt(pow(pos[0]-x_b,2) + pow(pos[1]-y_b,2) + pow(pos[2]-z_b,2));
+	double dist_a = sqrt(pow(pos[0]-pt_a[0],2) + pow(pos[1]-pt_a[1],2) + pow(pos[2]-pt_a[2],2));
+	double dist_b = sqrt(pow(pos[0]-pt_b[0],2) + pow(pos[1]-pt_b[1],2) + pow(pos[2]-pt_b[2],2));
 
 	return min(dist_a, dist_b);
     }
@@ -121,7 +119,7 @@ private:
     // Private helper methods
     // ----------------------------------------------------------------------
    
-    bool passed_spherical_tally(Photon phtn) {
+    bool passed_spherical_tally(Photon& phtn) {
 	const double* phtn_pos = phtn.get_position();
 	const double* phtn_prev_pos = phtn.get_prev_position();
 	
