@@ -12,7 +12,7 @@
 #include <mpi.h>
 #include <iostream>
 #include <fstream>
-#include <chrono>
+//#include <chrono>
 	
 #include "RNG.h"
 #include "constants.h"
@@ -46,9 +46,6 @@ public:
     //     if the particle reaches a barrier - kill it
     void generate_response(int n_particles) {
 
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();	
-
-
 	if(!response_set) {
 	    setup_response();
 	    response_set = true;
@@ -75,17 +72,10 @@ public:
 	    move_photon(cpy_phtn); 
 	}
 
-        high_resolution_clock::time_point t2 = high_resolution_clock::now();	
-	auto duration = duration_cast<microseconds>( t2 - t1).count();
-	cout << "Time to move all photons: " << duration << endl;
-
 	response_generated = true;
     }
 
     double get_response(uint32_t cell_id) {
-	if(!response_generated) { return -1; }
-	if(cell_id < 0 || cell_id > mesh.get_n_local_cells()) { return -1; }
-	
 	return cell_total_sigma_dist[cell_id] / cell_total_dist[cell_id];
     }
 
@@ -112,7 +102,13 @@ public:
         	      + cos(phi)*mu_phi;
         double mu_z = cos(theta)*mu_r - sin(theta)*mu_theta;
         double angle[3] = {mu_x, mu_y, mu_z};
-        
+       
+	if(rng->generate_random_number() < 0.5) {
+	    angle[0] *= -1;
+	    angle[1] *= -1;
+	    angle[2] *= -1;
+	}
+ 
         // Set photon values
         phtn.set_total_dist(0.0);
 	phtn.set_total_sigma_dist(0.0);
@@ -179,21 +175,22 @@ private:
 
     void move_photon(Photon &phtn) {
 	uint32_t cell_id, next_cell;
-	bc_type boundary_event;
 	double dist_to_event;
 	double sigma_a;
 
         uint32_t surface_cross = 0;
   	
-        int group;
   	Cell cell;
   	cell_id = phtn.get_cell();
   	cell = mesh.get_cell(cell_id);
 	
   	bool active = true;
   	while (active) {
-            group = phtn.get_group();
-            sigma_a = cell.get_op_a(group);
+ 	    if(!tally->is_inside_tally(phtn)) {
+		active = false;
+	    }
+
+            sigma_a = cell.get_op_a(phtn.get_group());
        
 	    // get distance to event
             dist_to_event = cell.get_distance_to_boundary(
@@ -203,12 +200,11 @@ private:
  	    cell_total_dist[cell_id] += dist_to_event;
 	    cell_total_sigma_dist[cell_id] += 
 		    (phtn.get_total_sigma_dist() / phtn.get_total_dist()) * dist_to_event;
- 
- 	    // update position
+	
+	    // update position
             phtn.move(dist_to_event);
 
-            boundary_event = cell.get_bc(surface_cross);
-            if (boundary_event == ELEMENT) {
+            if (active && cell.get_bc(surface_cross) == ELEMENT) {
                 next_cell = cell.get_next_cell(surface_cross);
                 phtn.set_cell(next_cell);
                 cell_id = next_cell;
@@ -216,7 +212,8 @@ private:
             } else {
 	        active = false;
             }
-        }   // end while alive
+
+         }   // end while alive
     }
 
     // Check if a point is inside one of the cells
