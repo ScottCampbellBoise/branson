@@ -41,6 +41,7 @@ Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG 
   event_type event;
   double dist_to_scatter, dist_to_boundary, dist_to_census, dist_to_event;
   double sigma_a, sigma_s, f, absorbed_E, ew_factor;
+  double dist_to_tally, tally_contr;
   double angle[3];
   int group;
   Cell cell;
@@ -52,12 +53,8 @@ Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG 
   cell = mesh.get_on_rank_cell(cell_id);
   bool active = true;
 
-
-
-  // generate the response table
-  resp->generate_response(1000);
- 
-
+  // Only generate the response function if the particle is going to intersect tally
+  bool resp_generated = false;
 
   // transport this photon
   while (active) {
@@ -70,16 +67,30 @@ Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG 
     //------------------------------------------------------------------------------------------
     // Added methods for the sphere response method
     //------------------------------------------------------------------------------------------
+    if(tally->is_inside_tally(phtn)) {
+	// Get the distance of the photon from the tally surface
+        dist_to_tally = tally->get_dist_to_tally(phtn);
 
-    // Get the distance of the photon from the tally surface
-    double dist_to_tally = tally->get_dist_to_tally(phtn);
-
-    // calculate the contribution to the tally 
-    double tally_contr = phtn.get_E() * 
-	exp(-(resp->get_response(cell_id) + 1 / phtn.get_distance_remaining()) * dist_to_tally);   
+        // See of the photon is directed towards the tally
+        if(dist_to_tally < tally->get_radius()) {
+	    if(!resp_generated) {
+	        resp->generate_response(1000);
+	        resp_generated = true;
+	    }
+	
+            // calculate the contribution to the tally 
+            tally_contr = phtn.get_E() * 
+	        exp(-(resp->get_response(cell_id) + 1 / phtn.get_distance_remaining()) * dist_to_tally);   
   
-    // Add the contribution to the tally
-    tally->add_weight(tally_contr);	
+            // Add the contribution to the tally
+            if(tally_contr > 0) {
+                tally->add_weight(tally_contr);	
+            }
+        }
+    } else {
+	active = false;
+	event = KILL;
+    }
 
     //------------------------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------
@@ -200,8 +211,10 @@ std::vector<Photon> response_transport(Source &source, const Mesh &mesh,
 
     count++;
 
-    if((count % 1000) == 0) 
-    	std::cout << "\t\tCOUNT: " << count << std::endl;
+    if((count % 10000) == 0) {
+    	std::cout << "\t\tCOUNT: \t\t\t" << count << std::endl;
+	cout << "\t\t  Total Contribution: \t" << tally->get_E() << endl;
+    }
 
     phtn = source.get_photon(rng, dt);
     n_local_sourced++;
