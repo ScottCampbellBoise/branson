@@ -186,13 +186,13 @@ int main(int argc, char *argv[]) {
 	cout << "distance to tally: " << dist << endl;
 	if(dist != 5) { tally_surface_pass = false; }
 
-	double pos_8[3] = {-2,0,0};
-	double prev_pos_8[3] = {-1,0,0};
+	double pos_8[3] = {2,0,0};
+	double prev_pos_8[3] = {1,0,0};
 	phtn2.set_position(pos_8);
 	phtn2.set_prev_position(prev_pos_8);
  	dist = tally->get_dist_to_tally(phtn2);
 	cout << "distance to tally: " << dist << endl;
-	if(dist != 0) { tally_surface_pass = false; }
+	if(dist != 3) { tally_surface_pass = false; }
 
 	double pos_9[3] = {6,6,6};
 	double prev_pos_9[3] = {6,16,6};
@@ -200,9 +200,14 @@ int main(int argc, char *argv[]) {
 	phtn2.set_prev_position(prev_pos_9);
  	dist = tally->get_dist_to_tally(phtn2);
 	cout << "distance to tally: " << dist << endl;
-	if(dist != -1) { tally_surface_pass = false; }
+	if(!dist >= 1e9) { tally_surface_pass = false; }
 
-
+	double pos_10[3] = {8,9,7};
+	double prev_pos_10[3] = {0,0,0};
+	phtn2.set_position(pos_10);
+	phtn2.set_prev_position(prev_pos_10);
+ 	dist = tally->get_dist_to_tally(phtn2);
+	cout << "distance to tally ( 8.92834): " << dist << endl;
 
 
         if (tally_surface_pass) {
@@ -258,7 +263,7 @@ int main(int argc, char *argv[]) {
 	Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh
         mesh.initialize_physical_properties(input); // Initialize the physical props (T)
 
-	Tally* tally = new Tally(.05, 0, 0, 0, mesh); // Tally for point_source.xml
+	Tally* tally = new Tally(.1, 0, 0, 0, mesh); // Tally for point_source.xml
 	
     	imc_replicated_driver(mesh, imc_state, imc_p, mpi_types, mpi_info, tally);
 
