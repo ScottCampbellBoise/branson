@@ -65,36 +65,31 @@ Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG 
 
 
     //------------------------------------------------------------------------------------------
-    // Added methods for the sphere response method
+    // Add resp contribution (if valid) - ASSUMES source is inside tally
     //------------------------------------------------------------------------------------------
     if(tally->is_inside_tally(phtn)) {
-	// Get the distance of the photon from the tally surface
-        dist_to_tally = tally->get_dist_to_tally(phtn);
-
-        // See of the photon is directed towards the tally
-        if(dist_to_tally < tally->get_radius()) {
-	    if(!resp_generated) {
-	        resp->generate_response(1000);
-	        resp_generated = true;
-	    }
-	
-            // calculate the contribution to the tally 
-            tally_contr = phtn.get_E() * 
-	        exp(-(resp->get_response(cell_id) + 1 / phtn.get_distance_remaining()) * dist_to_tally);   
-  
-            // Add the contribution to the tally
-            if(tally_contr > 0) {
-                tally->add_weight(tally_contr);	
-            }
+        if(!resp_generated) {
+	    resp->generate_response(1000);
+	    resp_generated = true;
         }
-    } else {
-	active = false;
-	event = KILL;
+        // Get the distance of the photon from the tally surface
+        dist_to_tally = tally->get_dist_to_tally(phtn);
+        // calculate the contribution to the tally 
+        tally_contr = phtn.get_E() * 
+	    exp(-(resp->get_response(cell_id) + 1 / phtn.get_distance_remaining()) * dist_to_tally);   
+        // Add the contribution to the tally
+        if(tally_contr > 0) {
+	    tally->add_response_weight(tally_contr);	
+        }
     }
-
+    //------------------------------------------------------------------------------------------
+    // Add regular contribution (if valid) - ONLY RECORDS OUTGOING PHOTONS
+    //------------------------------------------------------------------------------------------
+    if(tally->hit_tally(phtn)) {
+        tally->add_regular_weight(phtn.get_E());
+    }
     //------------------------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------
-
 
     // get distance to event
     dist_to_scatter =
@@ -113,9 +108,9 @@ Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG 
 
     rank_track_E[cell_id] += absorbed_E / (sigma_a * f);
     rank_abs_E[cell_id] += absorbed_E;
-
+	  
     phtn.set_E(phtn.get_E() - absorbed_E);
-
+	  
     // update position
     phtn.move(dist_to_event);
 
@@ -180,9 +175,6 @@ std::vector<Photon> response_transport(Source &source, const Mesh &mesh,
   double exit_E = 0.0;
   double next_dt = imc_state.get_next_dt(); //! Set for census photons
   double dt = imc_state.get_next_dt();      //! For making current photons
-
-  RNG *rng = imc_state.get_rng();
-
 
   // timing
   Timer t_transport;
