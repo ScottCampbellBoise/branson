@@ -133,6 +133,11 @@ public:
     m_angle[0] = angle[0];
     m_angle[1] = angle[1];
     m_angle[2] = angle[2];
+
+    m_prev_pos[0] = m_pos[0] - angle[0];
+    m_prev_pos[1] = m_pos[1] - angle[1];
+    m_prev_pos[2] = m_pos[2] - angle[2];
+
   }
 
   //! Set the spatial position of the photon
@@ -140,10 +145,6 @@ public:
     m_pos[0] = pos[0];
     m_pos[1] = pos[1];
     m_pos[2] = pos[2];
-
-    m_prev_pos[0] = pos[0] - 1e-6;
-    m_prev_pos[1] = pos[1] - 1e-6;
-    m_prev_pos[2] = pos[2] - 1e-6;
   }
 
   //! Set previous position: FOR TESTING USE ONLY!
@@ -171,12 +172,10 @@ public:
 
   inline void set_total_sigma_dist(double val) { total_sigma_dist = val; }
   inline void set_total_dist(double val) { total_dist = val; }
-
   inline void add_to_total_dist(double dist, double sigma) {
     total_dist += dist;
     total_sigma_dist += dist * sigma;
   }
-
   inline double get_total_dist() { return total_dist; }
   inline double get_total_sigma_dist() { return total_sigma_dist; }
 
