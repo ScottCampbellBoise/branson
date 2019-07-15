@@ -55,7 +55,7 @@ public:
     inline void add_regular_weight(double weight) { total_regular_E += weight; }
 	
     void print_tally_info(ostream& outfile, double time_step) {
-	outfile << time_step << " , " << total_energy << endl;
+	outfile << time_step << " , " << total_regular_E << "," << total_response_E << endl;
     }
 
    bool hit_tally(Photon& phtn) {
@@ -63,8 +63,12 @@ public:
 	const double* phtn_prev_pos = phtn.get_prev_position();
 	
 	//Calculate the distance the phtn is from the tally center
-	double cur_dist = sqrt(pow(phtn_pos[0] - x1,2) + pow(phtn_pos[1] - y1,2) + pow(phtn_pos[2] - z1,2));
-	double prev_dist = sqrt(pow(phtn_prev_pos[0] - x1,2) + pow(phtn_prev_pos[1] - y1,2) + pow(phtn_prev_pos[2] - z1,2));
+	double cur_dist = sqrt(pow(phtn_pos[0] - x1,2) + 
+			       pow(phtn_pos[1] - y1,2) + 
+			       pow(phtn_pos[2] - z1,2));
+	double prev_dist = sqrt(pow(phtn_prev_pos[0] - x1,2) + 
+				pow(phtn_prev_pos[1] - y1,2) + 
+				pow(phtn_prev_pos[2] - z1,2));
 	
 	if(filter_state == POSITIVE_ONLY_FILTER) {
 	    // Count only particles moving into the sphere
@@ -100,8 +104,8 @@ public:
 		       (prev_pos[2] - pos[2]) * (z1 - pos[2]));
 	double c = pow(x1 - pos[0], 2) + pow(y1 - pos[1], 2) + 
 		   pow(z1 - pos[2], 2) - pow(radius, 2);
-	
-	if((pow(b, 2) - 4*a*c) < 0) { return 1e9; } // No intersection
+
+	if((pow(b, 2) - 4*a*c) < 0) { return std::numeric_limits<int>::max(); } // No intersection
 
 	// Solve the quadratic equation for t
 	double t_a = (-b + sqrt(pow(b, 2) - 4*a*c)) / (2*a);
@@ -114,10 +118,23 @@ public:
 			   (prev_pos[1] - pos[1])*t_b + pos[1],
 			   (prev_pos[2] - pos[2])*t_b + pos[2] };
 	
-	double dist_a = sqrt(pow(pos[0]-pt_a[0],2) + pow(pos[1]-pt_a[1],2) + pow(pos[2]-pt_a[2],2));
-	double dist_b = sqrt(pow(pos[0]-pt_b[0],2) + pow(pos[1]-pt_b[1],2) + pow(pos[2]-pt_b[2],2));
+	// Return the point that is along the phtn trajectory
+	double dist_a = sqrt(pow((pos[0]+ang[0]*radius)-pt_a[0],2) +
+			     pow((pos[1]+ang[1]*radius)-pt_a[1],2) + 
+			     pow((pos[2]+ang[2]*radius)-pt_a[2],2));
+	double dist_b = sqrt(pow((pos[0]+ang[0]*radius)-pt_b[0],2) +
+			     pow((pos[1]+ang[1]*radius)-pt_b[1],2) + 
+			     pow((pos[2]+ang[2]*radius)-pt_b[2],2));
 
-	return min(dist_a, dist_b);
+	if(dist_a < dist_b) {
+	    return sqrt(pow(pos[0] - pt_a[0],2) + 
+		        pow(pos[1] - pt_a[1],2) + 
+			pow(pos[2] - pt_a[2],2));
+	} else {
+	    return sqrt(pow(pos[0] - pt_b[0],2) + 
+		        pow(pos[1] - pt_b[1],2) + 
+			pow(pos[2] - pt_b[2],2));
+	}	
     }
 
     // Variables regarding the motion filter settings
@@ -126,13 +143,6 @@ public:
     const static int NEGATIVE_ONLY_FILTER = -1; // " " in (-) dir / out of sphere
 
 private:
-    
-    // ----------------------------------------------------------------------
-    // Private helper methods
-    // ----------------------------------------------------------------------
-   
- 
-
     // ----------------------------------------------------------------------
     // Private Variables/Constants
     // ----------------------------------------------------------------------
