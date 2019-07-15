@@ -207,7 +207,17 @@ int main(int argc, char *argv[]) {
 	phtn2.set_position(pos_10);
 	phtn2.set_prev_position(prev_pos_10);
  	dist = tally->get_dist_to_tally(phtn2);
-	cout << "distance to tally ( 8.92834): " << dist << endl;
+	cout << "distance to tally (8.92834): " << dist << endl;
+
+	double pos_11[3] = {1,0,0};
+	double prev_pos_11[3] = {2,0,0};
+	double ang_11[3] = {-1,0,0};
+	phtn2.set_position(pos_11);
+	phtn2.set_prev_position(prev_pos_11);
+	phtn2.set_angle(ang_11);
+ 	dist = tally->get_dist_to_tally(phtn2);
+	cout << "distance to tally (6): " << dist << endl;
+	if(dist != 6) { tally_surface_pass = false; }
 
 
         if (tally_surface_pass) {
@@ -218,38 +228,6 @@ int main(int argc, char *argv[]) {
         }
     }  
 
-/*    // Test the spherical response function 
-    {
-	bool passed = true;
-
-	string filename("/users/campbell_s/branson/src/test/simple_input.xml");
-//	string filename("/users/campbell_s/branson/src/test/point_source.xml");
-	const Info mpi_info;
-	MPI_Types mpi_types;
-	Input input(filename, mpi_types);
-	IMC_Parameters imc_p(input);	
-        IMC_State imc_state(input, mpi_info.get_rank());
-
-	const Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh
-        mesh.initialize_physical_properties(input); // Initialize the physical props (T)
-
-//	Tally tally(.05, 0, 0, 0, mesh); // Tally for point_source.xml
-	Tally tally(2.5, 5, 5, 5, mesh); // Tally for simple_input.xml	
-
-	Sphere_Response resp(tally, mesh, imc_state); // Create a response function class
-	double* table = resp.generate_response(10000);	
-
-	// Print out all the cells sigma*dist, dist, and calc sigma values ....
-	ofstream outfile("RESP_TABLE.txt");
-
- 	uint32_t n_cell = mesh.get_n_local_cells();
-	for(uint32_t k = 0; k < n_cell; ++k) {
-	    outfile <<  "\tcell resp: " << table[k] << endl;
-	}
-	
-	outfile.close();
-    }
-*/
     {
 	bool passed = true;
 
@@ -263,13 +241,13 @@ int main(int argc, char *argv[]) {
 	Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh
         mesh.initialize_physical_properties(input); // Initialize the physical props (T)
 
-	Tally* tally = new Tally(.1, 0, 0, 0, mesh); // Tally for point_source.xml
+	Tally* tally = new Tally(.07, 0, 0, 0, mesh); // Tally for point_source.xml
 	
     	imc_replicated_driver(mesh, imc_state, imc_p, mpi_types, mpi_info, tally);
 
 	// PRINT OUT THE TALLY INFORMATION
-    	cout << "\n\tTally energy for non-resp: \t" << tally->get_E() << endl << endl;
-    	//cout << "Tally energy for resp funct: \t" << tally.get_E() << endl;
+    	cout << "\n\tTally energy for Regular: \t" << tally->get_regular_E() << endl;
+	cout << "\tTally energy for Response: \t" << tally->get_response_E() << endl << endl;
     }
    
 
