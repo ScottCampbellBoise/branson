@@ -12,6 +12,7 @@
 #include <mpi.h>
 #include <iostream>
 #include <fstream>
+#include <math.h>
 //#include <chrono>
 	
 #include "RNG.h"
@@ -76,7 +77,10 @@ public:
     }
 
     double get_response(uint32_t cell_id) {
-	return cell_total_sigma_dist[cell_id] / cell_total_dist[cell_id];
+	double resp = cell_total_sigma_dist[cell_id] / cell_total_dist[cell_id];
+	if(resp <= 0 || isnan(resp))
+	    return std::numeric_limits<int>::max();
+	return resp; 
     }
 
     void reset_response() { response_set = false; }
@@ -102,13 +106,19 @@ public:
         	      + cos(phi)*mu_phi;
         double mu_z = cos(theta)*mu_r - sin(theta)*mu_theta;
         double angle[3] = {mu_x, mu_y, mu_z};
-       
-	if(rng->generate_random_number() < 0.5) {
+
+	// Direct the photon into the tally       
+	double temp[3] = {pos[0] + angle[0] * tally_r,
+		      	  pos[1] + angle[1] * tally_r,
+		       	  pos[2] + angle[2] * tally_r};
+	double pos_to_center = sqrt(pow(tally_x-pos[0],2) + pow(tally_y-pos[1],2) + pow(tally_z-pos[2],2));
+	double temp_to_center = sqrt(pow(tally_x-temp[0],2) + pow(tally_y-temp[1],2) + pow(tally_z-temp[2],2));	
+	if(temp_to_center > pos_to_center) {
 	    angle[0] *= -1;
 	    angle[1] *= -1;
 	    angle[2] *= -1;
-	}
- 
+	} 
+
         // Set photon values
         phtn.set_total_dist(0.0);
 	phtn.set_total_sigma_dist(0.0);
@@ -186,12 +196,12 @@ private:
 	
   	bool active = true;
   	while (active) {
- 	    if(!tally->is_inside_tally(phtn)) {
-		active = false;
-	    }
-
             sigma_a = cell.get_op_a(phtn.get_group());
-       
+
+/*	   if(!tally->is_inside_tally(phtn)) {
+		active = false;
+	    }      
+*/
 	    // get distance to event
             dist_to_event = cell.get_distance_to_boundary(
                 phtn.get_position(), phtn.get_angle(), surface_cross);
@@ -204,7 +214,7 @@ private:
 	    // update position
             phtn.move(dist_to_event);
 
-            if (active && cell.get_bc(surface_cross) == ELEMENT) {
+	    if(active && cell.get_bc(surface_cross) == ELEMENT) {
                 next_cell = cell.get_next_cell(surface_cross);
                 phtn.set_cell(next_cell);
                 cell_id = next_cell;
@@ -212,7 +222,6 @@ private:
             } else {
 	        active = false;
             }
-
          }   // end while alive
     }
 
