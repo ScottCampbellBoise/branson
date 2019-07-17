@@ -57,22 +57,30 @@ public:
             cell_total_dist[k] = 0;
 	}
 
+	Photon phtn;
+	double total_phtn_dist;
+	double total_phtn_sigma_dist;
+ 	double sigma_a;
+	double cell_dist;
+	Cell cell;
+	    
 	for(int k = 0; k < n_particles; k++) {
-	    Photon phtn = photon_deck[(int)(rng->generate_random_number() * photon_deck_size)];
-	    Photon cpy_phtn;
-
-	    // Set the copy photon values
-            cpy_phtn.set_total_dist(0.0);
- 	    cpy_phtn.set_total_sigma_dist(0.0);
-            cpy_phtn.set_position(phtn.get_position());
-            cpy_phtn.set_angle(phtn.get_angle());
-            cpy_phtn.set_cell(phtn.get_cell());
-            cpy_phtn.set_group(phtn.get_group());
-
-	    // Move the photon through the mesh
-	    move_photon(cpy_phtn); 
+	    phtn = photon_deck[(int)(rng->generate_random_number() * photon_deck_size)];
+	    total_phtn_dist = 0;
+	    total_phtn_sigma_dist = 0;
+		
+	    for(uint32_t index = 0; index < phtn.get_n_resp_cells(); index++) {
+ 	        cell_dist = phtn.get_resp_cell_dist(index);
+		cell = mesh.get_cell(phtn.get_resp_cell(index));
+		sigma_a = cell.get_op_a(phtn.get_group());
+		    
+		total_phtn_dist += cell_dist;
+		total_phtn_sigma_dist += sigma_a * cell_dist;
+	        cell_total_dist += cell_dist;
+		cell_total_sigma_dist += 
+		    (total_phtn_sigma_dist / total_phtn_dist) * cell_dist;
+	    }
 	}
-
 	response_generated = true;
     }
 
@@ -175,6 +183,7 @@ private:
 	for(int k = 0; k < photon_deck_size; k++) {
 	    Photon phtn;
 	    create_photon(phtn);
+	    move_photon(phtn);
 	    photon_deck[k] = phtn;
 	}
 
@@ -194,6 +203,10 @@ private:
   	cell_id = phtn.get_cell();
   	cell = mesh.get_cell(cell_id);
 	
+	double* cell_ids = new double[n_cell];
+	double* cell_dist = new double[n_cell];
+	uint32_t pos = 0;
+	    
   	bool active = true;
   	while (active) {
             sigma_a = cell.get_op_a(phtn.get_group());
@@ -205,11 +218,10 @@ private:
 	    // get distance to event
             dist_to_event = cell.get_distance_to_boundary(
                 phtn.get_position(), phtn.get_angle(), surface_cross);
-       
-	    phtn.add_to_total_dist(dist_to_event, sigma_a);
- 	    cell_total_dist[cell_id] += dist_to_event;
-	    cell_total_sigma_dist[cell_id] += 
-		    (phtn.get_total_sigma_dist() / phtn.get_total_dist()) * dist_to_event;
+   
+	    cell_ids[pos] = cell_id;
+	    cell_dist[pos] = dist_to_event;
+	    pos++;	
 	
 	    // update position
             phtn.move(dist_to_event);
@@ -223,6 +235,17 @@ private:
 	        active = false;
             }
          }   // end while alive
+	    
+	 //Truncate the arrays
+	 double* trunc_ids = new double[pos];
+	 double* truc_dists = new double[pos];
+	 for(uint32_t k = 0; k < pos; ++k) {
+	     trunc_ids[k] = cell_ids[k];
+	     trunc_dists[k] = cell_dist[k];
+	 }
+	 phtn.set_resp_cell_ids(trunc_ids);
+	 phtn.set_resp_cell_dist(trunc_dists);
+	 phtn.set_n_resp_cells(pos);
     }
 
     // Check if a point is inside one of the cells
