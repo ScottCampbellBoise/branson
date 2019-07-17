@@ -92,18 +92,19 @@ public:
     double get_dist_to_tally(Photon& phtn) {
 	const double* pos = phtn.get_position();
 	const double* ang = phtn.get_angle();
-	const double* prev_pos = phtn.get_prev_position();
 
 	// Check that the photon intersects the sphere
 	// equation: a*t^2 + b*t + c = 0
-	double a = pow(prev_pos[0] - pos[0], 2) + 
-		   pow(prev_pos[1] - pos[1], 2) +
-		   pow(prev_pos[2] - pos[2], 2);
-	double b = -2*((prev_pos[0] - pos[0]) * (x1 - pos[0]) + 
-		       (prev_pos[1] - pos[1]) * (y1 - pos[1]) +
-		       (prev_pos[2] - pos[2]) * (z1 - pos[2]));
-	double c = pow(x1 - pos[0], 2) + pow(y1 - pos[1], 2) + 
-		   pow(z1 - pos[2], 2) - pow(radius, 2);
+	double a = pow(ang[0], 2) + 
+		   pow(ang[1], 2) +
+		   pow(ang[2], 2);
+	double b = 2*(ang[0]*(pos[0]-x1) +
+	              ang[1]*(pos[1]-y1) +
+		      ang[2]*(pos[2]-z1));
+	double c = pow(pos[0]-x1,2) + 
+		   pow(pos[1]-y1,2) + 
+		   pow(pos[2]-z1,2) - 
+		   pow(radius,2);
 
 	if((pow(b, 2) - 4*a*c) < 0) { return std::numeric_limits<int>::max(); } // No intersection
 
@@ -111,42 +112,12 @@ public:
 	double t_a = (-b + sqrt(pow(b, 2) - 4*a*c)) / (2*a);
 	double t_b = (-b - sqrt(pow(b, 2) - 4*a*c)) / (2*a);	
 
-	double pt_a[3] = { (prev_pos[0] - pos[0])*t_a + pos[0], 
-			   (prev_pos[1] - pos[1])*t_a + pos[1],
-			   (prev_pos[2] - pos[2])*t_a + pos[2] };
-	double pt_b[3] = { (prev_pos[0] - pos[0])*t_b + pos[0], 
-			   (prev_pos[1] - pos[1])*t_b + pos[1],
-			   (prev_pos[2] - pos[2])*t_b + pos[2] };
-	
-	// Return the point that is along the phtn trajectory
-	double dist_a = sqrt(pow((pos[0]+ang[0]*radius)-pt_a[0],2) +
-			     pow((pos[1]+ang[1]*radius)-pt_a[1],2) + 
-			     pow((pos[2]+ang[2]*radius)-pt_a[2],2));
-	double dist_b = sqrt(pow((pos[0]+ang[0]*radius)-pt_b[0],2) +
-			     pow((pos[1]+ang[1]*radius)-pt_b[1],2) + 
-			     pow((pos[2]+ang[2]*radius)-pt_b[2],2));
+	double max_t = max(t_a, t_b);
+	double min_t = min(t_a, t_b);	
 
-	// If the photon is inside the tally, return the closest point along its path
-	if(is_inside_tally(phtn)) {
-	    if(dist_a < dist_b)
-	        return sqrt(pow(pos[0] - pt_a[0],2) + 
-	  	            pow(pos[1] - pt_a[1],2) + 
-			    pow(pos[2] - pt_a[2],2));
-	    else
-	        return sqrt(pow(pos[0] - pt_b[0],2) + 
-		            pow(pos[1] - pt_b[1],2) + 
-			    pow(pos[2] - pt_b[2],2));
-	}
-	// If outside the tally, return the distance to the far point 
-	else {
-	    return max(sqrt(pow(pos[0] - pt_a[0],2) + 
-	  	            pow(pos[1] - pt_a[1],2) + 
-			    pow(pos[2] - pt_a[2],2)), 
-	               sqrt(pow(pos[0] - pt_b[0],2) + 
-		            pow(pos[1] - pt_b[1],2) + 
-			    pow(pos[2] - pt_b[2],2)));
-
-	}
+	if(max_t < 0) { return std::numeric_limits<int>::max(); }
+         
+ 	return max_t;	
     }
 
     // Variables regarding the motion filter settings

@@ -217,6 +217,7 @@ std::vector<Photon> response_transport(Source &source, const Mesh &mesh,
     phtn = source.get_photon(rng, dt);
     n_local_sourced++;
 
+    
     sourced_E += phtn.get_E();
 
     event = resp_transport_photon(phtn, mesh, rng, next_dt, exit_E,
@@ -232,10 +233,14 @@ std::vector<Photon> response_transport(Source &source, const Mesh &mesh,
       break;
     case CENSUS:
       census_list.push_back(phtn);
+
+      sourced_E -= phtn.get_E();
+
       break;
     }
 	
   } // end while
+
 
   // record time of transport work for this rank
   t_transport.stop_timer("timestep transport");
