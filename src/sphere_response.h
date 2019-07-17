@@ -37,7 +37,8 @@ public:
 
     // Constructor: store the info about the mesh and tally
     Sphere_Response(Tally*& tally, const Mesh& mesh, IMC_State &imc_state) : tally(tally),
-					     mesh(mesh), imc_state(imc_state) {}   
+					     mesh(mesh), imc_state(imc_state), 
+					     current_phtn_pos(0) {}   
 
     ~Sphere_Response() {}
 
@@ -65,7 +66,9 @@ public:
 	Cell cell;
 	    
 	for(int k = 0; k < n_particles; k++) {
-	    phtn = photon_deck[(int)(rng->generate_random_number() * photon_deck_size)];
+	    phtn = photon_deck[current_phtn_pos];
+	    current_phtn_pos = (current_phtn_pos + 1) % photon_deck_size;
+		
 	    total_phtn_dist = 0;
 	    total_phtn_sigma_dist = 0;
 		
@@ -305,7 +308,8 @@ private:
     double* cell_total_sigma_dist;
     double*  cell_total_dist;
 
-    int photon_deck_size = 1000000;
+    uint32_t photon_deck_size = 1000000;
+    uint32_t current_phtn_pos;
     Photon* photon_deck;
 };
 #endif
