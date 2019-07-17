@@ -126,15 +126,27 @@ public:
 			     pow((pos[1]+ang[1]*radius)-pt_b[1],2) + 
 			     pow((pos[2]+ang[2]*radius)-pt_b[2],2));
 
-	if(dist_a < dist_b) {
-	    return sqrt(pow(pos[0] - pt_a[0],2) + 
-		        pow(pos[1] - pt_a[1],2) + 
-			pow(pos[2] - pt_a[2],2));
-	} else {
-	    return sqrt(pow(pos[0] - pt_b[0],2) + 
-		        pow(pos[1] - pt_b[1],2) + 
-			pow(pos[2] - pt_b[2],2));
-	}	
+	// If the photon is inside the tally, return the closest point along its path
+	if(is_inside_tally(phtn)) {
+	    if(dist_a < dist_b)
+	        return sqrt(pow(pos[0] - pt_a[0],2) + 
+	  	            pow(pos[1] - pt_a[1],2) + 
+			    pow(pos[2] - pt_a[2],2));
+	    else
+	        return sqrt(pow(pos[0] - pt_b[0],2) + 
+		            pow(pos[1] - pt_b[1],2) + 
+			    pow(pos[2] - pt_b[2],2));
+	}
+	// If outside the tally, return the distance to the far point 
+	else {
+	    return max(sqrt(pow(pos[0] - pt_a[0],2) + 
+	  	            pow(pos[1] - pt_a[1],2) + 
+			    pow(pos[2] - pt_a[2],2)), 
+	               sqrt(pow(pos[0] - pt_b[0],2) + 
+		            pow(pos[1] - pt_b[1],2) + 
+			    pow(pos[2] - pt_b[2],2)));
+
+	}
     }
 
     // Variables regarding the motion filter settings
