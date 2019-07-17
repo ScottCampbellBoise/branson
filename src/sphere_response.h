@@ -21,6 +21,7 @@
 #include "mesh.h"
 #include "photon.h"
 #include "tally.h"
+#include "response_exception.h"
 
 using namespace std::chrono;
 
@@ -36,8 +37,8 @@ class Sphere_Response {
 public:
 
     // Constructor: store the info about the mesh and tally
-    Sphere_Response(Tally*& tally, const Mesh& mesh, IMC_State &imc_state) : tally(tally),
-					     mesh(mesh), imc_state(imc_state) {}   
+    Sphere_Response(Tally*& tally, const Mesh& mesh, IMC_State &imc_state, uint32_t n_particles) 
+		     : tally(tally), mesh(mesh), imc_state(imc_state), n_particles(n_particles) {}   
 
     ~Sphere_Response() {}
 
@@ -45,9 +46,8 @@ public:
     // track the photons outward,
     //     each cell the photon passes through, update the dist and sigma_dist
     //     if the particle reaches a barrier - kill it
-    void generate_response(int n_particles) {
-
-	if(!response_set) {
+    void generate_response() {	
+        if(!response_set) {
 	    setup_response();
 	    response_set = true;
 	}
@@ -76,14 +76,31 @@ public:
 	response_generated = true;
     }
 
-    double get_response(uint32_t cell_id) {
-	double resp = cell_total_sigma_dist[cell_id] / cell_total_dist[cell_id];
-	if(resp <= 0 || isnan(resp))
-	    return std::numeric_limits<int>::max();
-	return resp; 
+    void increase_response() {
+	for(int k = 0; k < n_particles*10 - n_particles; k++) {
+	    Photon phtn = photon_deck[(int)(rng->generate_random_number() * photon_deck_size)];
+	    Photon cpy_phtn;
+
+	    // Set the copy photon values
+            cpy_phtn.set_total_dist(0.0);
+ 	    cpy_phtn.set_total_sigma_dist(0.0);
+            cpy_phtn.set_position(phtn.get_position());
+            cpy_phtn.set_angle(phtn.get_angle());
+            cpy_phtn.set_cell(phtn.get_cell());
+            cpy_phtn.set_group(phtn.get_group());
+
+	    // Move the photon through the mesh
+	    move_photon(cpy_phtn); 
+	}
+	n_particles *= 10;
     }
 
-    void reset_response() { response_set = false; }
+    double get_response(uint32_t cell_id) throw(Response_Exception) {
+	double resp = cell_total_sigma_dist[cell_id] / cell_total_dist[cell_id];
+	if(resp <= 0 || isnan(resp))
+	    throw Response_Exception("Response value not set for the cell!");
+	return resp; 
+    }
 
     void create_photon(Photon& phtn) {
         // Create a photon on the tally surface	
@@ -198,10 +215,6 @@ private:
   	while (active) {
             sigma_a = cell.get_op_a(phtn.get_group());
 
-/*	   if(!tally->is_inside_tally(phtn)) {
-		active = false;
-	    }      
-*/
 	    // get distance to event
             dist_to_event = cell.get_distance_to_boundary(
                 phtn.get_position(), phtn.get_angle(), surface_cross);
@@ -266,6 +279,8 @@ private:
 
     bool response_set = false;
     bool response_generated = false;
+
+    uint32_t n_particles = 1000;
 
     const Mesh& mesh;
     Tally*& tally;
