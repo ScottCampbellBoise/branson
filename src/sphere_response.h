@@ -36,8 +36,8 @@ class Sphere_Response {
 public:
 
     // Constructor: store the info about the mesh and tally
-    Sphere_Response(Tally*& tally, const Mesh& mesh, IMC_State &imc_state) : tally(tally),
-					     mesh(mesh), imc_state(imc_state) {}   
+    Sphere_Response(Tally*& tally, const Mesh& mesh, IMC_State &imc_state, uint32_t n_particles) : tally(tally),
+					     mesh(mesh), imc_state(imc_state), n_particles(n_particles) {}   
 
     ~Sphere_Response() {}
 
@@ -45,7 +45,7 @@ public:
     // track the photons outward,
     //     each cell the photon passes through, update the dist and sigma_dist
     //     if the particle reaches a barrier - kill it
-    void generate_response(int n_particles) {
+    void generate_response() {
 
 	if(!response_set) {
 	    setup_response();
@@ -73,6 +73,26 @@ public:
 	    move_photon(cpy_phtn); 
 	}
 
+	response_generated = true;
+    }
+
+    void increase_response() {
+	for(int k = 0; k < n_particles*10 - n_particles; k++) {
+	    Photon phtn = photon_deck[(int)(rng->generate_random_number() * photon_deck_size)];
+	    Photon cpy_phtn;
+
+	    // Set the copy photon values
+            cpy_phtn.set_total_dist(0.0);
+ 	    cpy_phtn.set_total_sigma_dist(0.0);
+            cpy_phtn.set_position(phtn.get_position());
+            cpy_phtn.set_angle(phtn.get_angle());
+            cpy_phtn.set_cell(phtn.get_cell());
+            cpy_phtn.set_group(phtn.get_group());
+
+	    // Move the photon through the mesh
+	    move_photon(cpy_phtn); 
+	}
+	n_particles *= 10;
 	response_generated = true;
     }
 
@@ -263,6 +283,8 @@ private:
     //-------------------------------------------
     // Variables
     //-------------------------------------------
+
+    uint32_t n_particles;
 
     bool response_set = false;
     bool response_generated = false;
