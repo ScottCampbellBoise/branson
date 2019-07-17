@@ -169,13 +169,16 @@ public:
       m_angle[2] = -m_angle[2];
   }
 
-  inline void set_resp_inter_cells(double* cell_ids) { resp_inter_cells = cell_ids; }
-  inline void set_resp_inter_cell_dist(double* dists) { resp_inter_cell_dist = dists; }
-  inline void set_n_resp_cells(uint32_t n_cells) { n_resp_cells = n_cells; }
-  inline double get_resp_cell_id(uint32_t pos) { return resp_inter_cells[pos]; }
-  inline double get_resp_cell_dist(uint32_t pos) { return resp_inter_cell_dist[pos]; }
-  inline int get_n_resp_cells() { return n_resp_cells; }
-  
+
+  inline void set_total_sigma_dist(double val) { total_sigma_dist = val; }
+  inline void set_total_dist(double val) { total_dist = val; }
+  inline void add_to_total_dist(double dist, double sigma) {
+    total_dist += dist;
+    total_sigma_dist += dist * sigma;
+  }
+  inline double get_total_dist() { return total_dist; }
+  inline double get_total_sigma_dist() { return total_sigma_dist; }
+
   //--------------------------------------------------------------------------//
   // member data                                                              //
   //--------------------------------------------------------------------------//
@@ -189,11 +192,10 @@ private:
   double m_E;         //!< current photon energy
   double m_E0;        //!< photon energy at creation
   double m_life_dx;   //!< Distance remaining this time step
-  
-  double* resp_inter_cells;
-  double* resp_inter_cell_dist;
-  uint32_t n_resp_cells;
-  
+
+  double total_sigma_dist;
+  double total_dist;
+
   // private member functions
 private:
 };
