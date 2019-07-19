@@ -20,7 +20,7 @@ void comb_photons(std::vector<Photon> &census_photons,
   std::unordered_map<uint32_t, double> cell_census_E;
   std::unordered_map<uint32_t, double> cell_corrected_E;
 
-  // only comb if the photon population is too large
+  // only comb if the photon population is too large, 10%
   uint64_t n_global_census = census_photons.size();
   MPI_Allreduce(MPI_IN_PLACE, &n_global_census, 1, MPI_UNSIGNED_LONG, MPI_SUM,
                 MPI_COMM_WORLD);
