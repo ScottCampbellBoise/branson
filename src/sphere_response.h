@@ -21,6 +21,7 @@
 #include "mesh.h"
 #include "photon.h"
 #include "tally.h"
+#include "response_exception.h"
 
 using namespace std::chrono;
 
@@ -81,7 +82,7 @@ public:
 	double pos[3];
         uint32_t cell_id;
 
-	for(int k = 0; k < n_particles; k++) {
+	for(int k = 0; k < n_particles*5; k++) {
 	    index = (uint32_t)(rng->generate_random_number() * n_particles);
 	    pos[0] = start_x[index];
 	    pos[1] = start_y[index];
@@ -98,10 +99,10 @@ public:
 	response_generated = true;
     }
  
-    double get_response(uint32_t cell_id) {
+    double get_response(uint32_t cell_id) throw(Response_Exception){
 	double resp = cell_total_sigma_dist[cell_id] / cell_total_dist[cell_id];
 	if(resp <= 0 || isnan(resp))
-	    return std::numeric_limits<int>::max();
+	    throw Response_Exception();
 	return resp; 
     }
 

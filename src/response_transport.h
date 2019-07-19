@@ -37,8 +37,6 @@ void add_tally_contribution(Photon& phtn, Tally*& tally,
       }
       //cout << "\t\t\t\tEnergy: " << phtn.get_E() << "\tContr: " << tally_contr << endl;
   } catch(Response_Exception& e) {
-      cout << "\tERROR: " << e.what() << endl;
-      cout << "\t  Increasing response calculation size..." << endl;
       resp->increase_response();
       add_tally_contribution(phtn, tally, resp, cell_id, next_dt);
   }
