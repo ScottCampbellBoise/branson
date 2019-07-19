@@ -194,7 +194,7 @@ public:
 
   //! Calculate new physical properties and emission energy for each cell on
   // the mesh
-  void calculate_photon_energy(IMC_State &imc_state) {
+  void calculate_photon_energy(IMC_State &imc_state){
     using Constants::a;
     using Constants::c;
     total_photon_E = 0.0;
@@ -385,5 +385,4 @@ private:
 
 #endif // mesh_h_
 //---------------------------------------------------------------------------//
-// end of mesh.h
-//---------------------------------------------------------------------------//
+// end of mesh_h_

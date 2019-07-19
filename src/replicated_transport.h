@@ -64,6 +64,7 @@ Constants::event_type transport_photon(Photon &phtn, const Mesh &mesh, RNG *rng,
 
   // transport this photon
   while (active) {
+    
     group = phtn.get_group();
     sigma_a = cell.get_op_a(group);
     sigma_s = cell.get_op_s(group);

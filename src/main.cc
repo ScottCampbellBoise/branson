@@ -82,6 +82,12 @@ int main(int argc, char **argv) {
     Mesh mesh(input, mpi_types, mpi_info, imc_p);
     mesh.initialize_physical_properties(input);
 
+
+    // UPDATE TO BE IN AN XML FILE IN THE FUTURE ...
+    // Tally Object
+    Tally* tally = new Tally(1,1,1,1,mesh);	
+
+
     timers.stop_timer("Total setup");
 
     MPI_Barrier(MPI_COMM_WORLD);
@@ -93,7 +99,7 @@ int main(int argc, char **argv) {
 
     timers.start_timer("Total transport");
 
-    imc_replicated_driver(mesh, imc_state, imc_p, mpi_types, mpi_info);
+    imc_replicated_driver(mesh, imc_state, imc_p, mpi_types, mpi_info, tally);
 
     timers.stop_timer("Total transport");
 
