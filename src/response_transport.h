@@ -178,7 +178,9 @@ std::vector<Photon> response_transport(Source &source, const Mesh &mesh,
                                          IMC_State &imc_state,
                                          std::vector<double> &rank_abs_E,
                                          std::vector<double> &rank_track_E,
-					 Tally* tally, Sphere_Response* resp, double& sourced_E) {
+					 const uint64_t max_census_photons,
+					 Tally* tally, Sphere_Response* resp,
+				         double& sourced_E) {
   using Constants::CENSUS;
   using Constants::event_type;
   using Constants::EXIT;
@@ -240,6 +242,8 @@ std::vector<Photon> response_transport(Source &source, const Mesh &mesh,
   } // end while
 
   sourced_E += imc_state.get_emission_E();
+
+  comb_photons(census_list, max_census_photons, rng);
 
   // record time of transport work for this rank
   t_transport.stop_timer("timestep transport");
