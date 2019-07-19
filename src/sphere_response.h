@@ -189,25 +189,19 @@ private:
 	// Set the random number generator
 	rng = new RNG();
 
-        int cur_pos = 0;
-
 	// Find all cells that the tally intersects
  	n_cell = mesh.get_n_local_cells();
-	Cell temp_tally_cells[n_cell]; 
+	tally_cells.resize(n_cell);
+        uint32_t cur_pos = 0;
 
 	for(uint32_t k = 0; k < n_cell; ++k) {
 	    Cell cell = mesh.get_cell(k);
 	    if(tally_intersects_cell(cell)) {
-		temp_tally_cells[cur_pos++] = cell;
+		tally_cells[cur_pos++] = cell.get_ID();
 	    }
 	}
 
-	tally_cells = new Cell[cur_pos];
-	for(int k = 0; k < cur_pos; k++) {
-	    tally_cells[k] = temp_tally_cells[k];
-	}	
-
-	n_tally_cells = cur_pos + 1;
+	tally_cells.shrink_to_fit();
 
 	//Create a 'deck' of photons to use for the sampling
 	start_x.resize(n_particles);
@@ -269,16 +263,16 @@ private:
     // Check if a point is inside one of the cells
     // that the tally surface is in
     uint32_t get_photons_cell(double x, double y, double z) {
-	for(int k = 0; k < n_tally_cells; k++) {
-	    Cell cell = tally_cells[k];
+	for(auto k = tally_cells.begin(); k != tally_cells.end(); k++) {
+	    Cell cell = mesh.get_cell(*k);
 	    const double* cell_dim = cell.get_node_array();
 	    if(x >= cell_dim[0] && x <= cell_dim[1] &&
 	       y >= cell_dim[1] && y <= cell_dim[2] &&
 	       z >= cell_dim[3] && z <= cell_dim[5]) {
-		return tally_cells[k].get_ID();
+		return *k;
 	    } 
 	}
-	return tally_cells[0].get_ID();
+	return tally_cells[0];
     }
 
     // Check if the tally surface intersects the cell
@@ -304,31 +298,26 @@ private:
     // Variables
     //-------------------------------------------
 
-    uint32_t n_particles;
-
-    bool response_set = false;
-    bool response_generated = false;
-
     const Mesh& mesh;
     Tally*& tally;
     IMC_State &imc_state;
-
-    Cell* tally_cells;
-    int n_tally_cells;
-    uint32_t n_cell;
-
     RNG* rng;
-
+    
+    uint32_t n_particles;
+    uint32_t n_cell;
     double tally_r, tally_x, tally_y, tally_z;
+    
+    bool response_set = false;
+    bool response_generated = false;
+
+    vector<uint32_t> tally_cells;
 
     vector<double> cell_total_sigma_dist;
     vector<double> cell_total_dist;
-
 
     vector<double> start_x;
     vector<double> start_y;
     vector<double> start_z;
     vector<uint32_t> start_cell_id;
-
 };
 #endif
