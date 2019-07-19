@@ -52,50 +52,52 @@ public:
 	    response_set = true;
 	}
 
-	for(uint32_t k = 0; k < n_cell; k++) {
-	    cell_total_sigma_dist[k] = 0;
-            cell_total_dist[k] = 0;
-	}
+	cell_total_sigma_dist.assign(n_cell, 0.0);
+        cell_total_dist.assign(n_cell, 0.0);
+
+        uint32_t index;
+	double pos[3];
+        uint32_t cell_id;
 
 	for(int k = 0; k < n_particles; k++) {
-	    Photon phtn = photon_deck[(int)(rng->generate_random_number() * photon_deck_size)];
-	    Photon cpy_phtn;
-
-	    // Set the copy photon values
-            cpy_phtn.set_total_dist(0.0);
- 	    cpy_phtn.set_total_sigma_dist(0.0);
-            cpy_phtn.set_position(phtn.get_position());
-            cpy_phtn.set_angle(phtn.get_angle());
-            cpy_phtn.set_cell(phtn.get_cell());
-            cpy_phtn.set_group(phtn.get_group());
+	    index = (uint32_t)(rng->generate_random_number() * n_particles);
+	    pos[0] = start_x[index];
+	    pos[1] = start_y[index];
+	    pos[2] = start_z[index];	
+	    cell_id = start_cell_id[index];    
+	    
+	    Photon phtn;
+	    create_photon(phtn, pos, cell_id);
 
 	    // Move the photon through the mesh
-	    move_photon(cpy_phtn); 
+	    move_photon(phtn); 
 	}
 
 	response_generated = true;
     }
 
     void increase_response() {
-	for(int k = 0; k < n_particles*10 - n_particles; k++) {
-	    Photon phtn = photon_deck[(int)(rng->generate_random_number() * photon_deck_size)];
-	    Photon cpy_phtn;
+        uint32_t index;
+	double pos[3];
+        uint32_t cell_id;
 
-	    // Set the copy photon values
-            cpy_phtn.set_total_dist(0.0);
- 	    cpy_phtn.set_total_sigma_dist(0.0);
-            cpy_phtn.set_position(phtn.get_position());
-            cpy_phtn.set_angle(phtn.get_angle());
-            cpy_phtn.set_cell(phtn.get_cell());
-            cpy_phtn.set_group(phtn.get_group());
+	for(int k = 0; k < n_particles; k++) {
+	    index = (uint32_t)(rng->generate_random_number() * n_particles);
+	    pos[0] = start_x[index];
+	    pos[1] = start_y[index];
+	    pos[2] = start_z[index];	
+	    cell_id = start_cell_id[index];    
+	    
+	    Photon phtn;
+	    create_photon(phtn, pos, cell_id);
 
 	    // Move the photon through the mesh
-	    move_photon(cpy_phtn); 
+	    move_photon(phtn); 
 	}
-	n_particles *= 10;
+
 	response_generated = true;
     }
-
+ 
     double get_response(uint32_t cell_id) {
 	double resp = cell_total_sigma_dist[cell_id] / cell_total_dist[cell_id];
 	if(resp <= 0 || isnan(resp))
@@ -105,14 +107,22 @@ public:
 
     void reset_response() { response_set = false; }
 
-    void create_photon(Photon& phtn) {
-        // Create a photon on the tally surface	
-        double phi = 2 * Constants::pi * rng->generate_random_number();
+    void create_photon(Photon& phtn, double* pos, uint32_t cell_id) {
+	double* angle = get_uniform_angle(pos);
+
+        // Set photon values
+        phtn.set_total_dist(0.0);
+	phtn.set_total_sigma_dist(0.0);
+        phtn.set_position(pos);
+        phtn.set_angle(angle);
+        phtn.set_cell(cell_id);
+        phtn.set_group(floor(rng->generate_random_number() * double(BRANSON_N_GROUPS)));
+    }
+
+    double* get_uniform_angle(double* pos) {
+	double phi = 2 * Constants::pi * rng->generate_random_number();
         double mu = 1 - 2 * rng->generate_random_number();
         double theta = acos(mu);
-        double pos[3] = {tally_x + tally_r*(cos(phi)*sqrt((1-pow(mu,2)))),
-       	     	         tally_y + tally_r*(sin(phi)*sqrt(1-pow(mu,2))),
-        		 tally_z + tally_r*mu};
 
         // Cosine-distribution for angle
         double mu_r = sqrt(rng->generate_random_number());
@@ -125,7 +135,10 @@ public:
         double mu_y = sin(theta)*sin(phi)*mu_r + cos(theta)*sin(phi)*mu_theta
         	      + cos(phi)*mu_phi;
         double mu_z = cos(theta)*mu_r - sin(theta)*mu_theta;
-        double angle[3] = {mu_x, mu_y, mu_z};
+        double* angle = new double[3];
+        angle[0] = mu_x;
+	angle[1] = mu_y;
+	angle[2] = mu_z;
 
 	// Direct the photon into the tally       
 	double temp[3] = {pos[0] + angle[0] * tally_r,
@@ -137,15 +150,21 @@ public:
 	    angle[0] *= -1;
 	    angle[1] *= -1;
 	    angle[2] *= -1;
-	} 
+	}
 
-        // Set photon values
-        phtn.set_total_dist(0.0);
-	phtn.set_total_sigma_dist(0.0);
-        phtn.set_position(pos);
-        phtn.set_angle(angle);
-        phtn.set_cell(get_photons_cell(pos[0],pos[1],pos[2]));
-        phtn.set_group(floor(rng->generate_random_number() * double(BRANSON_N_GROUPS)));
+	return angle;
+    }
+
+    double* get_start_pos() {
+        double phi = 2 * Constants::pi * rng->generate_random_number();
+        double mu = 1 - 2 * rng->generate_random_number();
+        double theta = acos(mu);
+        double* pos = new double[3];
+	pos[0] = tally_x + tally_r*(cos(phi)*sqrt((1-pow(mu,2))));
+	pos[1] = tally_y + tally_r*(sin(phi)*sqrt(1-pow(mu,2)));
+        pos[2] = tally_z + tally_r*mu;
+
+	return pos;
     }
 
     void print_response() {
@@ -191,16 +210,22 @@ private:
 	n_tally_cells = cur_pos + 1;
 
 	//Create a 'deck' of photons to use for the sampling
-	photon_deck = new Photon[photon_deck_size];
-	for(int k = 0; k < photon_deck_size; k++) {
-	    Photon phtn;
-	    create_photon(phtn);
-	    photon_deck[k] = phtn;
+	start_x.resize(n_particles);
+	start_y.resize(n_particles);
+ 	start_z.resize(n_particles);
+	start_cell_id.resize(n_particles);
+
+	for(uint32_t k = 0; k < n_particles; k++) {
+	    double* pos = get_start_pos();
+	    start_x[k] = pos[0];
+	    start_y[k] = pos[1];
+	    start_z[k] = pos[2];
+	    start_cell_id[k] = get_photons_cell(pos[0], pos[1], pos[2]);
 	}
 
 	//Generate the variables to hold the resp info
-	cell_total_sigma_dist = new double[n_cell];
-        cell_total_dist = new double[n_cell];	
+	cell_total_sigma_dist.resize(n_cell);
+        cell_total_dist.resize(n_cell);	
     }
 
     void move_photon(Photon &phtn) {
@@ -218,10 +243,6 @@ private:
   	while (active) {
             sigma_a = cell.get_op_a(phtn.get_group());
 
-/*	   if(!tally->is_inside_tally(phtn)) {
-		active = false;
-	    }      
-*/
 	    // get distance to event
             dist_to_event = cell.get_distance_to_boundary(
                 phtn.get_position(), phtn.get_angle(), surface_cross);
@@ -262,22 +283,21 @@ private:
 
     // Check if the tally surface intersects the cell
     bool tally_intersects_cell(Cell& cell) {
-	const double* cell_dim = cell.get_node_array();
-        double dist_squared = pow(tally_r,2);
-	
-	if(tally_x < cell_dim[0])
-	    dist_squared -= pow(tally_x - cell_dim[0], 2);
-	else if(tally_x > cell_dim[1]) 
-	    dist_squared -= pow(tally_x - cell_dim[1], 2);
-	if(tally_y < cell_dim[2])
-	    dist_squared -= pow(tally_y - cell_dim[2], 2);
-	else if(tally_y > cell_dim[3]) 
-	    dist_squared -= pow(tally_y - cell_dim[3], 2);
-	if(tally_z < cell_dim[4])
-	    dist_squared -= pow(tally_z - cell_dim[4], 2);
-	else if(tally_z > cell_dim[5]) 
-	    dist_squared -= pow(tally_z - cell_dim[5], 2);
-	return dist_squared > 0;
+	const double* pos = cell.get_node_array();
+   	// get the distance from all six points to the center
+   	double dist1 = sqrt(pow(pos[0]-tally_x,2)+pow(pos[2]-tally_y,2)+pow(pos[4]-tally_z,2));	
+   	double dist2 = sqrt(pow(pos[1]-tally_x,2)+pow(pos[2]-tally_y,2)+pow(pos[4]-tally_z,2));	
+   	double dist3 = sqrt(pow(pos[1]-tally_x,2)+pow(pos[3]-tally_y,2)+pow(pos[4]-tally_z,2));	
+   	double dist4 = sqrt(pow(pos[0]-tally_x,2)+pow(pos[3]-tally_y,2)+pow(pos[4]-tally_z,2));	
+   	double dist5 = sqrt(pow(pos[0]-tally_x,2)+pow(pos[2]-tally_y,2)+pow(pos[5]-tally_z,2));	
+   	double dist6 = sqrt(pow(pos[1]-tally_x,2)+pow(pos[2]-tally_y,2)+pow(pos[5]-tally_z,2));	
+   	double dist7 = sqrt(pow(pos[0]-tally_x,2)+pow(pos[3]-tally_y,2)+pow(pos[5]-tally_z,2));	
+   	double dist8 = sqrt(pow(pos[1]-tally_x,2)+pow(pos[3]-tally_y,2)+pow(pos[5]-tally_z,2));	
+
+	return !((dist1 > tally_r && dist2 > tally_r && dist3 > tally_r && dist4 > tally_r &&
+	     dist5 > tally_r && dist6 > tally_r && dist7 > tally_r && dist8 > tally_r) ||
+            (dist1 < tally_r && dist2 < tally_r && dist3 < tally_r && dist4 < tally_r &&
+	     dist5 < tally_r && dist6 < tally_r && dist7 < tally_r && dist8 < tally_r));
     }
 
     //-------------------------------------------
@@ -301,10 +321,14 @@ private:
 
     double tally_r, tally_x, tally_y, tally_z;
 
-    double* cell_total_sigma_dist;
-    double*  cell_total_dist;
+    vector<double> cell_total_sigma_dist;
+    vector<double> cell_total_dist;
 
-    int photon_deck_size = 1000000;
-    Photon* photon_deck;
+
+    vector<double> start_x;
+    vector<double> start_y;
+    vector<double> start_z;
+    vector<uint32_t> start_cell_id;
+
 };
 #endif
