@@ -22,8 +22,8 @@ public:
     
     Tally(double radius, double x1, double y1, double z1, Mesh& mesh) : 
 	  radius(radius), x1(x1), y1(y1), z1(z1), mesh(mesh), 
-	  n_hits(0), total_regular_E(0), total_response_E(0), 
-	  filter_state(NEGATIVE_ONLY_FILTER) {}
+	  total_regular_E(0), total_response_E(0), n_response_hits(0), 
+	  n_regular_hits(0), filter_state(NEGATIVE_ONLY_FILTER) {}
     
     ~Tally() {}
 
@@ -31,7 +31,16 @@ public:
     inline double get_response_E() { return total_response_E; }
     inline void reset_regular_E() { total_regular_E = 0; }
     inline void reset_response_E() { total_response_E = 0; }
-    
+    inline void add_response_weight(double weight) { total_response_E += weight; }
+    inline void add_regular_weight(double weight) { total_regular_E += weight; }
+	  
+    inline uint32_t get_regular_hits() { return n_regular_hits; }
+    inline uint32_t get_response_hits() { return n_response_hits; }
+    inline void reset_regular_hits() { n_regular_hits = 0; }
+    inline void reset_response_hits() { n_response_hits = 0; }  
+    inline void add_regular_hit() { n_regular_hits++; }
+    inline void add_response_hit() { n_response_hits++; } 
+
     inline double get_x1() { return x1; }
     inline double get_y1() { return y1; }
     inline double get_z1() { return z1; }
@@ -51,14 +60,7 @@ public:
 	return true;
     }
 
-    inline void add_response_weight(double weight) { total_response_E += weight; }
-    inline void add_regular_weight(double weight) { total_regular_E += weight; }
-	
-    void print_tally_info(ostream& outfile, double time_step) {
-	outfile << time_step << " , " << total_regular_E << "," << total_response_E << endl;
-    }
-
-   bool hit_tally(Photon& phtn) {
+    bool hit_tally(Photon& phtn) {
 	const double* phtn_pos = phtn.get_position();
 	const double* phtn_prev_pos = phtn.get_prev_position();
 	
@@ -133,9 +135,12 @@ private:
     
     double radius, x1, y1, z1;
    
-    int n_hits;
+    int n_response_hits;
+    int n_regular_hits;
+
     double total_regular_E;
     double total_response_E;
+
     int filter_state;
 };
 
