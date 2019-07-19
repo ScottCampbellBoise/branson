@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "RNG.h"
+#include "comb_photons.h"
 #include "constants.h"
 #include "info.h"
 #include "mesh.h"
@@ -145,6 +146,7 @@ std::vector<Photon> replicated_transport(Source &source, const Mesh &mesh,
                                          IMC_State &imc_state,
                                          std::vector<double> &rank_abs_E,
                                          std::vector<double> &rank_track_E,
+					 const uint64_t max_census_photons,
 					 Tally* tally) {
   using Constants::CENSUS;
   using Constants::event_type;
@@ -204,6 +206,8 @@ std::vector<Photon> replicated_transport(Source &source, const Mesh &mesh,
     }
 	
   } // end while
+
+  comb_photons(census_list, max_census_photons, rng);
 
   // record time of transport work for this rank
   t_transport.stop_timer("timestep transport");
