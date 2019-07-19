@@ -29,7 +29,7 @@ void imc_response_driver(Mesh &mesh, IMC_State &imc_state,
   int rank = mpi_info.get_rank();
   constexpr double fake_mpi_runtime = 0.0;
 
-  uint43_t max_census_size = static_cast<uint64_t>(1.1*imc_parameters.get_n_user_photon());
+  uint64_t max_census_size = static_cast<uint64_t>(1.1*imc_parameters.get_n_user_photon());
 
   if (imc_parameters.get_write_silo_flag()) {
     // write SILO file
