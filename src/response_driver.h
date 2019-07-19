@@ -37,7 +37,11 @@ void imc_response_driver(Mesh &mesh, IMC_State &imc_state,
                mpi_info.get_n_rank());
   }
 
-  double sourced_E = 0.0;
+  double sourced_E = imc_state.get_pre_census_E();
+
+  // Create an object to hold the sphere response class
+  Sphere_Response* resp = new Sphere_Response(tally, mesh, imc_state, n_resp_particles);
+
   while (!imc_state.finished()) {
     if (rank == 0)
       imc_state.print_timestep_header();
@@ -63,7 +67,6 @@ void imc_response_driver(Mesh &mesh, IMC_State &imc_state,
     imc_state.set_transported_particles(source.get_n_photon());
 
     // transport photons, return the particles that reached census
-    Sphere_Response* resp = new Sphere_Response(tally, mesh, imc_state, n_resp_particles);
     census_photons = response_transport(source, mesh, imc_state, abs_E, track_E, tally, resp, sourced_E);
 
 
@@ -83,6 +86,16 @@ void imc_response_driver(Mesh &mesh, IMC_State &imc_state,
     }
 
     imc_state.print_conservation();
+    //Print out tally information
+    cout << "Regular Tally Info: " << endl;
+    cout << "\tTotal Flux: \t\t" << tally->get_regular_E() << endl;
+    cout << "\t# of crossings: \t" << tally->get_regular_hits() << endl;
+    cout << "Response Tally Info: " << endl;
+    cout << "\tTotal Flux: \t\t" << tally->get_response_E() << endl;
+    cout << "\t# of crossings: \t" << tally->get_response_hits() << endl;
+
+    tally->reset_regular_hits();
+    tally->reset_response_hits();
 
     if (imc_parameters.get_write_silo_flag() &&
         !(imc_state.get_step() % imc_parameters.get_output_frequency())) {
@@ -96,7 +109,7 @@ void imc_response_driver(Mesh &mesh, IMC_State &imc_state,
     imc_state.next_time_step();
   }
  
-  cout << "\n\tSOURCED ENERGY: \t\t" << sourced_E << endl;
+  cout << "\n\tSourced Energy: \t\t" << sourced_E << endl;
 
 }
 

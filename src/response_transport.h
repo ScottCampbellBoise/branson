@@ -21,24 +21,26 @@
 #include "response_exception.h"
 
 void add_tally_contribution(Photon& phtn, Tally*& tally, 
-			    Sphere_Response*& resp, uint32_t cell_id ) {
+			    Sphere_Response*& resp, uint32_t cell_id, double next_dt ) {
+  using Constants::c;
+
   try {
       // Get the distance of the photon from the tally surface
       double dist_to_tally = tally->get_dist_to_tally(phtn);
       double cell_response = resp->get_response(cell_id);
       // calculate the contribution to the tally 
       double tally_contr = phtn.get_E() * 
-          exp(-(cell_response + 1 / phtn.get_distance_remaining()) * dist_to_tally);   
+          exp(-(cell_response + 1 / (c * next_dt)) * dist_to_tally);   
       // Add the contribution to the tally
       if(tally_contr > 0) {
-         tally->add_response_weight(tally_contr);	
+         tally->add_response_weight(abs(tally_contr));	
       }
       //cout << "\t\t\t\tEnergy: " << phtn.get_E() << "\tContr: " << tally_contr << endl;
   } catch(Response_Exception& e) {
       cout << "\tERROR: " << e.what() << endl;
       cout << "\t  Increasing response calculation size..." << endl;
       resp->increase_response();
-      add_tally_contribution(phtn, tally, resp, cell_id);
+      add_tally_contribution(phtn, tally, resp, cell_id, next_dt);
   }
 
 }
@@ -79,7 +81,8 @@ Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG 
   bool active = true;
 
   // Add the response tally contribution
-  add_tally_contribution(phtn, tally, resp, cell_id);
+  add_tally_contribution(phtn, tally, resp, cell_id, next_dt);
+  tally->add_response_hit();
 
   // transport this photon
   while (active) {
@@ -108,6 +111,7 @@ Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG 
         ew_factor = exp(-sigma_a * f * dist_to_tally);
         absorbed_E = phtn.get_E() * (1.0 - ew_factor);
         tally->add_regular_weight(phtn.get_E() - absorbed_E);
+        tally->add_regular_hit();
     }
     //------------------------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------
@@ -141,7 +145,8 @@ Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG 
            phtn.set_group(sample_emission_group(rng, cell));
 
 	// Add the response tally contribution
-         add_tally_contribution(phtn, tally, resp, cell_id);
+         add_tally_contribution(phtn, tally, resp, cell_id, next_dt);
+         tally->add_response_hit();
       }
       // EVENT TYPE: BOUNDARY CROSS
       else if (dist_to_event == dist_to_boundary) {
@@ -155,8 +160,9 @@ Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG 
           exit_E += phtn.get_E();
           active = false;
           event = EXIT;
-        } else
+        } else {
           phtn.reflect(surface_cross);
+	}
       }
       // EVENT TYPE: REACH CENSUS
       else if (dist_to_event == dist_to_census) {
@@ -217,9 +223,6 @@ std::vector<Photon> response_transport(Source &source, const Mesh &mesh,
     phtn = source.get_photon(rng, dt);
     n_local_sourced++;
 
-    
-    sourced_E += phtn.get_E();
-
     event = resp_transport_photon(phtn, mesh, rng, next_dt, exit_E,
                              census_E, rank_abs_E, rank_track_E, tally, resp);
 
@@ -233,14 +236,12 @@ std::vector<Photon> response_transport(Source &source, const Mesh &mesh,
       break;
     case CENSUS:
       census_list.push_back(phtn);
-
-      sourced_E -= phtn.get_E();
-
       break;
     }
 	
   } // end while
 
+  sourced_E += imc_state.get_emission_E();
 
   // record time of transport work for this rank
   t_transport.stop_timer("timestep transport");
