@@ -1,124 +1,344 @@
-#ifndef response_driver_h_
-#define response_driver_h_
+//----------------------------------*-C++-*----------------------------------//
+/*!
+ * \file   source.h
+ * \author Alex Long
+ * \date   December 2 2015
+ * \brief  Allows transport function to create particles when needed
+ * \note   Copyright (C) 2017 Los Alamos National Security, LLC.
+ *         All rights reserved
+ */
+//---------------------------------------------------------------------------//
 
-#include <functional>
+#ifndef source_h_
+#define source_h_
+
 #include <iostream>
-#include <mpi.h>
+#include <unordered_map>
 #include <vector>
 
-#include "census_creation.h"
-#include "imc_parameters.h"
+#include "constants.h"
 #include "imc_state.h"
-#include "info.h"
 #include "mesh.h"
-#include "mpi_types.h"
-#include "response_transport.h"
-#include "timer.h"
-#include "write_silo.h"
+#include "photon.h"
+#include "sampling_functions.h"
+#include "work_packet.h"
 
-#include "tally.h"
+//==============================================================================
+/*!
+ * \class Work_Local_Map
+ * \brief A class that's used as a functor in sorting local vs. non-local work
+ * packets
+ *
+ * \example no test yet
+ */
+//==============================================================================
+class Work_Local_Map {
 
-void imc_response_driver(Mesh &mesh, IMC_State &imc_state,
-                           const IMC_Parameters &imc_parameters,
-                           const MPI_Types &mpi_types, const Info &mpi_info,
-			   Tally* tally, uint32_t n_resp_particles) {
-  using std::vector;
-  vector<double> abs_E(mesh.get_global_num_cells(), 0.0);
-  vector<double> track_E(mesh.get_global_num_cells(), 0.0);
-  vector<Photon> census_photons;
-  int rank = mpi_info.get_rank();
-  constexpr double fake_mpi_runtime = 0.0;
+public:
+  //! Constructor
+  Work_Local_Map(std::unordered_map<uint32_t, bool> &_work_map)
+      : work_map(_work_map) {}
+  //! Destructor
+  ~Work_Local_Map() {}
 
-  uint64_t max_census_size = static_cast<uint64_t>(1.1*imc_parameters.get_n_user_photon());
-
-  if (imc_parameters.get_write_silo_flag()) {
-    // write SILO file
-    write_silo(mesh, imc_state.get_time(), imc_state.get_step(),
-               imc_state.get_rank_transport_runtime(), fake_mpi_runtime, rank,
-               mpi_info.get_n_rank());
+  //! Parnthesis operator for sorting work packets based on global cell ID
+  bool operator()(const Work_Packet &a, const Work_Packet &b) {
+    return work_map[a.get_global_cell_ID()] < work_map[b.get_global_cell_ID()];
   }
 
-  double sourced_E = imc_state.get_pre_census_E();
+  // member data
+  //! Map global cell ID to on processor bool
+  std::unordered_map<uint32_t, bool> &work_map;
+};
 
-  // Create an object to hold the sphere response class
-  Sphere_Response* resp = new Sphere_Response(tally, mesh, imc_state, n_resp_particles);
+//==============================================================================
+/*!
+ * \class Source
+ * \brief Describes how to create emssion particles and return census particles
+ *
+ * \example no test yet
+ */
+//==============================================================================
+class Source {
 
-  while (!imc_state.finished()) {
-    if (rank == 0)
-      imc_state.print_timestep_header();
+public:
+  //! constructor
+  Source(Mesh &_mesh, IMC_State &imc_s, const uint64_t user_photons,
+         const double total_E, std::vector<Photon> &_census_photons)
+      : mesh(_mesh), census_photons(_census_photons), iphoton(0) {
+    using std::vector;
 
-    // set opacity, Fleck factor, all energy to source
-    mesh.calculate_photon_energy(imc_state);
+    uint32_t n_cell = mesh.get_n_local_cells();
+    E_cell_emission = mesh.get_emission_E();
+    E_cell_census = mesh.get_census_E();
 
-    // all reduce to get total source energy to make correct number of
-    // particles on each rank
-    double global_source_energy = mesh.get_total_photon_E();
-    MPI_Allreduce(MPI_IN_PLACE, &global_source_energy, 1, MPI_DOUBLE, MPI_SUM,
-                  MPI_COMM_WORLD);
+    uint32_t step = imc_s.get_step();
 
-    imc_state.set_pre_census_E(get_photon_list_E(census_photons));
+    //reset the total number of photons before counting
+    n_photon = 0;
+    n_sourced = 0;
 
-    // setup source
-    Source source(mesh, imc_state, imc_parameters.get_n_user_photon(),
-                  global_source_energy, census_photons);
-    // no load balancing in particle passing method, just call the method
-    // to get accurate count and map census to work correctly
-    source.post_lb_prepare_source();
+    double total_census_E = 0.0;
 
-    imc_state.set_transported_particles(source.get_n_photon());
-
-    // transport photons, return the particles that reached census
-    census_photons = response_transport(source, mesh, imc_state, abs_E, 
-		  track_E, max_census_size, tally, resp, sourced_E);
-
-    // reduce the abs_E and the track weighted energy (for T_r)
-    MPI_Allreduce(MPI_IN_PLACE, &abs_E[0], mesh.get_global_num_cells(),
-                  MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(MPI_IN_PLACE, &track_E[0], mesh.get_global_num_cells(),
-                  MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-
-    mesh.update_temperature(abs_E, track_E, imc_state);
-
-    // for replicated let root do conservation checks, zero out your tallies
-    if (rank) {
-      imc_state.set_absorbed_E(0.0);
-      imc_state.set_pre_mat_E(0.0);
-      imc_state.set_post_mat_E(0.0);
+    //make work packets
+    // current cell pointer
+    const Cell *cell_ptr;
+    for (uint32_t i = 0; i < n_cell; ++i) {
+      Work_Packet temp_cell_work;
+      cell_ptr = mesh.get_cell_ptr(i);
+      //emission
+      if (E_cell_emission[i] > 0.0) {
+        uint32_t t_num_emission =
+            int(user_photons * E_cell_emission[i] / total_E);
+        // make at least one photon to represent emission energy
+        if (t_num_emission == 0)
+          t_num_emission = 1;
+        n_photon += t_num_emission;
+        // make work packet and add to vector
+        temp_cell_work.set_global_cell_ID(cell_ptr->get_ID());
+        temp_cell_work.set_global_grip_ID(cell_ptr->get_grip_ID());
+        temp_cell_work.attach_creation_work(E_cell_emission[i], t_num_emission);
+        temp_cell_work.set_coor(cell_ptr->get_node_array());
+        temp_cell_work.set_source_type(Constants::EMISSION);
+        work.push_back(temp_cell_work);
+      }
+      // initial census
+      if (step == 1) {
+        if (E_cell_census[i] > 0.0) {
+          Work_Packet temp_cell_work;
+          cell_ptr = mesh.get_cell_ptr(i);
+          if (E_cell_census[i] > 0.0) {
+            uint32_t t_num_census =
+                int(user_photons * E_cell_census[i] / total_E);
+            // make at least one photon to represent census energy
+            if (t_num_census == 0)
+              t_num_census = 1;
+            n_photon += t_num_census;
+            // make work packet and add to vector
+            temp_cell_work.set_global_cell_ID(cell_ptr->get_ID());
+            temp_cell_work.set_global_grip_ID(cell_ptr->get_grip_ID());
+            temp_cell_work.attach_creation_work(E_cell_census[i], t_num_census);
+            temp_cell_work.set_coor(cell_ptr->get_node_array());
+            temp_cell_work.set_source_type(Constants::INITIAL_CENSUS);
+            work.push_back(temp_cell_work);
+            // keep track of census energy for conservation check
+            total_census_E += E_cell_census[i];
+          }
+        }
+        imc_s.set_pre_census_E(total_census_E);
+      }
     }
 
-    imc_state.print_conservation();
-    //Print out tally information
-    cout << "Regular Tally Info: " << endl;
-    cout << "\tTotal Flux: \t\t" << tally->get_regular_E() << endl;
-    cout << "\t# of crossings: \t" << tally->get_regular_hits() << endl;
-    cout << "Response Tally Info: " << endl;
-    cout << "\tTotal Flux: \t\t" << tally->get_response_E() << endl;
-    cout << "\t# of crossings: \t" << tally->get_response_hits() << endl;
-
-    tally->reset_regular_E();
-    tally->reset_response_E();
-
-    tally->reset_regular_hits();
-    tally->reset_response_hits();
-
-    if (imc_parameters.get_write_silo_flag() &&
-        !(imc_state.get_step() % imc_parameters.get_output_frequency())) {
-      // write SILO file
-      write_silo(mesh, imc_state.get_time(), imc_state.get_step(),
-                 imc_state.get_rank_transport_runtime(), fake_mpi_runtime, rank,
-                 mpi_info.get_n_rank());
-    }
-
-    // update time for next step
-    imc_state.next_time_step();
+    // add local census size to n_photon
+    n_photon += census_photons.size();
   }
- 
-  cout << "\n\tSourced Energy: \t\t" << sourced_E << endl;
 
-}
+  //! destructor
+  ~Source() {}
 
-#endif // response_driver_h_
+  //! Get total photon count
+  uint64_t get_n_photon(void) const { return n_photon; }
 
-//---------------------------------------------------------------------------//
-// end of response_driver.h
-//---------------------------------------------------------------------------//
+  //! Print source census balance
+  void print_work_summary(const int &rank) const {
+    std::cout << "rank: " << rank
+              << " emission: " << n_photon - census_photons.size();
+    std::cout << " census: " << census_photons.size();
+    std::cout << " fraction census: "
+              << census_photons.size() / double(n_photon);
+    std::cout << std::endl;
+  }
+
+  //! Link work packets to census particles and get new total
+  void post_lb_prepare_source(void) {
+    using std::unordered_map;
+    using std::vector;
+
+    // recount number of photons
+    n_photon = 0;
+
+    unordered_map<uint32_t, uint32_t> work_map;
+
+    // map global cell ID to work packets to determine if census photons
+    // can be attached to a work packet
+    for (uint32_t i = 0; i < work.size(); ++i) {
+      Work_Packet &work_ref = work[i];
+      work_map[work_ref.get_global_cell_ID()] = i;
+      n_photon += work_ref.get_n_particles();
+    }
+
+    uint32_t cell_ID, grip_ID;
+    unordered_map<uint32_t, uint32_t> census_in_cell;
+    unordered_map<uint32_t, uint32_t> census_start_index;
+    unordered_map<uint32_t, uint32_t> grip_index;
+
+    if (!census_photons.empty()) {
+      uint32_t i = 0;
+      for (auto const &iphtn : census_photons) {
+        cell_ID = iphtn.get_cell();
+        grip_ID = iphtn.get_grip();
+        // at first instance of cell ID set the starting index
+        if (census_in_cell.find(cell_ID) == census_in_cell.end()) {
+          census_in_cell[cell_ID] = 1;
+          grip_index[cell_ID] = grip_ID;
+          census_start_index[cell_ID] = i;
+        } else {
+          census_in_cell[cell_ID]++;
+        }
+        i++;
+      }
+
+      uint32_t work_index;
+      // now attach census particles to work packets or make new ones
+      for (auto const &imap : census_start_index) {
+        cell_ID = imap.first;
+        grip_ID = grip_index[cell_ID];
+
+        // apppend count in this cell to the total
+        n_photon += census_in_cell[cell_ID];
+
+        // if a work packet for this cell exists, attach the census work
+        if (work_map.find(cell_ID) != work_map.end()) {
+          work_index = work_map[cell_ID];
+          work[work_index].attach_census_work(imap.second,
+                                              census_in_cell[cell_ID]);
+        }
+        // otherwise, make a new work packet
+        else {
+          Work_Packet temp_packet;
+          temp_packet.set_global_cell_ID(cell_ID);
+          temp_packet.set_global_grip_ID(grip_ID);
+          temp_packet.attach_census_work(imap.second, census_in_cell[cell_ID]);
+          // add this work to the total work vector
+          work.push_back(temp_packet);
+        }
+      }
+    } // end if !census_photons.empty()
+
+    std::unordered_map<uint32_t, bool> on_proc_map;
+    uint32_t work_cell_ID;
+    for (auto const &iw : work) {
+      work_cell_ID = iw.get_global_cell_ID();
+      on_proc_map[work_cell_ID] = mesh.on_processor(work_cell_ID);
+    }
+
+    Work_Local_Map work_local_map(on_proc_map);
+    std::sort(work.begin(), work.end(), work_local_map);
+
+    // set initial parameters and iterators
+    iwork = work.begin();
+    n_create = iwork->get_n_create();
+    phtn_E = iwork->get_photon_E();
+    n_in_packet = iwork->get_n_particles();
+    census_index = iwork->get_census_index();
+    current_source = iwork->get_source_type();
+    iphoton = 0;
+    n_work = 1;
+  }
+
+  //! Get next particle, create it if it's an emission particle
+  Photon get_photon(RNG *rng, const double &dt) {
+    Photon return_photon;
+
+    // get creation photon
+    if (iphoton < n_create) {
+      if (current_source == Constants::EMISSION)
+        get_emission_photon(return_photon, *iwork, phtn_E, dt, rng);
+      else if (current_source == Constants::INITIAL_CENSUS)
+        get_initial_census_photon(return_photon, *iwork, phtn_E, dt, rng);
+      iphoton++;
+    }
+    // get census photon
+    else {
+      return_photon = census_photons[census_index];
+      iphoton++;
+      census_index++;
+    }
+
+    // if work packet is done, increment the work packet and reset quantities
+    // don't increment if this is the last photon
+    if (iphoton == n_in_packet && n_work != work.size()) {
+      ++iwork;
+      ++n_work;
+      n_create = iwork->get_n_create();
+      phtn_E = iwork->get_photon_E();
+      n_in_packet = iwork->get_n_particles();
+      census_index = iwork->get_census_index();
+      current_source = iwork->get_source_type();
+      iphoton = 0;
+    }
+
+    if (n_sourced >= n_photon) {
+      std::cout << "this is bad: can't source more than this" << std::endl;
+    }
+
+    // increment count of sourced particles
+    ++n_sourced;
+
+    return return_photon;
+  }
+
+  //! Set input photon to the next emission photon
+  void get_emission_photon(Photon &emission_photon, Work_Packet &work,
+                           const double &phtn_E, const double &dt, RNG *rng) {
+    using Constants::c;
+    double pos[3]={1.0e-6,1.0e-6,1.0e-6};
+    double angle[3];
+    //work.uniform_position_in_cell(rng, pos);
+    get_uniform_angle(angle, rng);
+    emission_photon.set_position(pos);
+    emission_photon.set_angle(angle);
+    emission_photon.set_E0(phtn_E);
+    emission_photon.set_distance_to_census(rng->generate_random_number() * c *
+                                           dt);
+    emission_photon.set_cell(work.get_global_cell_ID());
+    emission_photon.set_grip(work.get_global_grip_ID());
+    emission_photon.set_group(
+        std::floor(rng->generate_random_number() * double(BRANSON_N_GROUPS)));
+  }
+
+  //! Set input photon to the next intiial census photon
+  void get_initial_census_photon(Photon &census_photon, Work_Packet &work,
+                                 const double &phtn_E, const double &dt,
+                                 RNG *rng) {
+    using Constants::c;
+    double pos[3];
+    double angle[3];
+    work.uniform_position_in_cell(rng, pos);
+    get_uniform_angle(angle, rng);
+    census_photon.set_position(pos);
+    census_photon.set_angle(angle);
+    census_photon.set_E0(phtn_E);
+    // initial census particles born at the beginning of timestep
+    census_photon.set_distance_to_census(c * dt);
+    census_photon.set_cell(work.get_global_cell_ID());
+    census_photon.set_grip(work.get_global_grip_ID());
+    census_photon.set_group(
+        std::floor(rng->generate_random_number() * double(BRANSON_N_GROUPS)));
+  }
+
+  //! Return reference to work vector
+  std::vector<Work_Packet> &get_work_vector(void) { return work; }
+
+private:
+  const Mesh &mesh; //!< Pointer to mesh (source cannot change Mesh)
+  std::vector<Photon> &census_photons; //!< Reference to census photons on rank
+  uint32_t n_create;    //!< Number of emission particles created in this packet
+  double phtn_E;        //!< Photon emission energy in this packet
+  uint32_t n_work;      //!< Work packet counter
+  uint32_t n_in_packet; //!< Number of total particles in this packet
+  uint32_t census_index;         //!< Index of next census particle to return
+  uint32_t iphoton;              //!< Local photon counter
+  uint32_t current_source;       //!< Current source
+  uint64_t n_sourced;            //!< Number of particles returned by source
+  std::vector<Work_Packet> work; //!< Vector of Work_Packet objects
+  std::vector<Work_Packet>::iterator iwork; //!< Work iterator
+  uint64_t n_photon;                        //!< Total photons in this source
+  std::vector<double> E_cell_emission;      //!< Emission energy in each cell
+  std::vector<double> E_cell_census; //!< Initial census energy in each cell
+};
+
+#endif // source_h_
+//----------------------------------------------------------------------------//
+// end of source.h
+//----------------------------------------------------------------------------//
