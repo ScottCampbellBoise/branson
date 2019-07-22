@@ -95,6 +95,9 @@ void imc_response_driver(Mesh &mesh, IMC_State &imc_state,
     cout << "\tTotal Flux: \t\t" << tally->get_response_E() << endl;
     cout << "\t# of crossings: \t" << tally->get_response_hits() << endl;
 
+    tally->reset_regular_E();
+    tally->reset_response_E();
+
     tally->reset_regular_hits();
     tally->reset_response_hits();
 
