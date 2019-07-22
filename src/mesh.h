@@ -224,20 +224,28 @@ public:
 
       op_a = region.get_absorption_opacity(T);
       op_s = region.get_scattering_opacity();
-      f = 1.0 / (1.0 + dt * op_a * c * (4.0 * a * pow(T, 3) / (cV * rho)));
+      f = 1.0; // / (1.0 + dt * op_a * c * (4.0 * a * pow(T, 3) / (cV * rho)));
       e.set_op_a(op_a);
       e.set_op_s(op_s);
       e.set_f(f);
 
-      m_emission_E[i] =
-          replicated_factor * dt * vol * f * op_a * a * c * pow(T, 4);
+      //hack out the source
+      m_emission_E[i] = 0.0;
+          //replicated_factor * dt * vol * f * op_a * a * c * pow(T, 4);
       if (step > 1)
         m_census_E[i] = 0.0;
       else
-        m_census_E[i] = replicated_factor * vol * a * pow(Tr, 4);
-      m_source_E[i] = dt * op_a * a * c * pow(Ts, 4);
+        m_census_E[i] = 0.0;// replicated_factor * vol * a * pow(Tr, 4);
+      m_source_E[i] = 0.0;// dt * op_a * a * c * pow(Ts, 4);
 
-      pre_mat_E += T * cV * vol * rho;
+      //make a point source
+      double position[3]={1.0e-6, 1.0e-6, 1.0e-6};
+      if (e.check_in_cell(position)){
+          m_emission_E[i] = 10.0;
+          m_source_E[i] = 10.0;
+      }
+
+      pre_mat_E += 0.0; //T * cV * vol * rho;
       tot_emission_E += m_emission_E[i];
       tot_census_E += m_census_E[i];
       tot_source_E += m_source_E[i];
