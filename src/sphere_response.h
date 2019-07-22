@@ -77,6 +77,8 @@ public:
 	response_generated = true;
     }
 
+    inline bool get_response_state() const { return response_generated; }
+
     void increase_response() {
         uint32_t index;
 	double pos[3];
@@ -99,7 +101,7 @@ public:
 	response_generated = true;
     }
  
-    double get_response(uint32_t cell_id) throw(Response_Exception){
+    double get_response(uint32_t cell_id) const throw(Response_Exception){
 	double resp = cell_total_sigma_dist[cell_id] / cell_total_dist[cell_id];
 	if(resp <= 0 || isnan(resp))
 	    throw Response_Exception();

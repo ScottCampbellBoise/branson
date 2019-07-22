@@ -25,10 +25,11 @@
 #include "config.h"
 #include "constants.h"
 #include "imc_state.h"
+#include "sphere_response.h"
 
 //! All ranks perform reductions to produce global arrays and rank zero
 // writes the SILO file for visualization
-void write_silo(const Mesh &mesh, const double &arg_time, const uint32_t &step,
+void write_silo(const Mesh &mesh, const Sphere_Response &resp, const double &arg_time, const uint32_t &step,
                 const double &r_transport_time, const double &r_mpi_time,
                 const int &rank, const int &n_rank, bool rep_flag = true) {
 
@@ -87,6 +88,8 @@ void write_silo(const Mesh &mesh, const double &arg_time, const uint32_t &step,
   vector<int> region_data(n_xyz_cells, -1);
   vector<double> T_e(n_xyz_cells, 0.0);
   vector<double> T_r(n_xyz_cells, 0.0);
+  vector<double> sig_a(n_xyz_cells, 0.0);
+  vector<double> r_sig_a(n_xyz_cells, 0.0);
   vector<double> transport_time(n_xyz_cells, 0.0);
   vector<double> mpi_time(n_xyz_cells, 0.0);
   vector<int> grip_ID(n_xyz_cells, 0);
@@ -103,6 +106,10 @@ void write_silo(const Mesh &mesh, const double &arg_time, const uint32_t &step,
     // set silo plot variables
     T_e[silo_index] = cell.get_T_e();
     T_r[silo_index] = mesh.get_T_r(i);
+    sig_a[silo_index] = mesh.get_cell(i).get_op_a(0);
+    if(resp.get_response_state()) {
+        r_sig_a[silo_index] = resp.get_response(i);
+    }
     transport_time[silo_index] = r_transport_time;
     mpi_time[silo_index] = r_mpi_time;
     grip_ID[silo_index] = cell.get_grip_ID();
@@ -121,6 +128,15 @@ void write_silo(const Mesh &mesh, const double &arg_time, const uint32_t &step,
     // reduce to get T_r across all ranks
     MPI_Allreduce(MPI_IN_PLACE, &T_r[0], n_xyz_cells, MPI_DOUBLE, MPI_SUM,
                   MPI_COMM_WORLD);
+    
+    // reduce to get sig_a across all ranks
+    MPI_Allreduce(MPI_IN_PLACE, &sig_a[0], n_xyz_cells, MPI_DOUBLE, MPI_SUM,
+                  MPI_COMM_WORLD);
+
+    // reduce to get sig_a across all ranks
+    MPI_Allreduce(MPI_IN_PLACE, &r_sig_a[0], n_xyz_cells, MPI_DOUBLE, MPI_SUM,
+                  MPI_COMM_WORLD);
+
 
     // reduce to get transport runtime from all ranks
     MPI_Allreduce(MPI_IN_PLACE, &transport_time[0], n_xyz_cells, MPI_DOUBLE,
@@ -229,10 +245,28 @@ void write_silo(const Mesh &mesh, const double &arg_time, const uint32_t &step,
     DBPutQuadvar1(dbfile, "T_r", "quadmesh", &T_r[0], cell_dims, ndims, NULL, 0,
                   DB_DOUBLE, DB_ZONECENT, Tr_optlist);
 
+    // write the radiation temperature scalar field
+    DBoptlist *sig_a_optlist = DBMakeOptlist(2);
+    DBAddOption(sig_a_optlist, DBOPT_UNITS, (void *)"1/cm");
+    DBAddOption(sig_a_optlist, DBOPT_DTIME, &time);
+    DBPutQuadvar1(dbfile, "sig_a", "quadmesh", &sig_a[0], cell_dims, ndims, NULL, 0,
+                  DB_DOUBLE, DB_ZONECENT, Tr_optlist);
+
+    // ture scalar field
+    DBoptlist *r_sig_a_optlist = DBMakeOptlist(2);
+    DBAddOption(r_sig_a_optlist, DBOPT_UNITS, (void *)"1/cm");
+    DBAddOption(r_sig_a_optlist, DBOPT_DTIME, &time);
+    DBPutQuadvar1(dbfile, "r_sig_a", "quadmesh", &r_sig_a[0], cell_dims, ndims, NULL, 0,
+                  DB_DOUBLE, DB_ZONECENT, Tr_optlist);
+
+
+
     // free option lists
     DBFreeOptlist(optlist);
     DBFreeOptlist(Te_optlist);
     DBFreeOptlist(Tr_optlist);
+    DBFreeOptlist(sig_a_optlist);
+    DBFreeOptlist(r_sig_a_optlist);
 
     // free data
     delete[] cell_dims;

@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
       int step = 0;
       double transport_runtime = 10.0;
       double mpi_time = 5.0;
-      write_silo(mesh, time, step, transport_runtime, mpi_time, rank, n_rank);
+      //write_silo(mesh, time, step, transport_runtime, mpi_time, rank, n_rank);
 
       if (silo_write_pass)
         cout << "TEST PASSED: writing simple mesh silo file" << endl;
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
       int step = 1;
       double transport_runtime = 7.0;
       double mpi_time = 2.0;
-      write_silo(mesh, time, step, transport_runtime, mpi_time, rank, n_rank);
+      //write_silo(mesh, time, step, transport_runtime, mpi_time, rank, n_rank);
 
       if (three_reg_silo_write_pass) {
         cout << "TEST PASSED: writing three region mesh silo file" << endl;

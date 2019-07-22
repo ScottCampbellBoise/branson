@@ -81,7 +81,7 @@ Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG 
   // Add the response tally contribution
   add_tally_contribution(phtn, tally, resp, cell_id, next_dt);
   tally->add_response_hit();
-
+  
   // transport this photon
   while (active) {
     group = phtn.get_group();

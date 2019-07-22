@@ -196,7 +196,7 @@ private:
   double total_sigma_dist;
   double total_dist;
 
-  // private member functions
+// private member functions
 private:
 };
 

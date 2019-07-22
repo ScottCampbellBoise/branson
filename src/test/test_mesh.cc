@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <sstream>
 
 #include "../replicated_driver.h"
 #include "../response_driver.h"
@@ -233,15 +234,67 @@ int main(int argc, char *argv[]) {
 	Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh
         mesh.initialize_physical_properties(input); // Initialize the physical props (T)
 
-	Tally* tally = new Tally(.071, 0, 0, 0, mesh); // Tally for point_source.xml
+	Tally* tally = new Tally(1, 1e-6, 1e-6, 1e-6, mesh); // Tally for point_source.xml
 	
-    	imc_response_driver(mesh, imc_state, imc_p, mpi_types, mpi_info, tally, 5000);
+    	imc_response_driver(mesh, imc_state, imc_p, mpi_types, mpi_info, tally, 50000);
 
 	// PRINT OUT THE TALLY INFORMATION
     	cout << "\n\tTally energy for Regular: \t" << tally->get_regular_E() << endl;
 	cout << "\tTally energy for Response: \t" << tally->get_response_E() << endl << endl;
     }
-   
+  
+/*    {
+	int num_files = 9;	
+	
+	string files[] = {
+	    "/users/campbell_s/branson/src/test/Point_Source_Files/ps1.xml", 
+	    "/users/campbell_s/branson/src/test/Point_Source_Files/ps2.xml", 
+	    "/users/campbell_s/branson/src/test/Point_Source_Files/ps3.xml", 
+	    "/users/campbell_s/branson/src/test/Point_Source_Files/ps4.xml", 
+	    "/users/campbell_s/branson/src/test/Point_Source_Files/ps5.xml", 
+	    "/users/campbell_s/branson/src/test/Point_Source_Files/ps6.xml", 
+	    "/users/campbell_s/branson/src/test/Point_Source_Files/ps7.xml", 
+	    "/users/campbell_s/branson/src/test/Point_Source_Files/ps8.xml", 
+	    "/users/campbell_s/branson/src/test/Point_Source_Files/ps9.xml" 
+	};
+
+
+	double dt[num_files];
+	double reg[num_files];
+	double resp[num_files];
+
+	for(int k = 0; k < num_files; k++) {
+
+	   string filename = files[k]; 
+	   const Info mpi_info;
+	   MPI_Types mpi_types;
+	   Input input(filename, mpi_types);
+	   IMC_Parameters imc_p(input);	
+           IMC_State imc_state(input, mpi_info.get_rank());
+
+	   Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh
+           mesh.initialize_physical_properties(input); // Initialize the physical props (T)
+
+	   Tally* tally = new Tally(1, 1e-6, 1e-6, 1e-6, mesh); // Tally for point_source.xml
+
+
+	   dt[k] = imc_state.get_dt();
+	
+    	   imc_response_driver(mesh, imc_state, imc_p, mpi_types, mpi_info, tally, 5000);
+
+	   reg[k] = tally->get_regular_E();
+	   resp[k] = tally->get_response_E();
+	}
+	
+	cout << "\n\n\nResults ..." << endl << endl;
+	cout << "\tdt\tRegular\tResponse" << endl << endl;
+	for(int k = 0; k < num_files; k++) {
+	   cout << "\t" << dt[k] << "\t" << reg[k] << "\t" << resp[k] << endl;
+	}
+	cout << "\n\n\n";
+
+    }
+*/
 
   }
 

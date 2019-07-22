@@ -31,17 +31,20 @@ void imc_response_driver(Mesh &mesh, IMC_State &imc_state,
 
   uint64_t max_census_size = static_cast<uint64_t>(1.1*imc_parameters.get_n_user_photon());
 
+
+  // Create an object to hold the sphere response class
+  Sphere_Response* resp = new Sphere_Response(tally, mesh, imc_state, n_resp_particles);
+
+
+
   if (imc_parameters.get_write_silo_flag()) {
     // write SILO file
-    write_silo(mesh, imc_state.get_time(), imc_state.get_step(),
+    write_silo(mesh, *resp, imc_state.get_time(), imc_state.get_step(),
                imc_state.get_rank_transport_runtime(), fake_mpi_runtime, rank,
                mpi_info.get_n_rank());
   }
 
   double sourced_E = imc_state.get_pre_census_E();
-
-  // Create an object to hold the sphere response class
-  Sphere_Response* resp = new Sphere_Response(tally, mesh, imc_state, n_resp_particles);
 
   while (!imc_state.finished()) {
     if (rank == 0)
@@ -101,7 +104,7 @@ void imc_response_driver(Mesh &mesh, IMC_State &imc_state,
     if (imc_parameters.get_write_silo_flag() &&
         !(imc_state.get_step() % imc_parameters.get_output_frequency())) {
       // write SILO file
-      write_silo(mesh, imc_state.get_time(), imc_state.get_step(),
+      write_silo(mesh, *resp, imc_state.get_time(), imc_state.get_step(),
                  imc_state.get_rank_transport_runtime(), fake_mpi_runtime, rank,
                  mpi_info.get_n_rank());
     }
