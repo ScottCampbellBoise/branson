@@ -123,37 +123,17 @@ public:
     }
 
     double* get_uniform_angle(double* pos) {
-	double phi = 2 * Constants::pi * rng->generate_random_number();
-        double mu = 1 - 2 * rng->generate_random_number();
-        double theta = acos(mu);
-
         // Cosine-distribution for angle
-        double mu_r = sqrt(rng->generate_random_number());
-        double phi_r = 2 * Constants::pi * rng->generate_random_number();
-        double mu_theta = cos(phi_r) * sqrt(1 - pow(mu,2));
-        double mu_phi = sin(phi_r) * sqrt(1 - pow(mu_r,2));
-       
-        double mu_x = sin(theta)*cos(phi)*mu_r + cos(theta)*cos(phi)*mu_theta
-        	      - sin(phi)*mu_phi;
-        double mu_y = sin(theta)*sin(phi)*mu_r + cos(theta)*sin(phi)*mu_theta
-        	      + cos(phi)*mu_phi;
-        double mu_z = cos(theta)*mu_r - sin(theta)*mu_theta;
-        double* angle = new double[3];
-        angle[0] = mu_x;
-	angle[1] = mu_y;
-	angle[2] = mu_z;
+	double r = sqrt(pow(pos[0]-tally_x,2) + pow(pos[1]-tally_y,2) + pow(pos[2]-tally_z,2));      
+	double mu = (pos[2]-tally_z) / tally_r;
+	double phi = atan((pos[1]-tally_y) / (pos[0]-tally_x));
+	double theta = acos(mu);
 
-	// Direct the photon into the tally       
-	double temp[3] = {pos[0] + angle[0] * tally_r,
-		      	  pos[1] + angle[1] * tally_r,
-		       	  pos[2] + angle[2] * tally_r};
-	double pos_to_center = sqrt(pow(tally_x-pos[0],2) + pow(tally_y-pos[1],2) + pow(tally_z-pos[2],2));
-	double temp_to_center = sqrt(pow(tally_x-temp[0],2) + pow(tally_y-temp[1],2) + pow(tally_z-temp[2],2));	
-	if(temp_to_center > pos_to_center) {
-	    angle[0] *= -1;
-	    angle[1] *= -1;
-	    angle[2] *= -1;
-	}
+	// Convert spherical to cartesian 
+        double* angle = new double[3];
+	angle[0] = sin(theta)*cos(phi)*r + cos(theta)*cos(phi)*theta - sin(phi)*phi;
+ 	angle[1] = sin(theta)*sin(phi)*r + cos(theta)*sin(phi)*theta + cos(phi)*phi;
+	angle[2] = cos(theta)*r - sin(theta)*theta;
 
 	return angle;
     }
