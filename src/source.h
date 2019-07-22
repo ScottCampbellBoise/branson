@@ -282,9 +282,9 @@ public:
   void get_emission_photon(Photon &emission_photon, Work_Packet &work,
                            const double &phtn_E, const double &dt, RNG *rng) {
     using Constants::c;
-    double pos[3];
+    double pos[3]={1.0e-6,1.0e-6,1.0e-6};
     double angle[3];
-    work.uniform_position_in_cell(rng, pos);
+    //work.uniform_position_in_cell(rng, pos);
     get_uniform_angle(angle, rng);
     emission_photon.set_position(pos);
     emission_photon.set_angle(angle);
