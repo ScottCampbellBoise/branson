@@ -62,7 +62,7 @@ public:
 	Photon phtn;
 
 	for(int k = 0; k < n_particles; k++) {
-	    index = (uint32_t)(rng->generate_random_number() * n_particles);
+	    index = (uint32_t)(rng->generate_random_number() * phtn_deck_size);
 	    pos[0] = start_x[index];
 	    pos[1] = start_y[index];
 	    pos[2] = start_z[index];	
@@ -83,6 +83,8 @@ public:
         uint32_t cell_id;
 	Photon phtn;
 
+	cout << "\t INCREASING RESPONSE SIZE ..." << endl;
+
 	for(int k = 0; k < n_particles*5; k++) {
 	    index = (uint32_t)(rng->generate_random_number() * phtn_deck_size);
 	    pos[0] = start_x[index];
@@ -96,6 +98,10 @@ public:
 
 	response_generated = true;
     }
+
+    uint32_t get_count(uint32_t cell_id) const{
+	return counts[cell_id];
+    }	
  
     double get_response(uint32_t cell_id) const throw(Response_Exception){
 	double resp = cell_total_sigma_dist[cell_id] / cell_total_dist[cell_id];
@@ -137,18 +143,17 @@ public:
         	      + cos(phi)*mu_phi;
         double mu_z = cos(theta)*mu_r - sin(theta)*mu_theta;
        
-        angle[0] = mu_x;
-	angle[1] = mu_y;
-	angle[2] = mu_z;
+        angle[0] = -mu_x;
+	angle[1] = -mu_y;
+	angle[2] = -mu_z;
     }
 
     void get_start_pos(double pos[3]) {
         double phi = 2 * Constants::pi * rng->generate_random_number();
         double mu = 1 - 2 * rng->generate_random_number();
-        double theta = acos(mu);
         
-	pos[0] = tally_x + tally_r*(cos(phi)*sqrt((1-pow(mu,2))));
-	pos[1] = tally_y + tally_r*(sin(phi)*sqrt(1-pow(mu,2)));
+	pos[0] = tally_x + tally_r*cos(phi)*sqrt(1-pow(mu,2));
+	pos[1] = tally_y + tally_r*sin(phi)*sqrt(1-pow(mu,2));
         pos[2] = tally_z + tally_r*mu;
     }
 
@@ -157,7 +162,7 @@ public:
 
  	uint32_t n_cell = mesh.get_n_local_cells();
 	for(uint32_t k = 0; k < n_cell; ++k) {
-	    outfile <<  "\tcell resp: " << cell_total_sigma_dist[k] / cell_total_dist[k] << endl;
+	    outfile << "\tcell resp: " << cell_total_sigma_dist[k] / cell_total_dist[k] << endl;
 	}
 	
 	outfile.close();
@@ -208,6 +213,7 @@ private:
 	//Generate the variables to hold the resp info
 	cell_total_sigma_dist.resize(n_cell);
         cell_total_dist.resize(n_cell);	
+   	counts.resize(n_cell);
     }
 
     void move_photon(Photon &phtn) {
@@ -223,6 +229,8 @@ private:
 	
   	bool active = true;
   	while (active) {
+	    counts[cell_id]++;
+
             sigma_a = cell.get_op_a(phtn.get_group());
 
 	    // get distance to event
@@ -300,6 +308,7 @@ private:
 
     vector<uint32_t> tally_cells;
 
+    vector<uint32_t> counts;
     vector<double> cell_total_sigma_dist;
     vector<double> cell_total_dist;
 

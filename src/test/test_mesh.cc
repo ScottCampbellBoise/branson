@@ -234,9 +234,9 @@ int main(int argc, char *argv[]) {
 	Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh
         mesh.initialize_physical_properties(input); // Initialize the physical props (T)
 
-	Tally* tally = new Tally(1, 1e-6, 1e-6, 1e-6, mesh); // Tally for point_source.xml
+	Tally* tally = new Tally(1, 0, 0, 0, mesh); // Tally for point_source.xml
 	
-    	imc_response_driver(mesh, imc_state, imc_p, mpi_types, mpi_info, tally, 50000);
+    	imc_response_driver(mesh, imc_state, imc_p, mpi_types, mpi_info, tally, 25000);
 
 	// PRINT OUT THE TALLY INFORMATION
     	cout << "\n\tTally energy for Regular: \t" << tally->get_regular_E() << endl;

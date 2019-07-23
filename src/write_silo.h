@@ -90,6 +90,7 @@ void write_silo(const Mesh &mesh, const Sphere_Response &resp, const double &arg
   vector<double> T_r(n_xyz_cells, 0.0);
   vector<double> sig_a(n_xyz_cells, 0.0);
   vector<double> r_sig_a(n_xyz_cells, 0.0);
+  vector<double> r_count(n_xyz_cells, 0.0);
   vector<double> transport_time(n_xyz_cells, 0.0);
   vector<double> mpi_time(n_xyz_cells, 0.0);
   vector<int> grip_ID(n_xyz_cells, 0);
@@ -109,6 +110,7 @@ void write_silo(const Mesh &mesh, const Sphere_Response &resp, const double &arg
     sig_a[silo_index] = mesh.get_cell(i).get_op_a(0);
     if(resp.get_response_state()) {
         r_sig_a[silo_index] = resp.get_response(i);
+        r_count[silo_index] = resp.get_count(i);
     }
     transport_time[silo_index] = r_transport_time;
     mpi_time[silo_index] = r_mpi_time;
@@ -260,6 +262,14 @@ void write_silo(const Mesh &mesh, const Sphere_Response &resp, const double &arg
                   DB_DOUBLE, DB_ZONECENT, Tr_optlist);
 
 
+    // ture scalar field
+    DBoptlist *r_count_optlist = DBMakeOptlist(2);
+    DBAddOption(r_count_optlist, DBOPT_UNITS, (void *)"n/a");
+    DBAddOption(r_count_optlist, DBOPT_DTIME, &time);
+    DBPutQuadvar1(dbfile, "r_count", "quadmesh", &r_count[0], cell_dims, ndims, NULL, 0,
+                  DB_DOUBLE, DB_ZONECENT, Tr_optlist);
+
+
 
     // free option lists
     DBFreeOptlist(optlist);
@@ -267,6 +277,8 @@ void write_silo(const Mesh &mesh, const Sphere_Response &resp, const double &arg
     DBFreeOptlist(Tr_optlist);
     DBFreeOptlist(sig_a_optlist);
     DBFreeOptlist(r_sig_a_optlist);
+    DBFreeOptlist(r_count_optlist);
+
 
     // free data
     delete[] cell_dims;
