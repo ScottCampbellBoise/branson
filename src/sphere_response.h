@@ -52,9 +52,10 @@ public:
 	    setup_response();
 	    response_set = true;
 	}
-
+	
 	cell_total_sigma_dist.assign(n_cell, 0.0);
         cell_total_dist.assign(n_cell, 0.0);
+	num_respon_source.assign(n_cell, 0.0);	
 
         uint32_t index;
 	double pos[3];
@@ -67,7 +68,8 @@ public:
 	    pos[1] = start_y[index];
 	    pos[2] = start_z[index];	
 	    cell_id = start_cell_id[index];    
-	    
+	    num_respon_source[cell_id]++;	    
+
 	    create_photon(phtn, pos, cell_id);
 	    move_photon(phtn); 
 	}
@@ -81,28 +83,26 @@ public:
         uint32_t index;
 	double pos[3];
         uint32_t cell_id;
+
 	Photon phtn;
 
-	cout << "\t INCREASING RESPONSE SIZE ..." << endl;
-
-	for(int k = 0; k < n_particles*5; k++) {
-	    index = (uint32_t)(rng->generate_random_number() * phtn_deck_size);
+	for(int k = 0; k < n_particles; k++) {
+	    index = (uint32_t)(rng->generate_random_number() * n_particles);
 	    pos[0] = start_x[index];
 	    pos[1] = start_y[index];
 	    pos[2] = start_z[index];	
-	    cell_id = start_cell_id[index];        
-
+	    cell_id = start_cell_id[index];    
+	    
 	    create_photon(phtn, pos, cell_id);
-	    move_photon(phtn); 
+	    move_photon(phtn);
 	}
 
 	response_generated = true;
     }
 
-    uint32_t get_count(uint32_t cell_id) const{
-	return counts[cell_id];
-    }	
- 
+    double get_dist(uint32_t cell_id) const { return cell_total_dist[cell_id]; }
+    double get_n_sourced(uint32_t cell_id) const { return num_respon_source[cell_id]; }
+
     double get_response(uint32_t cell_id) const throw(Response_Exception){
 	double resp = cell_total_sigma_dist[cell_id] / cell_total_dist[cell_id];
 	if(resp <= 0 || isnan(resp))
@@ -126,34 +126,58 @@ public:
     }
 
     void get_uniform_angle(double pos[3], double angle[3]) {
-	double r = sqrt(pow(pos[0]-tally_z,2)+pow(pos[1]-tally_y,2)+pow(pos[2]-tally_z,2));
-        double mu = (pos[2] - tally_z) / r; 
-        double theta = acos(mu);
-	double phi = atan((pos[1]-tally_y) / (pos[0]-tally_x));
-
         // Cosine-distribution for angle
-        double mu_r = sqrt(rng->generate_random_number());
-        double phi_r = 2 * Constants::pi * rng->generate_random_number();
-        double mu_theta = cos(phi_r) * sqrt(1 - pow(mu,2));
-        double mu_phi = sin(phi_r) * sqrt(1 - pow(mu_r,2));
-       
-        double mu_x = sin(theta)*cos(phi)*mu_r + cos(theta)*cos(phi)*mu_theta
-        	      - sin(phi)*mu_phi;
-        double mu_y = sin(theta)*sin(phi)*mu_r + cos(theta)*sin(phi)*mu_theta
-        	      + cos(phi)*mu_phi;
-        double mu_z = cos(theta)*mu_r - sin(theta)*mu_theta;
-       
-        angle[0] = -mu_x;
-	angle[1] = -mu_y;
-	angle[2] = -mu_z;
+        double costheta = sqrt(rng->generate_random_number());
+	double phi = 2.0 * Constants::pi * rng->generate_random_number();
+
+	// calculate the inward normal.
+	double r = sqrt(pow(tally_x-pos[0],2)+pow(tally_y-pos[1],2)+pow(tally_z-pos[2],2));
+	double x_hat = (tally_x - pos[0]) / r;
+	double y_hat = (tally_y - pos[1]) / r;
+	double z_hat = (tally_z - pos[2]) / r;
+
+	// helpful terms
+	double sintheta = sqrt(1.0 - costheta*costheta);
+	double factor = sqrt(fabs(1.0-z_hat*z_hat));
+	double cosphi = cos(phi);
+	double sinphi = sin(phi);
+	double sintcosp = sintheta * cosphi;
+	double sintsinp = sintheta * sinphi;
+	double f_inv = 1.0/factor;
+	double stcpDf = sintcosp*f_inv;
+	double stspDf = sintsinp*f_inv;
+
+	// scatter through the random angle
+	if(factor<1.0e-6) {
+	    angle[0] = sintcosp;
+	    angle[1] = sintsinp;
+	    angle[2] = ((z_hat<0)? - 1.0 : 1.0)*costheta;
+	} else {
+	    angle[0] = x_hat*costheta + z_hat*x_hat*stcpDf - y_hat*stspDf;
+	    angle[1] = y_hat*costheta + z_hat*y_hat*stcpDf + x_hat*stspDf;
+	    angle[2] = z_hat*costheta - factor*sintcosp;
+	}	
+
+	double norm = sqrt(angle[0]*angle[0]+angle[1]*angle[1]+angle[2]*angle[2]);
+	angle[0] /= norm;
+	angle[1] /= norm;
+	angle[2] /= norm;
+
+	// just set the direction in the outward normal procedures the analytic result
+	/*
+	angle[0] = -(tally_x - pos[0]) / r;
+	angle[1] = -(tally_y - pos[1]) / r;
+	angle[2] = -(tally_z - pos[2]) / r;
+	*/
     }
 
     void get_start_pos(double pos[3]) {
         double phi = 2 * Constants::pi * rng->generate_random_number();
         double mu = 1 - 2 * rng->generate_random_number();
-        
-	pos[0] = tally_x + tally_r*cos(phi)*sqrt(1-pow(mu,2));
-	pos[1] = tally_y + tally_r*sin(phi)*sqrt(1-pow(mu,2));
+	double theta = acos(mu);       
+
+	pos[0] = tally_x + tally_r*(cos(phi)*sqrt((1-pow(mu,2))));
+	pos[1] = tally_y + tally_r*(sin(phi)*sqrt((1-pow(mu,2))));
         pos[2] = tally_z + tally_r*mu;
     }
 
@@ -213,7 +237,7 @@ private:
 	//Generate the variables to hold the resp info
 	cell_total_sigma_dist.resize(n_cell);
         cell_total_dist.resize(n_cell);	
-   	counts.resize(n_cell);
+   	num_respon_source.resize(n_cell);
     }
 
     void move_photon(Photon &phtn) {
@@ -229,8 +253,6 @@ private:
 	
   	bool active = true;
   	while (active) {
-	    counts[cell_id]++;
-
             sigma_a = cell.get_op_a(phtn.get_group());
 
 	    // get distance to event
@@ -263,12 +285,13 @@ private:
 	    Cell cell = mesh.get_cell(*k);
 	    const double* cell_dim = cell.get_node_array();
 	    if(x >= cell_dim[0] && x <= cell_dim[1] &&
-	       y >= cell_dim[1] && y <= cell_dim[2] &&
-	       z >= cell_dim[3] && z <= cell_dim[5]) {
+	       y >= cell_dim[2] && y <= cell_dim[3] &&
+	       z >= cell_dim[4] && z <= cell_dim[5]) {
 		return *k;
 	    } 
 	}
-	return tally_cells[0];
+	std::cout << "ERROR: Position not found -> "<<x<<" "<<y<<" "<<z<<std::endl;
+	exit(0);
     }
 
     // Check if the tally surface intersects the cell
@@ -308,11 +331,11 @@ private:
 
     vector<uint32_t> tally_cells;
 
-    vector<uint32_t> counts;
+    vector<uint32_t> num_respon_source;
     vector<double> cell_total_sigma_dist;
     vector<double> cell_total_dist;
 
-    uint32_t phtn_deck_size = 10000;
+    uint32_t phtn_deck_size = 100000;
     vector<double> start_x;
     vector<double> start_y;
     vector<double> start_z;

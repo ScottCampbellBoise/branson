@@ -90,10 +90,12 @@ void write_silo(const Mesh &mesh, const Sphere_Response &resp, const double &arg
   vector<double> T_r(n_xyz_cells, 0.0);
   vector<double> sig_a(n_xyz_cells, 0.0);
   vector<double> r_sig_a(n_xyz_cells, 0.0);
-  vector<double> r_count(n_xyz_cells, 0.0);
+  vector<double> r_src(n_xyz_cells, 0.0);
   vector<double> transport_time(n_xyz_cells, 0.0);
   vector<double> mpi_time(n_xyz_cells, 0.0);
   vector<int> grip_ID(n_xyz_cells, 0);
+
+
 
   // get rank data, map values from from global ID to SILO ID
   uint32_t n_local = mesh.get_n_local_cells();
@@ -110,7 +112,7 @@ void write_silo(const Mesh &mesh, const Sphere_Response &resp, const double &arg
     sig_a[silo_index] = mesh.get_cell(i).get_op_a(0);
     if(resp.get_response_state()) {
         r_sig_a[silo_index] = resp.get_response(i);
-        r_count[silo_index] = resp.get_count(i);
+	r_src[silo_index] = resp.get_n_sourced(i);
     }
     transport_time[silo_index] = r_transport_time;
     mpi_time[silo_index] = r_mpi_time;
@@ -139,6 +141,9 @@ void write_silo(const Mesh &mesh, const Sphere_Response &resp, const double &arg
     MPI_Allreduce(MPI_IN_PLACE, &r_sig_a[0], n_xyz_cells, MPI_DOUBLE, MPI_SUM,
                   MPI_COMM_WORLD);
 
+    // reduce to get sig_a across all ranks
+    MPI_Allreduce(MPI_IN_PLACE, &r_src[0], n_xyz_cells, MPI_DOUBLE, MPI_SUM,
+                  MPI_COMM_WORLD);
 
     // reduce to get transport runtime from all ranks
     MPI_Allreduce(MPI_IN_PLACE, &transport_time[0], n_xyz_cells, MPI_DOUBLE,
@@ -252,22 +257,22 @@ void write_silo(const Mesh &mesh, const Sphere_Response &resp, const double &arg
     DBAddOption(sig_a_optlist, DBOPT_UNITS, (void *)"1/cm");
     DBAddOption(sig_a_optlist, DBOPT_DTIME, &time);
     DBPutQuadvar1(dbfile, "sig_a", "quadmesh", &sig_a[0], cell_dims, ndims, NULL, 0,
-                  DB_DOUBLE, DB_ZONECENT, Tr_optlist);
+                  DB_DOUBLE, DB_ZONECENT, sig_a_optlist);
 
     // ture scalar field
     DBoptlist *r_sig_a_optlist = DBMakeOptlist(2);
     DBAddOption(r_sig_a_optlist, DBOPT_UNITS, (void *)"1/cm");
     DBAddOption(r_sig_a_optlist, DBOPT_DTIME, &time);
     DBPutQuadvar1(dbfile, "r_sig_a", "quadmesh", &r_sig_a[0], cell_dims, ndims, NULL, 0,
-                  DB_DOUBLE, DB_ZONECENT, Tr_optlist);
+                  DB_DOUBLE, DB_ZONECENT, r_sig_a_optlist);
 
 
     // ture scalar field
-    DBoptlist *r_count_optlist = DBMakeOptlist(2);
-    DBAddOption(r_count_optlist, DBOPT_UNITS, (void *)"n/a");
-    DBAddOption(r_count_optlist, DBOPT_DTIME, &time);
-    DBPutQuadvar1(dbfile, "r_count", "quadmesh", &r_count[0], cell_dims, ndims, NULL, 0,
-                  DB_DOUBLE, DB_ZONECENT, Tr_optlist);
+    DBoptlist *r_src_optlist = DBMakeOptlist(2);
+    DBAddOption(r_src_optlist, DBOPT_UNITS, (void *)"#");
+    DBAddOption(r_src_optlist, DBOPT_DTIME, &time);
+    DBPutQuadvar1(dbfile, "r_src", "quadmesh", &r_sig_a[0], cell_dims, ndims, NULL, 0,
+                  DB_DOUBLE, DB_ZONECENT, r_src_optlist);
 
 
 
@@ -277,8 +282,7 @@ void write_silo(const Mesh &mesh, const Sphere_Response &resp, const double &arg
     DBFreeOptlist(Tr_optlist);
     DBFreeOptlist(sig_a_optlist);
     DBFreeOptlist(r_sig_a_optlist);
-    DBFreeOptlist(r_count_optlist);
-
+    DBFreeOptlist(r_src_optlist);
 
     // free data
     delete[] cell_dims;

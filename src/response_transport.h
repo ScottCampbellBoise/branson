@@ -21,7 +21,7 @@
 #include "response_exception.h"
 
 void add_tally_contribution(Photon& phtn, Tally*& tally, 
-			    Sphere_Response*& resp, uint32_t cell_id, double next_dt ) {
+			    Sphere_Response*& resp, uint32_t cell_id, double dt ) {
   using Constants::c;
 
   try {
@@ -30,7 +30,7 @@ void add_tally_contribution(Photon& phtn, Tally*& tally,
       double cell_response = resp->get_response(cell_id);
       // calculate the contribution to the tally 
       double tally_contr = phtn.get_E() * 
-          exp(-(cell_response + 1 / (c * next_dt)) * dist_to_tally);   
+          exp(-(cell_response + 1 / (c * dt)) * dist_to_tally);   
       // Add the contribution to the tally
       if(tally_contr > 0) {
          tally->add_response_weight(abs(tally_contr));	
@@ -38,13 +38,13 @@ void add_tally_contribution(Photon& phtn, Tally*& tally,
       //cout << "\t\t\t\tEnergy: " << phtn.get_E() << "\tContr: " << tally_contr << endl;
   } catch(Response_Exception& e) {
       resp->increase_response();
-      add_tally_contribution(phtn, tally, resp, cell_id, next_dt);
+      add_tally_contribution(phtn, tally, resp, cell_id, dt);
   }
 
 }
 
 Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG *rng,
-                                       double &next_dt, double &exit_E,
+                                       double &next_dt, double& dt, double &exit_E,
                                        double &census_E,
                                        std::vector<double> &rank_abs_E,
                                        std::vector<double> &rank_track_E,
@@ -79,7 +79,7 @@ Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG 
   bool active = true;
 
   // Add the response tally contribution
-  add_tally_contribution(phtn, tally, resp, cell_id, next_dt);
+  add_tally_contribution(phtn, tally, resp, cell_id, dt);
   tally->add_response_hit();
   
   // transport this photon
@@ -143,7 +143,7 @@ Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG 
            phtn.set_group(sample_emission_group(rng, cell));
 
 	// Add the response tally contribution
-         add_tally_contribution(phtn, tally, resp, cell_id, next_dt);
+         add_tally_contribution(phtn, tally, resp, cell_id, dt);
          tally->add_response_hit();
       }
       // EVENT TYPE: BOUNDARY CROSS
@@ -223,7 +223,7 @@ std::vector<Photon> response_transport(Source &source, const Mesh &mesh,
     phtn = source.get_photon(rng, dt);
     n_local_sourced++;
 
-    event = resp_transport_photon(phtn, mesh, rng, next_dt, exit_E,
+    event = resp_transport_photon(phtn, mesh, rng, next_dt, dt, exit_E,
                              census_E, rank_abs_E, rank_track_E, tally, resp);
 
     switch (event) {
