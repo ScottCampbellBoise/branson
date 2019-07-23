@@ -59,6 +59,7 @@ public:
         uint32_t index;
 	double pos[3];
         uint32_t cell_id;
+	Photon phtn;
 
 	for(int k = 0; k < n_particles; k++) {
 	    index = (uint32_t)(rng->generate_random_number() * n_particles);
@@ -67,10 +68,7 @@ public:
 	    pos[2] = start_z[index];	
 	    cell_id = start_cell_id[index];    
 	    
-	    Photon phtn;
 	    create_photon(phtn, pos, cell_id);
-
-	    // Move the photon through the mesh
 	    move_photon(phtn); 
 	}
 
@@ -83,18 +81,16 @@ public:
         uint32_t index;
 	double pos[3];
         uint32_t cell_id;
+	Photon phtn;
 
 	for(int k = 0; k < n_particles*5; k++) {
-	    index = (uint32_t)(rng->generate_random_number() * n_particles);
+	    index = (uint32_t)(rng->generate_random_number() * phtn_deck_size);
 	    pos[0] = start_x[index];
 	    pos[1] = start_y[index];
 	    pos[2] = start_z[index];	
-	    cell_id = start_cell_id[index];    
-	    
-	    Photon phtn;
-	    create_photon(phtn, pos, cell_id);
+	    cell_id = start_cell_id[index];        
 
-	    // Move the photon through the mesh
+	    create_photon(phtn, pos, cell_id);
 	    move_photon(phtn); 
 	}
 
@@ -110,8 +106,9 @@ public:
 
     void reset_response() { response_set = false; }
 
-    void create_photon(Photon& phtn, double* pos, uint32_t cell_id) {
-	double* angle = get_uniform_angle(pos);
+    void create_photon(Photon& phtn, double pos[3], uint32_t cell_id) {
+	double angle[3];
+        get_uniform_angle(pos, angle);
 
         // Set photon values
         phtn.set_total_dist(0.0);
@@ -122,32 +119,37 @@ public:
         phtn.set_group(floor(rng->generate_random_number() * double(BRANSON_N_GROUPS)));
     }
 
-    double* get_uniform_angle(double* pos) {
-        // Cosine-distribution for angle
-	double r = sqrt(pow(pos[0]-tally_x,2) + pow(pos[1]-tally_y,2) + pow(pos[2]-tally_z,2));      
-	double mu = (pos[2]-tally_z) / tally_r;
+    void get_uniform_angle(double pos[3], double angle[3]) {
+	double r = sqrt(pow(pos[0]-tally_z,2)+pow(pos[1]-tally_y,2)+pow(pos[2]-tally_z,2));
+        double mu = (pos[2] - tally_z) / r; 
+        double theta = acos(mu);
 	double phi = atan((pos[1]-tally_y) / (pos[0]-tally_x));
-	double theta = acos(mu);
 
-	// Convert spherical to cartesian 
-        double* angle = new double[3];
-	angle[0] = sin(theta)*cos(phi)*r + cos(theta)*cos(phi)*theta - sin(phi)*phi;
- 	angle[1] = sin(theta)*sin(phi)*r + cos(theta)*sin(phi)*theta + cos(phi)*phi;
-	angle[2] = cos(theta)*r - sin(theta)*theta;
-
-	return angle;
+        // Cosine-distribution for angle
+        double mu_r = sqrt(rng->generate_random_number());
+        double phi_r = 2 * Constants::pi * rng->generate_random_number();
+        double mu_theta = cos(phi_r) * sqrt(1 - pow(mu,2));
+        double mu_phi = sin(phi_r) * sqrt(1 - pow(mu_r,2));
+       
+        double mu_x = sin(theta)*cos(phi)*mu_r + cos(theta)*cos(phi)*mu_theta
+        	      - sin(phi)*mu_phi;
+        double mu_y = sin(theta)*sin(phi)*mu_r + cos(theta)*sin(phi)*mu_theta
+        	      + cos(phi)*mu_phi;
+        double mu_z = cos(theta)*mu_r - sin(theta)*mu_theta;
+       
+        angle[0] = mu_x;
+	angle[1] = mu_y;
+	angle[2] = mu_z;
     }
 
-    double* get_start_pos() {
+    void get_start_pos(double pos[3]) {
         double phi = 2 * Constants::pi * rng->generate_random_number();
         double mu = 1 - 2 * rng->generate_random_number();
         double theta = acos(mu);
-        double* pos = new double[3];
+        
 	pos[0] = tally_x + tally_r*(cos(phi)*sqrt((1-pow(mu,2))));
 	pos[1] = tally_y + tally_r*(sin(phi)*sqrt(1-pow(mu,2)));
         pos[2] = tally_z + tally_r*mu;
-
-	return pos;
     }
 
     void print_response() {
@@ -187,13 +189,16 @@ private:
 	tally_cells.shrink_to_fit();
 
 	//Create a 'deck' of photons to use for the sampling
-	start_x.resize(n_particles);
-	start_y.resize(n_particles);
- 	start_z.resize(n_particles);
-	start_cell_id.resize(n_particles);
+	start_x.resize(phtn_deck_size);
+	start_y.resize(phtn_deck_size);
+ 	start_z.resize(phtn_deck_size);
+	start_cell_id.resize(phtn_deck_size);
 
-	for(uint32_t k = 0; k < n_particles; k++) {
-	    double* pos = get_start_pos();
+        double pos[3];
+
+	for(uint32_t k = 0; k < phtn_deck_size; k++) {
+	    get_start_pos(pos);
+
 	    start_x[k] = pos[0];
 	    start_y[k] = pos[1];
 	    start_z[k] = pos[2];
@@ -298,6 +303,7 @@ private:
     vector<double> cell_total_sigma_dist;
     vector<double> cell_total_dist;
 
+    uint32_t phtn_deck_size = 10000;
     vector<double> start_x;
     vector<double> start_y;
     vector<double> start_z;
