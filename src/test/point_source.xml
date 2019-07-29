@@ -39,7 +39,6 @@
       <n_x_cells>19</n_x_cells>
     </x_division>
 
-
     <y_division>
       <y_start>-1.0</y_start>
       <y_end> -.05</y_end>
@@ -284,7 +283,7 @@
       <ID>100</ID>
       <density>1.0</density>
       <CV>100</CV>
-      <opacA>10</opacA>
+      <opacA>100</opacA>
       <opacB>0.0</opacB>
       <opacC>0.0</opacC>
       <opacS>0.0</opacS>
