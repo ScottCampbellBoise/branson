@@ -115,7 +115,6 @@ public:
 	double t_b = (-b - sqrt(pow(b, 2) - 4*a*c)) / (2*a);	
 
 	double max_t = max(t_a, t_b);
-	double min_t = min(t_a, t_b);	
 
 	if(max_t < 0) { return std::numeric_limits<int>::max(); }
          

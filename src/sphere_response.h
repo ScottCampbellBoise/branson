@@ -13,7 +13,6 @@
 #include <iostream>
 #include <fstream>
 #include <math.h>
-//#include <chrono>
 	
 #include "RNG.h"
 #include "constants.h"
@@ -23,8 +22,6 @@
 #include "tally.h"
 #include "response_exception.h"
 
-using namespace std::chrono;
-
 using namespace std;
 using Constants::ELEMENT;
 using Constants::bc_type;
@@ -33,7 +30,6 @@ using Constants::EXIT;
 using Constants::KILL;
 
 class Sphere_Response {
-
 public:
 
     // Constructor: store the info about the mesh and tally
