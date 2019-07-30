@@ -2,8 +2,8 @@
   <common>
     <method>IMC</method>
     <t_start>0.0</t_start>
-    <t_stop>10.0</t_stop>
-    <dt_start>0.08</dt_start>
+    <t_stop>1.0</t_stop>
+    <dt_start>0.05</dt_start>
     <t_mult>1.0</t_mult>
     <dt_max>1.0</dt_max>
     <photons>100000</photons>

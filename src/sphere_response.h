@@ -51,7 +51,19 @@ public:
 	
 	cell_total_sigma_dist.assign(n_cell, 0.0);
         cell_total_dist.assign(n_cell, 0.0);
-	num_respon_source.assign(n_cell, 0.0);	
+        cell_xp_total_sigma_dist.assign(n_cell, 0.0);
+        cell_xp_total_dist.assign(n_cell, 0.0);
+        cell_xm_total_sigma_dist.assign(n_cell, 0.0);
+        cell_xm_total_dist.assign(n_cell, 0.0);
+        cell_yp_total_sigma_dist.assign(n_cell, 0.0);
+        cell_yp_total_dist.assign(n_cell, 0.0);
+        cell_ym_total_sigma_dist.assign(n_cell, 0.0);
+        cell_ym_total_dist.assign(n_cell, 0.0);
+        cell_zp_total_sigma_dist.assign(n_cell, 0.0);
+        cell_zp_total_dist.assign(n_cell, 0.0);
+        cell_zm_total_sigma_dist.assign(n_cell, 0.0);
+        cell_zm_total_dist.assign(n_cell, 0.0);
+        num_respon_source.assign(n_cell, 0);
 
         uint32_t index;
 	double pos[3];
@@ -79,25 +91,38 @@ public:
         uint32_t index;
 	double pos[3];
         uint32_t cell_id;
+    Photon phtn;
 
-	Photon phtn;
+    for(int k = 0; k < n_particles; k++) {
+        index = (uint32_t)(rng->generate_random_number() * phtn_deck_size);
+        pos[0] = start_x[index];
+        pos[1] = start_y[index];
+        pos[2] = start_z[index];    
+        cell_id = start_cell_id[index];        
 
-	for(int k = 0; k < n_particles; k++) {
-	    index = (uint32_t)(rng->generate_random_number() * n_particles);
-	    pos[0] = start_x[index];
-	    pos[1] = start_y[index];
-	    pos[2] = start_z[index];	
-	    cell_id = start_cell_id[index];    
-	    
-	    create_photon(phtn, pos, cell_id);
-	    move_photon(phtn);
-	}
+        create_photon(phtn, pos, cell_id);
+        move_photon(phtn); 
+    }
 
 	response_generated = true;
     }
+ 
+    double get_angle_response(uint32_t cell_id, const double angle[3]) const throw(Response_Exception){
 
-    double get_dist(uint32_t cell_id) const { return cell_total_dist[cell_id]; }
-    double get_n_sourced(uint32_t cell_id) const { return num_respon_source[cell_id]; }
+    double xp = max(angle[0]*cell_xp_total_sigma_dist[cell_id]/cell_xp_total_dist[cell_id],0.0);
+    double xm = max(-angle[0]*cell_xm_total_sigma_dist[cell_id]/cell_xm_total_dist[cell_id],0.0);
+    double yp = max(angle[1]*cell_yp_total_sigma_dist[cell_id]/cell_yp_total_dist[cell_id],0.0);
+    double ym = max(-angle[1]*cell_ym_total_sigma_dist[cell_id]/cell_ym_total_dist[cell_id],0.0);
+    double zp = max(angle[2]*cell_zp_total_sigma_dist[cell_id]/cell_zp_total_dist[cell_id],0.0);
+    double zm = max(-angle[2]*cell_zm_total_sigma_dist[cell_id]/cell_zm_total_dist[cell_id],0.0);
+
+    double resp =  xp+xm+yp+ym+zp+zm;
+
+    //double resp = cell_total_sigma_dist[cell_id] / cell_total_dist[cell_id];
+    if(resp <= 0 || isnan(resp))
+        throw Response_Exception();
+    return resp; 
+    }
 
     double get_response(uint32_t cell_id) const throw(Response_Exception){
 	double resp = cell_total_sigma_dist[cell_id] / cell_total_dist[cell_id];
@@ -105,6 +130,9 @@ public:
 	    throw Response_Exception();
 	return resp; 
     }
+
+    double get_dist(uint32_t cell_id) const { return cell_total_dist[cell_id]; }
+    double get_n_sourced(uint32_t cell_id) const { return num_respon_source[cell_id]; }
 
     void reset_response() { response_set = false; }
 
@@ -240,6 +268,7 @@ private:
 	uint32_t cell_id, next_cell;
 	double dist_to_event;
 	double sigma_a;
+	const double* angle = phtn.get_angle();
 
         uint32_t surface_cross = 0;
   	
@@ -255,12 +284,37 @@ private:
             dist_to_event = cell.get_distance_to_boundary(
                 phtn.get_position(), phtn.get_angle(), surface_cross);
        
-	    phtn.add_to_total_dist(dist_to_event, sigma_a);
- 	    cell_total_dist[cell_id] += dist_to_event;
-	    cell_total_sigma_dist[cell_id] += 
-		    (phtn.get_total_sigma_dist() / phtn.get_total_dist()) * dist_to_event;
-	
-	    // update position
+        phtn.add_to_total_dist(dist_to_event, sigma_a);
+         cell_total_dist[cell_id] += dist_to_event;
+        
+        double ave_sig = phtn.get_total_sigma_dist() / phtn.get_total_dist();
+        cell_total_sigma_dist[cell_id] += 
+            (ave_sig) * dist_to_event;
+        
+        double xp = max(-angle[0]*dist_to_event,0.0);
+        double xm = max(angle[0]*dist_to_event,0.0);
+        double yp = max(-angle[1]*dist_to_event,0.0);
+        double ym = max(angle[1]*dist_to_event,0.0);
+        double zp = max(-angle[2]*dist_to_event,0.0);
+        double zm = max(angle[2]*dist_to_event,0.0);
+
+
+         cell_xp_total_dist[cell_id] += xp;
+         cell_xm_total_dist[cell_id] += xm;
+         cell_yp_total_dist[cell_id] += yp;
+         cell_ym_total_dist[cell_id] += ym;
+         cell_zp_total_dist[cell_id] += zp;
+         cell_zm_total_dist[cell_id] += zm;
+
+         cell_xp_total_sigma_dist[cell_id] += ave_sig*xp;
+         cell_xm_total_sigma_dist[cell_id] += ave_sig*xm;
+         cell_yp_total_sigma_dist[cell_id] += ave_sig*yp;
+         cell_ym_total_sigma_dist[cell_id] += ave_sig*ym;
+         cell_zp_total_sigma_dist[cell_id] += ave_sig*zp;
+         cell_zm_total_sigma_dist[cell_id] += ave_sig*zm;
+
+    
+        // update position
             phtn.move(dist_to_event);
 
 	    if(active && cell.get_bc(surface_cross) == ELEMENT) {
@@ -277,17 +331,19 @@ private:
     // Check if a point is inside one of the cells
     // that the tally surface is in
     uint32_t get_photons_cell(double x, double y, double z) {
-	for(auto k = tally_cells.begin(); k != tally_cells.end(); k++) {
-	    Cell cell = mesh.get_cell(*k);
-	    const double* cell_dim = cell.get_node_array();
-	    if(x >= cell_dim[0] && x <= cell_dim[1] &&
-	       y >= cell_dim[2] && y <= cell_dim[3] &&
-	       z >= cell_dim[4] && z <= cell_dim[5]) {
-		return *k;
-	    } 
-	}
-	std::cout << "ERROR: Position not found -> "<<x<<" "<<y<<" "<<z<<std::endl;
-	exit(0);
+    for(uint32_t k = 0; k < mesh.get_n_local_cells(); k++) {
+    //for(auto k = tally_cells.begin(); k != tally_cells.end(); k++) {
+        Cell cell = mesh.get_cell(k);
+        const double* cell_dim = cell.get_node_array();
+        if(x >= cell_dim[0] && x <= cell_dim[1] &&
+           y >= cell_dim[2] && y <= cell_dim[3] &&
+           z >= cell_dim[4] && z <= cell_dim[5]) {
+        return k;
+        } 
+    }
+    // Don't allow us to not find the correct cell
+    std::cout<<"ERROR: Possition non found -> "<<x<<" "<<y<<" "<<z<<std::endl;
+    exit(0);
     }
 
     // Check if the tally surface intersects the cell
@@ -329,7 +385,20 @@ private:
 
     vector<uint32_t> num_respon_source;
     vector<double> cell_total_sigma_dist;
+    vector<double> cell_xp_total_sigma_dist;
+    vector<double> cell_xm_total_sigma_dist;
+    vector<double> cell_yp_total_sigma_dist;
+    vector<double> cell_ym_total_sigma_dist;
+    vector<double> cell_zp_total_sigma_dist;
+    vector<double> cell_zm_total_sigma_dist;
+
     vector<double> cell_total_dist;
+    vector<double> cell_xp_total_dist;
+    vector<double> cell_xm_total_dist;
+    vector<double> cell_yp_total_dist;
+    vector<double> cell_ym_total_dist;
+    vector<double> cell_zp_total_dist;
+    vector<double> cell_zm_total_dist;
 
     uint32_t phtn_deck_size = 100000;
     vector<double> start_x;

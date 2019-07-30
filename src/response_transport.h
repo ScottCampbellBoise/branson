@@ -27,7 +27,8 @@ void add_tally_contribution(Photon& phtn, Tally*& tally,
   try {
       // Get the distance of the photon from the tally surface
       double dist_to_tally = tally->get_dist_to_tally(phtn);
-      double cell_response = resp->get_response(cell_id);
+      double cell_response = resp->get_angle_response(cell_id, phtn.get_angle());
+      //double cell_response = resp->get_response(cell_id);
       // calculate the contribution to the tally 
       double tally_contr = phtn.get_E() * 
           exp(-(cell_response + 1 / (c * dt)) * dist_to_tally);   
@@ -193,10 +194,10 @@ std::vector<Photon> response_transport(Source &source, const Mesh &mesh,
   double census_E = 0.0;
   double exit_E = 0.0;
   double next_dt = imc_state.get_next_dt(); //! Set for census photons
-  double dt = imc_state.get_next_dt();      //! For making current photons
+  double dt = imc_state.get_dt();      //! For making current photons
 
   RNG *rng = imc_state.get_rng();
-  rng->set_seed(rand(), 0); 
+  //rng->set_seed(rand(), 0); 
  
   // timing
   Timer t_transport;
