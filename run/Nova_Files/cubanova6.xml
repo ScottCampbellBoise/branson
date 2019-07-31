@@ -2,12 +2,12 @@
   <common>
     <method>IMC</method>
     <t_start>0.0</t_start>
-    <t_stop>1</t_stop>
-    <dt_start>0.005</dt_start>
+    <t_stop>0.025</t_stop>
+    <dt_start>0.001</dt_start>
     <t_mult>1.0</t_mult>
     <dt_max>0.001</dt_max>
     <photons>5000</photons>
-    <seed>14706</seed>
+    <seed>79807</seed>
     <tilt>FALSE</tilt>
     <stratified_sampling>FALSE</stratified_sampling>
     <use_combing>TRUE</use_combing>

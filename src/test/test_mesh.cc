@@ -220,7 +220,7 @@ int main(int argc, char *argv[]) {
           nfail++;
         }
     }  
-
+/*
     {
 	bool passed = true;
 
@@ -242,20 +242,21 @@ int main(int argc, char *argv[]) {
     	cout << "\n\tTally energy for Regular: \t" << tally->get_regular_E() << endl;
 	cout << "\tTally energy for Response: \t" << tally->get_response_E() << endl << endl;
     }
-  
-/*    {
-	int num_files = 9;	
+*/  
+    {
+	int num_files = 10;	
 	
 	string files[] = {
-	    "/users/campbell_s/branson/src/test/Point_Source_Files/ps1.xml", 
-	    "/users/campbell_s/branson/src/test/Point_Source_Files/ps2.xml", 
-	    "/users/campbell_s/branson/src/test/Point_Source_Files/ps3.xml", 
-	    "/users/campbell_s/branson/src/test/Point_Source_Files/ps4.xml", 
-	    "/users/campbell_s/branson/src/test/Point_Source_Files/ps5.xml", 
-	    "/users/campbell_s/branson/src/test/Point_Source_Files/ps6.xml", 
-	    "/users/campbell_s/branson/src/test/Point_Source_Files/ps7.xml", 
-	    "/users/campbell_s/branson/src/test/Point_Source_Files/ps8.xml", 
-	    "/users/campbell_s/branson/src/test/Point_Source_Files/ps9.xml" 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova1.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova2.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova3.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova4.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova5.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova6.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova7.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova8.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova9.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova10.xml", 
 	};
 
 
@@ -275,12 +276,12 @@ int main(int argc, char *argv[]) {
 	   Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh
            mesh.initialize_physical_properties(input); // Initialize the physical props (T)
 
-	   Tally* tally = new Tally(1, 1e-6, 1e-6, 1e-6, mesh); // Tally for point_source.xml
+	   Tally* tally = new Tally(1.99, 1e-6, 1e-6, 1e-6, mesh); // Tally for point_source.xml
 
 
 	   dt[k] = imc_state.get_dt();
 	
-    	   imc_response_driver(mesh, imc_state, imc_p, mpi_types, mpi_info, tally, 5000);
+    	   imc_response_driver(mesh, imc_state, imc_p, mpi_types, mpi_info, tally, 100000);
 
 	   reg[k] = tally->get_regular_E();
 	   resp[k] = tally->get_response_E();
@@ -294,7 +295,6 @@ int main(int argc, char *argv[]) {
 	cout << "\n\n\n";
 
     }
-*/
 
   }
 
