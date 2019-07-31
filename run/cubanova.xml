@@ -1,0 +1,2611 @@
+<prototype>
+  <common>
+    <method>IMC</method>
+    <t_start>0.0</t_start>
+    <t_stop>0.2</t_stop>
+    <dt_start>0.001</dt_start>
+    <t_mult>1.0</t_mult>
+    <dt_max>0.001</dt_max>
+    <photons>5000</photons>
+    <seed>14706</seed>
+    <tilt>FALSE</tilt>
+    <stratified_sampling>FALSE</stratified_sampling>
+    <use_combing>TRUE</use_combing>
+    <output_frequency>1</output_frequency>
+    <write_silo>TRUE</write_silo>
+  </common>
+
+  <debug_options>
+    <print_verbose>FALSE</print_verbose>
+    <print_mesh_info>FALSE</print_mesh_info>
+  </debug_options>
+
+  <boundary>
+    <bc_right>VACUUM</bc_right>
+    <bc_left>VACUUM</bc_left>
+    <bc_up>VACUUM</bc_up>
+    <bc_down>VACUUM</bc_down>
+    <bc_top>VACUUM</bc_top>
+    <bc_bottom>VACUUM</bc_bottom>
+  </boundary>
+
+  <spatial>
+    <x_division>
+       <x_start> -2.0 </x_start>
+       <x_end> -1.0 </x_end>
+       <n_x_cells> 1 </n_x_cells>
+    </x_division>
+
+    <x_division>
+       <x_start> -1.0 </x_start>
+       <x_end> -0.7454056583717418 </x_end>
+       <n_x_cells> 4 </n_x_cells>
+    </x_division>
+
+    <x_division>
+       <x_start> -0.7454056583717418 </x_start>
+       <x_end> -0.6745280276979229 </x_end>
+       <n_x_cells> 10 </n_x_cells>
+    </x_division>
+
+    <x_division>
+       <x_start> -0.6745280276979229 </x_start>
+       <x_end> 0.6745280276979229 </x_end>
+       <n_x_cells> 10 </n_x_cells>
+    </x_division>
+
+    <x_division>
+       <x_start> 0.6745280276979229 </x_start>
+       <x_end> 0.7454056583717418 </x_end>
+       <n_x_cells> 10 </n_x_cells>
+    </x_division>
+
+    <x_division>
+       <x_start> 0.7454056583717418 </x_start>
+       <x_end> 1.0 </x_end>
+       <n_x_cells> 4 </n_x_cells>
+    </x_division>
+
+    <x_division>
+       <x_start> 1.0 </x_start>
+       <x_end> 2.0 </x_end>
+       <n_x_cells> 1 </n_x_cells>
+    </x_division>
+
+    <y_division>
+       <y_start> -2.0 </y_start>
+       <y_end> -1.0 </y_end>
+       <n_y_cells> 1 </n_y_cells>
+    </y_division>
+
+    <y_division>
+       <y_start> -1.0 </y_start>
+       <y_end> -0.7454056583717418 </y_end>
+       <n_y_cells> 4 </n_y_cells>
+    </y_division>
+
+    <y_division>
+       <y_start> -0.7454056583717418 </y_start>
+       <y_end> -0.6745280276979229 </y_end>
+       <n_y_cells> 10 </n_y_cells>
+    </y_division>
+
+    <y_division>
+       <y_start> -0.6745280276979229 </y_start>
+       <y_end> 0.6745280276979229 </y_end>
+       <n_y_cells> 10 </n_y_cells>
+    </y_division>
+
+    <y_division>
+       <y_start> 0.6745280276979229 </y_start>
+       <y_end> 0.7454056583717418 </y_end>
+       <n_y_cells> 10 </n_y_cells>
+    </y_division>
+
+    <y_division>
+       <y_start> 0.7454056583717418 </y_start>
+       <y_end> 1.0 </y_end>
+       <n_y_cells> 4 </n_y_cells>
+    </y_division>
+
+    <y_division>
+       <y_start> 1.0 </y_start>
+       <y_end> 2.0 </y_end>
+       <n_y_cells> 1 </n_y_cells>
+    </y_division>
+
+    <z_division>
+       <z_start> -2.0 </z_start>
+       <z_end> -1.0 </z_end>
+       <n_z_cells> 1 </n_z_cells>
+    </z_division>
+
+    <z_division>
+       <z_start> -1.0 </z_start>
+       <z_end> -0.7454056583717418 </z_end>
+       <n_z_cells> 4 </n_z_cells>
+    </z_division>
+
+    <z_division>
+       <z_start> -0.7454056583717418 </z_start>
+       <z_end> -0.6745280276979229 </z_end>
+       <n_z_cells> 10 </n_z_cells>
+    </z_division>
+
+    <z_division>
+       <z_start> -0.6745280276979229 </z_start>
+       <z_end> 0.6745280276979229 </z_end>
+       <n_z_cells> 10 </n_z_cells>
+    </z_division>
+
+    <z_division>
+       <z_start> 0.6745280276979229 </z_start>
+       <z_end> 0.7454056583717418 </z_end>
+       <n_z_cells> 10 </n_z_cells>
+    </z_division>
+
+    <z_division>
+       <z_start> 0.7454056583717418 </z_start>
+       <z_end> 1.0 </z_end>
+       <n_z_cells> 4 </n_z_cells>
+    </z_division>
+
+    <z_division>
+       <z_start> 1.0 </z_start>
+       <z_end> 2.0 </z_end>
+       <n_z_cells> 1 </n_z_cells>
+    </z_division>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 0 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 1 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 2 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 4 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 3 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 3 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 4 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 2 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 5 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 0 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 1 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 2 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 3 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 4 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 5 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 0 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 1 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 2 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 3 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 4 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 5 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+    <region_map>
+       <x_div_ID> 6 </x_div_ID>
+       <y_div_ID> 6 </y_div_ID>
+       <z_div_ID> 6 </z_div_ID>
+       <region_ID> 1 </region_ID>
+    </region_map>
+
+  </spatial>
+  <regions>
+    <region>
+       <ID> 1 </ID>
+       <density> 1e-06 </density>
+       <CV> 1e+16 </CV>
+       <opacA> 1e-06 </opacA>
+       <opacB> 0.0 </opacB>
+       <opacC> 0.0 </opacC>
+       <opacS> 0.0 </opacS>
+       <initial_T_e> 0.00086 </initial_T_e>
+       <initial_T_r> 0.00086 </initial_T_r>
+    </region>
+
+    <region>
+       <ID> 2 </ID>
+       <density> 1e-14 </density>
+       <CV> 1000000000.0 </CV>
+       <opacA> 0.01 </opacA>
+       <opacB> 0.0 </opacB>
+       <opacC> 0.0 </opacC>
+       <opacS> 0.0 </opacS>
+       <initial_T_e> 0.00086 </initial_T_e>
+       <initial_T_r> 0.00086 </initial_T_r>
+    </region>
+
+    <region>
+       <ID> 3 </ID>
+       <density> 1e-12 </density>
+       <CV> 1000000000.0 </CV>
+       <opacA> 2727.272727272727 </opacA>
+       <opacB> 0.0 </opacB>
+       <opacC> 0.0 </opacC>
+       <opacS> 0.0 </opacS>
+       <initial_T_e> 0.086 </initial_T_e>
+       <initial_T_r> 0.086 </initial_T_r>
+    </region>
+
+    <region>
+       <ID> 4 </ID>
+       <density> 1e-14 </density>
+       <CV> 1000000000.0 </CV>
+       <opacA> 30.0 </opacA>
+       <opacB> 0.0 </opacB>
+       <opacC> 0.0 </opacC>
+       <opacS> 0.0 </opacS>
+       <initial_T_e> 0.00086 </initial_T_e>
+       <initial_T_r> 0.00086 </initial_T_r>
+    </region>
+
+  </regions>
+</prototype>
