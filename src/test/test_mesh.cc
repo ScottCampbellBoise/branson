@@ -219,8 +219,32 @@ int main(int argc, char *argv[]) {
 	  cout << "TEST FAILED: tally surface count" << endl;
           nfail++;
         }
-    }  
+    } 
+/*
+    {
+	bool passed = true;
 
+	string filename("/users/campbell_s/branson/src/test/point_source.xml");
+	const Info mpi_info;
+	MPI_Types mpi_types;
+	Input input(filename, mpi_types);
+	IMC_Parameters imc_p(input);	
+        IMC_State imc_state(input, mpi_info.get_rank());
+
+	Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh
+        mesh.initialize_physical_properties(input); // Initialize the physical props (T)
+
+	Tally* tally = new Tally(.99, 1e-6, 1e-6, 1e-6, mesh); // Tally for point_source.xml
+	
+    	imc_response_driver(mesh, imc_state, imc_p, mpi_types, mpi_info, tally, 10000);
+
+	// PRINT OUT THE TALLY INFORMATION
+    	cout << "\n\tTally energy for Regular: \t" << tally->get_regular_E() << endl;
+	cout << "\tTally energy for Response: \t" << tally->get_response_E() << endl << endl;
+    }
+*/
+ 
+/*
     {
 	bool passed = true;
 
@@ -242,7 +266,8 @@ int main(int argc, char *argv[]) {
     	cout << "\n\tTally energy for Regular: \t" << tally->get_regular_E() << endl;
 	cout << "\tTally energy for Response: \t" << tally->get_response_E() << endl << endl;
     }
-/*  
+*/ 
+ 
     {
 	int num_files = 10;	
 	
@@ -257,14 +282,24 @@ int main(int argc, char *argv[]) {
 	    "/users/campbell_s/branson/run/Nova_Files/cubanova8.xml", 
 	    "/users/campbell_s/branson/run/Nova_Files/cubanova9.xml", 
 	    "/users/campbell_s/branson/run/Nova_Files/cubanova10.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova11.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova12.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova13.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova14.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova15.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova16.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova17.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova18.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova19.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova20.xml", 
 	};
 
 
-	double dt[num_files];
-	double reg[num_files];
-	double resp[num_files];
+	cout << "\n\nRUNNING CUBANOVA VARIANCE TEST ... \n\n";
 
 	for(int k = 0; k < num_files; k++) {
+
+ 	   cout << "\nRunning File #" << (k+1) << "\n" << endl;
 
 	   string filename = files[k]; 
 	   const Info mpi_info;
@@ -278,24 +313,12 @@ int main(int argc, char *argv[]) {
 
 	   Tally* tally = new Tally(1.99, 1e-6, 1e-6, 1e-6, mesh); // Tally for point_source.xml
 
-
-	   dt[k] = imc_state.get_dt();
-	
     	   imc_response_driver(mesh, imc_state, imc_p, mpi_types, mpi_info, tally, 100000);
-
-	   reg[k] = tally->get_regular_E();
-	   resp[k] = tally->get_response_E();
 	}
 	
-	cout << "\n\n\nResults ..." << endl << endl;
-	cout << "\tdt\tRegular\tResponse" << endl << endl;
-	for(int k = 0; k < num_files; k++) {
-	   cout << "\t" << dt[k] << "\t" << reg[k] << "\t" << resp[k] << endl;
-	}
-	cout << "\n\n\n";
-
+	cout << "FINISHED RUNNING ALL TEST FILES" << endl;
     }
-*/
+
   }
 
   MPI_Finalize();

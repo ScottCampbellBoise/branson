@@ -331,14 +331,14 @@ private:
     // Check if a point is inside one of the cells
     // that the tally surface is in
     uint32_t get_photons_cell(double x, double y, double z) {
-    for(uint32_t k = 0; k < mesh.get_n_local_cells(); k++) {
-    //for(auto k = tally_cells.begin(); k != tally_cells.end(); k++) {
-        Cell cell = mesh.get_cell(k);
+    //for(uint32_t k = 0; k < mesh.get_n_local_cells(); k++) {
+    for(auto k = tally_cells.begin(); k != tally_cells.end(); k++) {
+        Cell cell = mesh.get_cell(*k);
         const double* cell_dim = cell.get_node_array();
         if(x >= cell_dim[0] && x <= cell_dim[1] &&
            y >= cell_dim[2] && y <= cell_dim[3] &&
            z >= cell_dim[4] && z <= cell_dim[5]) {
-        return k;
+        return *k;
         } 
     }
     // Don't allow us to not find the correct cell

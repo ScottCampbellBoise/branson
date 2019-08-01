@@ -23,6 +23,12 @@ void imc_response_driver(Mesh &mesh, IMC_State &imc_state,
                            const IMC_Parameters &imc_parameters,
                            const MPI_Types &mpi_types, const Info &mpi_info,
 			   Tally* tally, uint32_t n_resp_particles) {
+
+
+  bool write_flux = false;
+  bool write_cubanova = true;
+
+
   using std::vector;
   vector<double> abs_E(mesh.get_global_num_cells(), 0.0);
   vector<double> track_E(mesh.get_global_num_cells(), 0.0);
@@ -47,9 +53,11 @@ void imc_response_driver(Mesh &mesh, IMC_State &imc_state,
 
   double sourced_E = imc_state.get_pre_census_E();
 
-
   ofstream flux_file("flux_file.csv");
   flux_file << "Time,Reg. Fluence,Resp. Fluence,Reg. Flux,Resp. Flux" << endl;
+
+  ofstream cuba_file("cubanova_results.csv", ios::app);
+  cuba_file << "time, reg flux, resp flux" << endl;
 
   double prev_resp = 0.0;
   double prev_reg = 0.0;
@@ -107,16 +115,23 @@ void imc_response_driver(Mesh &mesh, IMC_State &imc_state,
     cout << "\tResponse Total Flux: \t\t" << tally->get_response_E() << endl;
     cout << "\t# of crossings: \t" << tally->get_response_hits() << endl;
 
+    if(write_cubanova) {
+	cuba_file << imc_state.get_time() << "," << tally->get_regular_E() << "," << tally->get_response_E() << endl;
+	tally->reset_regular_E();
+	tally->reset_response_E();
+    } 
 
-    double reg_flux = (tally->get_regular_E() - prev_reg) / imc_state.get_next_dt();
-    double resp_flux = (tally->get_response_E() - prev_resp) / imc_state.get_next_dt();
-    prev_reg = tally->get_regular_E(); 
-    prev_resp = tally->get_response_E(); 
+    if(write_flux) {
+   	double reg_flux = (tally->get_regular_E() - prev_reg) / imc_state.get_next_dt();
+   	double resp_flux = (tally->get_response_E() - prev_resp) / imc_state.get_next_dt();
+    	prev_reg = tally->get_regular_E(); 
+    	prev_resp = tally->get_response_E(); 
 
 
-    flux_file << imc_state.get_time() << "," << tally->get_regular_E() 
+    	flux_file << imc_state.get_time() << "," << tally->get_regular_E() 
 	      << "," << tally->get_response_E() << "," << reg_flux << "," 
 	      << resp_flux << endl;
+    }
 
     tally->reset_regular_hits();
     tally->reset_response_hits();
@@ -133,8 +148,12 @@ void imc_response_driver(Mesh &mesh, IMC_State &imc_state,
     imc_state.next_time_step();
   }
 
-  flux_file.close();
- 
+  if(write_flux)
+      	flux_file.close();
+  if(write_cubanova) {
+	cuba_file << "\n\n";
+      	cuba_file.close();
+  } 
 }
 
 #endif // response_driver_h_
