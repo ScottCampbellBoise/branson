@@ -15,10 +15,15 @@
 #include <fstream>
 #include <sstream>
 
-#include "../replicated_driver.h"
 #include "../response_driver.h"
 #include "../sphere_response.h"
 #include "../tally.h"
+
+#include "../plane_response_driver.h"
+#include "../plane_response.h"
+#include "../plane_tally.h"
+
+#include "../replicated_driver.h"
 #include "../constants.h"
 #include "../input.h"
 #include "../mpi_types.h"
@@ -267,7 +272,9 @@ int main(int argc, char *argv[]) {
 	cout << "\tTally energy for Response: \t" << tally->get_response_E() << endl << endl;
     }
 */ 
- 
+
+/*
+    // Testing the cubanova with SPHERICAL TALLY	  
     {
 	int num_files = 10;	
 	
@@ -295,7 +302,7 @@ int main(int argc, char *argv[]) {
 	};
 
 
-	cout << "\n\nRUNNING CUBANOVA VARIANCE TEST ... \n\n";
+	cout << "\n\nRUNNING CUBANOVA VARIANCE TEST WITH *** SPHERICAL TALLY *** ... \n\n";
 
 	for(int k = 0; k < num_files; k++) {
 
@@ -318,7 +325,65 @@ int main(int argc, char *argv[]) {
 	
 	cout << "FINISHED RUNNING ALL TEST FILES" << endl;
     }
+*/
 
+
+    // Testing the cubanova with PLANAR TALLY	  
+    {
+	int num_files = 10;	
+	
+	string files[] = {
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova1.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova2.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova3.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova4.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova5.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova6.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova7.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova8.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova9.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova10.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova11.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova12.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova13.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova14.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova15.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova16.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova17.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova18.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova19.xml", 
+	    "/users/campbell_s/branson/run/Nova_Files/cubanova20.xml", 
+	};
+
+
+	cout << "\n\nRUNNING CUBANOVA VARIANCE TEST WITH *** PLANAR TALLY *** ... \n\n";
+
+	for(int k = 0; k < num_files; k++) {
+
+ 	   cout << "\nRunning File #" << (k+1) << "\n" << endl;
+
+	   string filename = files[k]; 
+	   const Info mpi_info;
+	   MPI_Types mpi_types;
+	   Input input(filename, mpi_types);
+	   IMC_Parameters imc_p(input);	
+           IMC_State imc_state(input, mpi_info.get_rank());
+
+	   Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh
+           mesh.initialize_physical_properties(input); // Initialize the physical props (T)
+
+	   double v1[3] = {2, 2, -2};
+	   double v2[3] = {2, 2, 2};
+	   double v3[3] = {-2, -2, -2};
+	   double v4[3] = {-2, -2, 2};
+	   Plane_Tally* tally = new Plane_Tally(v1, v2, v3, v4, mesh); // Tally for point_source.xml
+
+    	   imc_plane_response_driver(mesh, imc_state, imc_p, mpi_types, mpi_info, tally, 100000);
+	}
+	
+	cout << "FINISHED RUNNING ALL TEST FILES" << endl;
+    }
+	  
   }
 
   MPI_Finalize();
