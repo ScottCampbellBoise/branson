@@ -126,10 +126,10 @@ public:
         double phi = 2.0 * Constants::pi * rng->generate_random_number();
         
         // calculate the inward normal.
-        double r = sqrt(pow(0-pos[0],2)+pow(0-pos[1],2)+pow(0-pos[2],2));
-        double x_hat = (0 - pos[0]) / r;
-        double y_hat = (0 - pos[1]) / r;
-        double z_hat = (0 - pos[2]) / r;
+        double r = pos[0]+pos[1]+pos[2];
+	double x_hat = -pos[0]/r;;
+        double y_hat = -pos[1]/r; 
+        double z_hat = -pos[2]/r;;
         
         // helpful terms
         double sintheta = sqrt(1.0 - costheta*costheta);
@@ -262,7 +262,7 @@ private:
     
     // Check if the tally surface intersects the cell
     bool tally_intersects_cell(Cell& cell) {
-        return true; // Just have to go through every cell ...
+	return  true;
     }
     
     //-------------------------------------------

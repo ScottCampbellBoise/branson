@@ -22,7 +22,7 @@
 #include "comb_photons.h"
 
 void add_plane_tally_contribution(Photon& phtn, Plane_Tally*& tally,
-                            Plane_Response*& resp, uint32_t cell_id, double dt ) {
+                            Plane_Response*& resp, uint32_t cell_id, double dt) {
     using Constants::c;
     
     try {

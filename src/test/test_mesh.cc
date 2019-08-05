@@ -371,10 +371,10 @@ int main(int argc, char *argv[]) {
 	   Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh
            mesh.initialize_physical_properties(input); // Initialize the physical props (T)
 
-	   double v1[3] = {.9, .9, -.9};
-	   double v2[3] = {.9, .9, .9};
-	   double v3[3] = {-.9, -.9, -.9};
-	   double v4[3] = {-.9, -.9, .9};
+	   double v1[3] = {-1, 1.9, 1.9};
+	   double v2[3] = {1, 1.9, 1.9};
+	   double v3[3] = {-1, 1.9, -1.9};
+	   double v4[3] = {1, 1.9, -1.9};
 	   Plane_Tally* tally = new Plane_Tally(v1, v2, v3, v4, mesh); // Tally for point_source.xml
 
     	   imc_plane_response_driver(mesh, imc_state, imc_p, mpi_types, mpi_info, tally, 50000);
