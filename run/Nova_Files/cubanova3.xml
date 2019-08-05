@@ -7,7 +7,7 @@
     <t_mult>1.0</t_mult>
     <dt_max>0.001</dt_max>
     <photons>5000</photons>
-    <seed>14668</seed>
+    <seed>54821</seed>
     <tilt>FALSE</tilt>
     <stratified_sampling>FALSE</stratified_sampling>
     <use_combing>TRUE</use_combing>
