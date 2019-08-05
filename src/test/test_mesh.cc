@@ -225,7 +225,7 @@ int main(int argc, char *argv[]) {
           nfail++;
         }
     } 
-
+/*
     {
 	bool passed = true;
 
@@ -247,7 +247,7 @@ int main(int argc, char *argv[]) {
     	cout << "\n\tTally energy for Regular: \t" << tally->get_regular_E() << endl;
 	cout << "\tTally energy for Response: \t" << tally->get_response_E() << endl << endl;
     }
-
+*/
  
 /*
     {
@@ -327,7 +327,6 @@ int main(int argc, char *argv[]) {
     }
 */
 
-/*
     // Testing the cubanova with PLANAR TALLY	  
     {
 	int num_files = 10;	
@@ -378,12 +377,12 @@ int main(int argc, char *argv[]) {
 	   double v4[3] = {-.9, -.9, .9};
 	   Plane_Tally* tally = new Plane_Tally(v1, v2, v3, v4, mesh); // Tally for point_source.xml
 
-    	   imc_plane_response_driver(mesh, imc_state, imc_p, mpi_types, mpi_info, tally, 100000);
+    	   imc_plane_response_driver(mesh, imc_state, imc_p, mpi_types, mpi_info, tally, 50000);
 	}
 	
 	cout << "FINISHED RUNNING ALL TEST FILES" << endl;
     }
-*/
+
 	  
   }
 

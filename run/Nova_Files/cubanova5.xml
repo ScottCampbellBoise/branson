@@ -6,7 +6,7 @@
     <dt_start>0.001</dt_start>
     <t_mult>1.0</t_mult>
     <dt_max>0.001</dt_max>
-    <photons>5000</photons>
+    <photons>50000</photons>
     <seed>89233</seed>
     <tilt>FALSE</tilt>
     <stratified_sampling>FALSE</stratified_sampling>

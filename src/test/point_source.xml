@@ -283,7 +283,7 @@
       <ID>100</ID>
       <density>1.0</density>
       <CV>100</CV>
-      <opacA>100</opacA>
+      <opacA>0.1</opacA>
       <opacB>0.0</opacB>
       <opacC>0.0</opacC>
       <opacS>0.0</opacS>
@@ -294,7 +294,7 @@
       <ID>5</ID>
       <density>1.0</density>
       <CV>.01</CV>
-      <opacA>10</opacA>
+      <opacA>0.1</opacA>
       <opacB>0.0</opacB>
       <opacC>0.0</opacC>
       <opacS>0.0</opacS>

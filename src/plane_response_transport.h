@@ -34,7 +34,7 @@ void add_plane_tally_contribution(Photon& phtn, Plane_Tally*& tally,
         double tally_contr = phtn.get_E() *
         exp(-(cell_response + 1 / (c * dt)) * dist_to_tally);
         // Add the contribution to the tally
-        if(tally_contr > 0 ) {
+	if(tally_contr > 0 ) {
             tally->add_response_weight(abs(tally_contr));
         }
         //cout << "\t\t\t\tEnergy: " << phtn.get_E() << "\tContr: " << tally_contr << endl;

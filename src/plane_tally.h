@@ -55,7 +55,7 @@ public:
         double C = vec_12[0]*vec_13[1] - vec_12[1]*vec_13[0];
         double D = A*v1[0] + B*v1[1] + C*v1[2];
         
-        if(A*ang[0] + B*ang[1] + C*ang[2] == 0) { return 1e9; } // parallel to plane
+        //if(A*ang[0] + B*ang[1] + C*ang[2] == 0) { return 1e9; } // parallel to plane
         
         double t = -(A*pos[0] + B*pos[1] + C*pos[2] + D) / (A*ang[0] + B*ang[1] + C*ang[2]);
         
@@ -63,10 +63,27 @@ public:
         double y_int = pos[1] - ang[1]*t;
         double z_int = pos[2] - ang[2]*t;
         
-        double dist_1 = sqrt(pow(x_int-pos[0],2) + pow(y_int-pos[1],2) + pow(z_int-pos[2],2));
-        double dist_2 = sqrt(pow(x_int-ang[0]-pos[0],2) + pow(y_int-ang[1]-pos[1],2) + pow(z_int-ang[2]-pos[2],2));
+        double dist = sqrt(pow(x_int-pos[0],2) + pow(y_int-pos[1],2) + pow(z_int-pos[2],2));
+	double dist_2 = sqrt(pow(x_int-(pos[0]+ang[0]*1e-6),2) + pow(y_int-(pos[1]+ang[1]*1e-6),2) + pow(z_int-(pos[2]+ang[2]*1e-6),2));        
+        double x_min = min(v1[0], min(v2[0], min(v3[0], v4[0])));
+        double x_max = max(v1[0], max(v2[0], max(v3[0], v4[0])));
+        double y_min = min(v1[1], min(v2[1], min(v3[1], v4[1])));
+        double y_max = max(v1[1], max(v2[1], max(v3[1], v4[1])));
+        double z_min = min(v1[2], min(v2[2], min(v3[2], v4[2])));
+        double z_max = max(v1[2], max(v2[2], max(v3[2], v4[2])));
+ 
+	double int_pos[3];
+	int_pos[0] = pos[0] + ang[0]*dist;
+	int_pos[1] = pos[1] + ang[1]*dist;
+	int_pos[2] = pos[2] + ang[2]*dist;
+
+	if(ang[0] < 0) { return 1e9; }
+
+	if(int_pos[0] > x_min && int_pos[0] < x_max && 
+	   int_pos[1] > y_min && int_pos[1] < y_max && 
+	   int_pos[2] > z_min && int_pos[2] < z_max && dist_2 < dist)
+  	{return dist;} 
         
-        if(dist_2 < dist_1) { return dist_1; }
         return 1e9;
     }
 
