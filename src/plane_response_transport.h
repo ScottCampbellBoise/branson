@@ -19,6 +19,7 @@
 #include "plane_tally.h"
 #include "plane_response.h"
 #include "response_exception.h"
+#include "comb_photons.h"
 
 void add_plane_tally_contribution(Photon& phtn, Plane_Tally*& tally,
                             Plane_Response*& resp, uint32_t cell_id, double dt ) {
@@ -33,7 +34,7 @@ void add_plane_tally_contribution(Photon& phtn, Plane_Tally*& tally,
         double tally_contr = phtn.get_E() *
         exp(-(cell_response + 1 / (c * dt)) * dist_to_tally);
         // Add the contribution to the tally
-        if(tally_contr > 0 && tally->hit_tally(phtn)) {
+        if(tally_contr > 0 ) {
             tally->add_response_weight(abs(tally_contr));
         }
         //cout << "\t\t\t\tEnergy: " << phtn.get_E() << "\tContr: " << tally_contr << endl;
@@ -105,7 +106,7 @@ Constants::event_type plane_resp_transport_photon(Photon &phtn, const Mesh &mesh
         // Add regular contribution (if valid) - ONLY RECORDS OUTGOING PHOTONS
         //------------------------------------------------------------------------------------------
         dist_to_tally = tally->get_dist_to_tally(phtn);
-        if(dist_to_tally < dist_to_event && tally->hit_tally(phtn)) {
+        if(dist_to_tally < dist_to_event ) {
             // calculate energy absorbed by material, update photon and material energy
             ew_factor = exp(-sigma_a * f * dist_to_tally);
             absorbed_E = phtn.get_E() * (1.0 - ew_factor);

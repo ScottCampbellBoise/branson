@@ -120,14 +120,17 @@ public:
 
     //double resp = cell_total_sigma_dist[cell_id] / cell_total_dist[cell_id];
     if(resp <= 0 || isnan(resp))
-        throw Response_Exception();
+        //throw Response_Exception();
+        return 1e9;
     return resp; 
     }
 
     double get_response(uint32_t cell_id) const throw(Response_Exception){
 	double resp = cell_total_sigma_dist[cell_id] / cell_total_dist[cell_id];
+
 	if(resp <= 0 || isnan(resp))
-	    throw Response_Exception();
+	    //throw Response_Exception();
+	    return 1e9;
 	return resp; 
     }
 

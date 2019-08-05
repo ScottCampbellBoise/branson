@@ -19,6 +19,7 @@
 #include "tally.h"
 #include "sphere_response.h"
 #include "response_exception.h"
+#include "comb_photons.h"
 
 void add_tally_contribution(Photon& phtn, Tally*& tally, 
 			    Sphere_Response*& resp, uint32_t cell_id, double dt ) {
@@ -27,8 +28,8 @@ void add_tally_contribution(Photon& phtn, Tally*& tally,
   try {
       // Get the distance of the photon from the tally surface
       double dist_to_tally = tally->get_dist_to_tally(phtn);
-      double cell_response = resp->get_angle_response(cell_id, phtn.get_angle());
-      //double cell_response = resp->get_response(cell_id);
+      //double cell_response = resp->get_angle_response(cell_id, phtn.get_angle());
+      double cell_response = resp->get_response(cell_id);
       // calculate the contribution to the tally 
       double tally_contr = phtn.get_E() * 
           exp(-(cell_response + 1 / (c * dt)) * dist_to_tally);   
@@ -41,7 +42,6 @@ void add_tally_contribution(Photon& phtn, Tally*& tally,
       resp->increase_response();
       add_tally_contribution(phtn, tally, resp, cell_id, dt);
   }
-
 }
 
 Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG *rng,
