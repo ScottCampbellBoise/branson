@@ -126,10 +126,9 @@ public:
         double phi = 2.0 * Constants::pi * rng->generate_random_number();
         
         // calculate the inward normal.
-        double r = pos[0]+pos[1]+pos[2];
-	double x_hat = -pos[0]/r;;
-        double y_hat = -pos[1]/r; 
-        double z_hat = -pos[2]/r;;
+	double x_hat = -1;
+        double y_hat = 0; 
+        double z_hat = 0;
         
         // helpful terms
         double sintheta = sqrt(1.0 - costheta*costheta);
