@@ -179,6 +179,9 @@ public:
   inline double get_total_dist() { return total_dist; }
   inline double get_total_sigma_dist() { return total_sigma_dist; }
 
+  inline bool get_mark_for_response() { return mark_for_response; }
+  inline void set_mark_for_response(bool state) { mark_for_response = state; }
+  
 //--------------------------------------------------------------------------//
   // member data                                                              //
   //--------------------------------------------------------------------------//
@@ -196,6 +199,7 @@ private:
   double total_sigma_dist;
   double total_dist;
 
+  bool mark_for_response = false;
 // private member functions
 private:
 };

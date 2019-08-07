@@ -40,7 +40,8 @@ void add_plane_tally_contribution(Photon& phtn, Plane_Tally*& tally,
         //cout << "\t\t\t\tEnergy: " << phtn.get_E() << "\tContr: " << tally_contr << endl;
     } catch(Response_Exception& e) {
         resp->increase_response();
-        add_plane_tally_contribution(phtn, tally, resp, cell_id, dt);
+        //add_plane_tally_contribution(phtn, tally, resp, cell_id, dt);
+	phtn.set_mark_for_response(true);
     }
     
 }
@@ -128,6 +129,16 @@ Constants::event_type plane_resp_transport_photon(Photon &phtn, const Mesh &mesh
         
         phtn.set_E(phtn.get_E() - absorbed_E);
         
+	// If the photon was previously marked, add its contribution
+	if(phtn.get_mark_for_response()) {
+	    // Add the response tally contribution
+	    phtn.set_mark_for_response(false);
+            add_plane_tally_contribution(phtn, tally, resp, cell_id, dt);
+	    if(!phtn.get_mark_for_response()) {
+                tally->add_response_hit();
+	    }
+	}
+	    
         // apply variance/runtime reduction
         if (phtn.below_cutoff(cutoff_fraction)) {
             rank_abs_E[cell_id] += phtn.get_E();
