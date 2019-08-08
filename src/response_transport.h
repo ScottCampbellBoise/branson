@@ -28,14 +28,19 @@ void add_tally_contribution(Photon& phtn, Tally*& tally,
   try {
       // Get the distance of the photon from the tally surface
       double dist_to_tally = tally->get_dist_to_tally(phtn);
-      //double cell_response = resp->get_angle_response(cell_id, phtn.get_angle());
+      double ang_cell_response = resp->get_angle_response(cell_id, phtn.get_angle());
       double cell_response = resp->get_response(cell_id);
       // calculate the contribution to the tally 
       double tally_contr = phtn.get_E() * 
           exp(-(cell_response + 1 / (c * dt)) * dist_to_tally);   
+      double ang_tally_contr = phtn.get_E() * 
+	  exp(-(ang_cell_response + 1 / (c * dt)) * dist_to_tally);
       // Add the contribution to the tally
       if(tally_contr > 0) {
          tally->add_response_weight(abs(tally_contr));	
+      }
+      if(ang_tally_contr > 0) {
+	 tally->add_response_ang_weight(abs(ang_tally_contr));	
       }
       //cout << "\t\t\t\tEnergy: " << phtn.get_E() << "\tContr: " << tally_contr << endl;
   } catch(Response_Exception& e) {

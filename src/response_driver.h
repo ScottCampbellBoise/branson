@@ -54,11 +54,12 @@ void imc_response_driver(Mesh &mesh, IMC_State &imc_state,
   double sourced_E = imc_state.get_pre_census_E();
 
   ofstream flux_file("flux_file.csv");
-  flux_file << "Time,Reg. Fluence,Resp. Fluence,Reg. Flux,Resp. Flux" << endl;
+  flux_file << "Time,Reg. Fluence,Resp. Fluence,Resp. Ang. Fluence,Reg. Flux,Resp. Flux,Resp. Ang. Flux" << endl;
 
   ofstream cuba_file("cubanova_results.csv", ios::app);
-  cuba_file << "time, reg flux, resp flux" << endl;
+  cuba_file << "time, reg flux, resp flux, resp ang flux" << endl;
 
+  double prev_resp_ang = 0.0;
   double prev_resp = 0.0;
   double prev_reg = 0.0;
 
@@ -116,21 +117,26 @@ void imc_response_driver(Mesh &mesh, IMC_State &imc_state,
     cout << "\t# of crossings: \t" << tally->get_response_hits() << endl;
 
     if(write_cubanova) {
-	cuba_file << imc_state.get_time() << "," << tally->get_regular_E() << "," << tally->get_response_E() << endl;
+	cuba_file << imc_state.get_time() << "," 
+		  << tally->get_regular_E() << "," 
+		  << tally->get_response_E() << "," 
+		  << tally->get_response_ang_E() << endl;
 	tally->reset_regular_E();
 	tally->reset_response_E();
+	tally->reset_response_ang_E();
     } 
 
     if(write_flux) {
    	double reg_flux = (tally->get_regular_E() - prev_reg) / imc_state.get_next_dt();
    	double resp_flux = (tally->get_response_E() - prev_resp) / imc_state.get_next_dt();
-    	prev_reg = tally->get_regular_E(); 
+    	double resp_ang_flux = (tally->get_response_ang_E() - prev_resp_ang) / imc_state.get_next_dt();
+ 	prev_reg = tally->get_regular_E(); 
     	prev_resp = tally->get_response_E(); 
-
+	prev_resp_ang = tally->get_response_ang_E();
 
     	flux_file << imc_state.get_time() << "," << tally->get_regular_E() 
-	      << "," << tally->get_response_E() << "," << reg_flux << "," 
-	      << resp_flux << endl;
+	      << "," << tally->get_response_E() << "," << tally->get_response_ang_E() <<"," << reg_flux << "," 
+	      << resp_flux << "," << resp_ang_flux << endl;
     }
 
     tally->reset_regular_hits();

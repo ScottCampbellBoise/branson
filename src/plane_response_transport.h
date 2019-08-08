@@ -39,7 +39,7 @@ void add_plane_tally_contribution(Photon& phtn, Plane_Tally*& tally,
         }
         //cout << "\t\t\t\tEnergy: " << phtn.get_E() << "\tContr: " << tally_contr << endl;
     } catch(Response_Exception& e) {
-        resp->increase_response();
+        //resp->increase_response();
         //add_plane_tally_contribution(phtn, tally, resp, cell_id, dt);
 	phtn.set_mark_for_response(true);
     }

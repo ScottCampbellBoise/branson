@@ -249,7 +249,7 @@ int main(int argc, char *argv[]) {
     }
 */
  
-/*
+
     {
 	bool passed = true;
 
@@ -263,15 +263,26 @@ int main(int argc, char *argv[]) {
 	Mesh mesh(input, mpi_types, mpi_info, imc_p); // Create a mesh
         mesh.initialize_physical_properties(input); // Initialize the physical props (T)
 
-	Tally* tally = new Tally(1.99, 1e-6, 1e-6, 1e-6, mesh); // Tally for point_source.xml
+//	Tally* tally = new Tally(1.99, 1e-6, 1e-6, 1e-6, mesh); // Tally for point_source.xml
 	
-    	imc_response_driver(mesh, imc_state, imc_p, mpi_types, mpi_info, tally, 10000);
+//    	imc_response_driver(mesh, imc_state, imc_p, mpi_types, mpi_info, tally, 10000);
+
+	cout << "RUNNING HIGH PARTICLE PLANE TALLY FOR CUBANOVA" << endl << endl;	
+
+	   double v1[3] = {-1, 1.9, 1.9};
+	   double v2[3] = {1, 1.9, 1.9};
+	   double v3[3] = {-1, 1.9, -1.9};
+	   double v4[3] = {1, 1.9, -1.9};
+	   Plane_Tally* tally = new Plane_Tally(v1, v2, v3, v4, mesh); // Tally for point_source.xml
+
+    	   imc_plane_response_driver(mesh, imc_state, imc_p, mpi_types, mpi_info, tally, 50000);
+	
 
 	// PRINT OUT THE TALLY INFORMATION
     	cout << "\n\tTally energy for Regular: \t" << tally->get_regular_E() << endl;
 	cout << "\tTally energy for Response: \t" << tally->get_response_E() << endl << endl;
     }
-*/ 
+ 
 
 /*
     // Testing the cubanova with SPHERICAL TALLY	  
@@ -326,7 +337,7 @@ int main(int argc, char *argv[]) {
 	cout << "FINISHED RUNNING ALL TEST FILES" << endl;
     }
 */
-
+/*
     // Testing the cubanova with PLANAR TALLY	  
     {
 	int num_files = 10;	
@@ -382,7 +393,7 @@ int main(int argc, char *argv[]) {
 	
 	cout << "FINISHED RUNNING ALL TEST FILES" << endl;
     }
-
+*/
 	  
   }
 

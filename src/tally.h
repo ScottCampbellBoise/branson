@@ -29,11 +29,14 @@ public:
 
     inline double get_regular_E() { return total_regular_E; }
     inline double get_response_E() { return total_response_E; }
+    inline double get_response_ang_E() { return total_response_ang_E; }
     inline void reset_regular_E() { total_regular_E = 0; }
     inline void reset_response_E() { total_response_E = 0; }
+    inline void reset_response_ang_E() { total_response_ang_E = 0; }
     inline void add_response_weight(double weight) { total_response_E += weight; }
     inline void add_regular_weight(double weight) { total_regular_E += weight; }
-	  
+    inline void add_response_ang_weight(double weight) { total_response_ang_E += weight; }	  
+
     inline uint32_t get_regular_hits() { return n_regular_hits; }
     inline uint32_t get_response_hits() { return n_response_hits; }
     inline void reset_regular_hits() { n_regular_hits = 0; }
@@ -139,6 +142,7 @@ private:
 
     double total_regular_E;
     double total_response_E;
+    double total_response_ang_E;
 
     int filter_state;
 };

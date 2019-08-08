@@ -57,7 +57,7 @@ void imc_plane_response_driver(Mesh &mesh, IMC_State &imc_state,
     ofstream flux_file("flux_file.csv");
     flux_file << "Time,Reg. Fluence,Resp. Fluence,Reg. Flux,Resp. Flux" << endl;
     
-    ofstream cuba_file("cubanova_results.csv", ios::app);
+    ofstream cuba_file("plane_cubanova_results.csv", ios::app);
     cuba_file << "time, reg flux, resp flux" << endl;
     
     double prev_resp = 0.0;
