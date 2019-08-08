@@ -110,7 +110,7 @@ Constants::event_type resp_transport_photon(Photon &phtn, const Mesh &mesh, RNG 
     // Add regular contribution (if valid) - ONLY RECORDS OUTGOING PHOTONS
     //------------------------------------------------------------------------------------------
     dist_to_tally = tally->get_dist_to_tally(phtn);
-    if(dist_to_tally < dist_to_event) {
+    if(dist_to_tally <= dist_to_event) {
 	// calculate energy absorbed by material, update photon and material energy
         ew_factor = exp(-sigma_a * f * dist_to_tally);
         absorbed_E = phtn.get_E() * (1.0 - ew_factor);

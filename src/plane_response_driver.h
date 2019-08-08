@@ -43,14 +43,14 @@ void imc_plane_response_driver(Mesh &mesh, IMC_State &imc_state,
     Plane_Response* resp = new Plane_Response(tally, mesh, imc_state, n_resp_particles);
     
     
- /*
+
     if (imc_parameters.get_write_silo_flag()) {
         // write SILO file
         write_silo(mesh, *resp, imc_state.get_time(), imc_state.get_step(),
                    imc_state.get_rank_transport_runtime(), fake_mpi_runtime, rank,
                    mpi_info.get_n_rank());
     }
-*/
+
     
     double sourced_E = imc_state.get_pre_census_E();
     
@@ -136,7 +136,7 @@ void imc_plane_response_driver(Mesh &mesh, IMC_State &imc_state,
         
         tally->reset_regular_hits();
         tally->reset_response_hits();
-/*
+
         if (imc_parameters.get_write_silo_flag() &&
             !(imc_state.get_step() % imc_parameters.get_output_frequency())) {
             // write SILO file
@@ -144,7 +144,7 @@ void imc_plane_response_driver(Mesh &mesh, IMC_State &imc_state,
                        imc_state.get_rank_transport_runtime(), fake_mpi_runtime, rank,
                        mpi_info.get_n_rank());
         }
-*/
+
         // update time for next step
         imc_state.next_time_step();
     }

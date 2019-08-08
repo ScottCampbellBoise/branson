@@ -48,7 +48,9 @@ public:
     double get_dist_to_tally(Photon& phtn) {
         const double* pos = phtn.get_position();
         const double* ang = phtn.get_angle();
-        
+
+	if(ang[0] < 0) {return 1e9;}        
+
         double vec_12[3] = {v2[0] - v1[0], v2[1] - v1[1], v2[2] - v1[2]};
         double vec_13[3] = {v3[0] - v1[0], v3[1] - v1[1], v3[2] - v1[2]};
         
@@ -67,7 +69,15 @@ public:
         
         double dist = sqrt(pow(x_int-pos[0],2) + pow(y_int-pos[1],2) + pow(z_int-pos[2],2));
 
-	if(ang[0] >= 0 && x_int >= v1[0] && y_int <=2 && y_int >= -2 && z_int <= 2 && z_int >= -2) {return dist;} 
+        double x_min = min(v1[0], min(v2[0], min(v3[0], v4[0])));
+        double x_max = max(v1[0], max(v2[0], max(v3[0], v4[0])));
+        double y_min = min(v1[1], min(v2[1], min(v3[1], v4[1])));
+        double y_max = max(v1[1], max(v2[1], max(v3[1], v4[1])));
+        double z_min = min(v1[2], min(v2[2], min(v3[2], v4[2])));
+        double z_max = max(v1[2], max(v2[2], max(v3[2], v4[2])));
+
+	if(y_int <= y_max && y_int >= y_min 
+	   && z_int <= z_max && z_int >= z_min) {return dist;} 
         
         return 1e9;
     }

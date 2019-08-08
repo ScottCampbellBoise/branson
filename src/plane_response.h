@@ -97,9 +97,10 @@ public:
     
     double get_response(uint32_t cell_id) const throw(Response_Exception){
         double resp = cell_total_sigma_dist[cell_id] / cell_total_dist[cell_id];
-        if(resp <= 0 || isnan(resp))
-            throw Response_Exception();
-            return resp;
+	if(isnan(resp))
+        	return -1;
+	else
+		return abs(resp);
     }
     
     double get_dist(uint32_t cell_id) const { return cell_total_dist[cell_id]; }
