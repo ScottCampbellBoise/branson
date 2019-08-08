@@ -249,7 +249,7 @@ int main(int argc, char *argv[]) {
     }
 */
  
-
+/*
     {
 	bool passed = true;
 
@@ -283,7 +283,7 @@ int main(int argc, char *argv[]) {
     	cout << "\n\tTally energy for Regular: \t" << tally->get_regular_E() << endl;
 	cout << "\tTally energy for Response: \t" << tally->get_response_E() << endl << endl;
     }
-
+*/
 
 /*
     // Testing the cubanova with SPHERICAL TALLY	  
