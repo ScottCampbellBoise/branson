@@ -29,7 +29,9 @@
 
 //! All ranks perform reductions to produce global arrays and rank zero
 // writes the SILO file for visualization
-void write_silo(const Mesh &mesh, const Sphere_Response &resp, const double &arg_time, const uint32_t &step,
+
+//void write_silo(const Mesh &mesh, const Sphere_Response &resp, const double &arg_time, const uint32_t &step,
+void write_silo(const Mesh &mesh, const Plane_Response &resp, const double &arg_time, const uint32_t &step,
                 const double &r_transport_time, const double &r_mpi_time,
                 const int &rank, const int &n_rank, bool rep_flag = true) {
 
@@ -116,10 +118,10 @@ void write_silo(const Mesh &mesh, const Sphere_Response &resp, const double &arg
     sig_a[silo_index] = mesh.get_cell(i).get_op_a(0);
     if(resp.get_response_state()) {
         r_sig_a[silo_index] = resp.get_response(i);
-        double xp[3]={0.577,0.577,0.577};
-        double xm[3]={-0.577,-0.577,-0.577};
-        r_xp_sig_a[silo_index] = resp.get_angle_response(i, xp);
-        r_xm_sig_a[silo_index] = resp.get_angle_response(i, xm);
+//        double xp[3]={0.577,0.577,0.577};
+//        double xm[3]={-0.577,-0.577,-0.577};
+//        r_xp_sig_a[silo_index] = resp.get_angle_response(i, xp);
+//        r_xm_sig_a[silo_index] = resp.get_angle_response(i, xm);
         r_src[silo_index] = resp.get_n_sourced(i);
     }
     transport_time[silo_index] = r_transport_time;
@@ -316,6 +318,8 @@ void write_silo(const Mesh &mesh, const Sphere_Response &resp, const double &arg
   } // end rank==0
 #endif
 }
+
+
 
 #endif // write_silo_h_
 //---------------------------------------------------------------------------//

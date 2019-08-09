@@ -112,7 +112,7 @@ public:
         double resp = cell_total_sigma_dist[cell_id] / cell_total_dist[cell_id];
 	
 	if(isnan(resp))
-        	return 1e100;
+        	return -1;
 	else
 		return abs(resp);
     }
