@@ -49,7 +49,7 @@ public:
         const double* pos = phtn.get_position();
         const double* ang = phtn.get_angle();
 
-	if(ang[0] < 0) {return 1e9;}        
+	if(ang[0] < 0) {return 1e100;}        
 
         double vec_12[3] = {v2[0] - v1[0], v2[1] - v1[1], v2[2] - v1[2]};
         double vec_13[3] = {v3[0] - v1[0], v3[1] - v1[1], v3[2] - v1[2]};
@@ -79,7 +79,7 @@ public:
 	if(y_int <= y_max && y_int >= y_min 
 	   && z_int <= z_max && z_int >= z_min) {return dist;} 
         
-        return 1e9;
+        return 1e100;
     }
     
     void get_point_on_plane(double*& pos) {

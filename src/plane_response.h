@@ -49,10 +49,22 @@ public:
             response_set = true;
         }
         
-        cell_total_sigma_dist.assign(n_cell, 0.0);
+	cell_total_sigma_dist.assign(n_cell, 0.0);
         cell_total_dist.assign(n_cell, 0.0);
-        num_respon_source.assign(n_cell, 0.0);
-        
+        cell_xp_total_sigma_dist.assign(n_cell, 0.0);
+        cell_xp_total_dist.assign(n_cell, 0.0);
+        cell_xm_total_sigma_dist.assign(n_cell, 0.0);
+        cell_xm_total_dist.assign(n_cell, 0.0);
+        cell_yp_total_sigma_dist.assign(n_cell, 0.0);
+        cell_yp_total_dist.assign(n_cell, 0.0);
+        cell_ym_total_sigma_dist.assign(n_cell, 0.0);
+        cell_ym_total_dist.assign(n_cell, 0.0);
+        cell_zp_total_sigma_dist.assign(n_cell, 0.0);
+        cell_zp_total_dist.assign(n_cell, 0.0);
+        cell_zm_total_sigma_dist.assign(n_cell, 0.0);
+        cell_zm_total_dist.assign(n_cell, 0.0);
+        num_respon_source.assign(n_cell, 0);       
+ 
         uint32_t index;
         double pos[3];
         uint32_t cell_id;
@@ -94,11 +106,32 @@ public:
         
         response_generated = true;
     }
-    
+   
+ 
     double get_response(uint32_t cell_id) const throw(Response_Exception){
         double resp = cell_total_sigma_dist[cell_id] / cell_total_dist[cell_id];
+	
 	if(isnan(resp))
-        	return -1;
+        	return 1e100;
+	else
+		return abs(resp);
+    }
+    
+ 
+    double get_angle_response(uint32_t cell_id, const double angle[3]) const throw(Response_Exception){
+        //double resp = cell_total_sigma_dist[cell_id] / cell_total_dist[cell_id];
+	
+	double xp = max(angle[0]*cell_xp_total_sigma_dist[cell_id]/cell_xp_total_dist[cell_id],0.0);
+    	double xm = max(-angle[0]*cell_xm_total_sigma_dist[cell_id]/cell_xm_total_dist[cell_id],0.0);
+   	double yp = max(angle[1]*cell_yp_total_sigma_dist[cell_id]/cell_yp_total_dist[cell_id],0.0);
+   	double ym = max(-angle[1]*cell_ym_total_sigma_dist[cell_id]/cell_ym_total_dist[cell_id],0.0);
+    	double zp = max(angle[2]*cell_zp_total_sigma_dist[cell_id]/cell_zp_total_dist[cell_id],0.0);
+    	double zm = max(-angle[2]*cell_zm_total_sigma_dist[cell_id]/cell_zm_total_dist[cell_id],0.0);
+
+	double resp = xp+xm;
+	
+	if(isnan(resp))
+        	return 1e100;
 	else
 		return abs(resp);
     }
@@ -227,7 +260,28 @@ private:
             double ave_sig = phtn.get_total_sigma_dist() / phtn.get_total_dist();
             cell_total_sigma_dist[cell_id] +=
             (ave_sig) * dist_to_event;
-            
+           
+           double xp = max(-angle[0]*dist_to_event,0.0);
+           double xm = max(angle[0]*dist_to_event,0.0);
+           double yp = max(-angle[1]*dist_to_event,0.0);
+           double ym = max(angle[1]*dist_to_event,0.0);
+           double zp = max(-angle[2]*dist_to_event,0.0);
+           double zm = max(angle[2]*dist_to_event,0.0);
+
+            cell_xp_total_dist[cell_id] += xp;
+            cell_xm_total_dist[cell_id] += xm;
+            cell_yp_total_dist[cell_id] += yp;
+            cell_ym_total_dist[cell_id] += ym;
+            cell_zp_total_dist[cell_id] += zp;
+            cell_zm_total_dist[cell_id] += zm;
+
+            cell_xp_total_sigma_dist[cell_id] += ave_sig*xp;
+            cell_xm_total_sigma_dist[cell_id] += ave_sig*xm;
+            cell_yp_total_sigma_dist[cell_id] += ave_sig*yp;
+            cell_ym_total_sigma_dist[cell_id] += ave_sig*ym;
+            cell_zp_total_sigma_dist[cell_id] += ave_sig*zp;
+            cell_zm_total_sigma_dist[cell_id] += ave_sig*zm;	    
+ 
             // update position
             phtn.move(dist_to_event);
             
@@ -285,7 +339,21 @@ private:
     vector<uint32_t> num_respon_source;
     vector<double> cell_total_sigma_dist;
     vector<double> cell_total_dist;
-    
+   
+    vector<double> cell_xp_total_sigma_dist;
+    vector<double> cell_xm_total_sigma_dist;
+    vector<double> cell_yp_total_sigma_dist;
+    vector<double> cell_ym_total_sigma_dist;
+    vector<double> cell_zp_total_sigma_dist;
+    vector<double> cell_zm_total_sigma_dist;
+
+    vector<double> cell_xp_total_dist;
+    vector<double> cell_xm_total_dist;
+    vector<double> cell_yp_total_dist;
+    vector<double> cell_ym_total_dist;
+    vector<double> cell_zp_total_dist;
+    vector<double> cell_zm_total_dist;
+ 
     uint32_t phtn_deck_size = 100000;
     vector<double> start_x;
     vector<double> start_y;

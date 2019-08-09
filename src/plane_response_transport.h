@@ -30,7 +30,8 @@ void add_plane_tally_contribution(Photon& phtn, Plane_Tally*& tally,
         double dist_to_tally = tally->get_dist_to_tally(phtn);
 
         double cell_response = resp->get_response(cell_id);
-		
+	//double cell_response = resp->get_angle_response(cell_id, phtn.get_angle());	
+	
 	if(cell_response < 0) {
 	    phtn.set_mark_for_response(true);
         } else {	
